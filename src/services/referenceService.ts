@@ -111,11 +111,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getCargoTypesRequest, request, 'getCargoTypes');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetCargoTypesRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoTypes,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetCargoTypesResponse['data']>(apiRequest);
@@ -154,11 +154,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getPalletsListRequest, request, 'getPalletsList');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetPalletsListRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPalletsList,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetPalletsListResponse['data']>(apiRequest);
@@ -197,11 +197,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getPackListRequest, request, 'getPackList');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetPackListRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPackList,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetPackListResponse['data']>(apiRequest);
@@ -240,11 +240,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getTiresWheelsListRequest, request, 'getTiresWheelsList');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetTiresWheelsListRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTiresWheelsList,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetTiresWheelsListResponse['data']>(apiRequest);
@@ -283,11 +283,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getCargoDescriptionListRequest, request, 'getCargoDescriptionList');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetCargoDescriptionListRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoDescriptionList,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetCargoDescriptionListResponse['data']>(apiRequest);
@@ -326,11 +326,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getMessageCodeTextRequest, request, 'getMessageCodeText');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetMessageCodeTextRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetMessageCodeText,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetMessageCodeTextResponse['data']>(apiRequest);
@@ -369,11 +369,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getServiceTypesRequest, request, 'getServiceTypes');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetServiceTypesRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetServiceTypes,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetServiceTypesResponse['data']>(apiRequest);
@@ -412,11 +412,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getOwnershipFormsListRequest, request, 'getOwnershipFormsList');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetOwnershipFormsListRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetOwnershipFormsList,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetOwnershipFormsListResponse['data']>(apiRequest);
@@ -455,11 +455,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.timeIntervalsRequest, request, 'getTimeIntervals');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetTimeIntervalsRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTimeIntervals,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetTimeIntervalsResponse['data']>(apiRequest);
@@ -498,11 +498,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.pickupTimeIntervalsRequest, request, 'getPickupTimeIntervals');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetPickupTimeIntervalsRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPickupTimeIntervals,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetPickupTimeIntervalsResponse['data']>(apiRequest);
@@ -541,11 +541,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getBackwardDeliveryCargoTypesRequest, request, 'getBackwardDeliveryCargoTypes');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetBackwardDeliveryCargoTypesRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetBackwardDeliveryCargoTypes,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetBackwardDeliveryCargoTypesResponse['data']>(apiRequest);
@@ -584,11 +584,11 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.getTypesOfPayersForRedeliveryRequest, request, 'getTypesOfPayersForRedelivery');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetTypesOfPayersForRedeliveryRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTypesOfPayersForRedelivery,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetTypesOfPayersForRedeliveryResponse['data']>(apiRequest);

@@ -28,34 +28,34 @@
  * const pallets = await client.reference.getPalletsList();
  *
  * // Work with addresses
- * const cities = await client.address.getCities({ findByString: 'Kyiv' });
+ * const cities = await client.address.getCities({ FindByString: 'Kyiv' });
  * const settlements = await client.address.searchSettlements({
- *   cityName: 'kyiv',
- *   page: 1,
- *   limit: 50
+ *   CityName: 'kyiv',
+ *   Page: 1,
+ *   Limit: 50
  * });
  *
  * // Create a waybill
  * const waybill = await client.waybill.create({
- *   payerType: PayerType.Sender,
- *   paymentMethod: PaymentMethod.Cash,
- *   dateTime: '25.12.2024',
- *   cargoType: CargoType.Parcel,
- *   weight: 1.5,
- *   serviceType: ServiceType.WarehouseWarehouse,
- *   seatsAmount: 1,
- *   description: 'Test package',
- *   cost: 1000,
- *   citySender: 'sender-city-ref',
- *   sender: 'sender-ref',
- *   senderAddress: 'sender-address-ref',
- *   contactSender: 'sender-contact-ref',
- *   sendersPhone: '380501234567',
- *   cityRecipient: 'recipient-city-ref',
- *   recipient: 'recipient-ref',
- *   recipientAddress: 'recipient-address-ref',
- *   contactRecipient: 'recipient-contact-ref',
- *   recipientsPhone: '380507654321',
+ *   PayerType: PayerType.Sender,
+ *   PaymentMethod: PaymentMethod.Cash,
+ *   DateTime: '25.12.2024',
+ *   CargoType: CargoType.Parcel,
+ *   Weight: 1.5,
+ *   ServiceType: ServiceType.WarehouseWarehouse,
+ *   SeatsAmount: 1,
+ *   Description: 'Test package',
+ *   Cost: 1000,
+ *   CitySender: 'sender-city-ref',
+ *   Sender: 'sender-ref',
+ *   SenderAddress: 'sender-address-ref',
+ *   ContactSender: 'sender-contact-ref',
+ *   SendersPhone: '380501234567',
+ *   CityRecipient: 'recipient-city-ref',
+ *   Recipient: 'recipient-ref',
+ *   RecipientAddress: 'recipient-address-ref',
+ *   ContactRecipient: 'recipient-contact-ref',
+ *   RecipientsPhone: '380507654321',
  * });
  * ```
  *

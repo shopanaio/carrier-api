@@ -74,8 +74,8 @@ export interface HealthCheckResult {
  *
  * // Create a waybill
  * const waybill = await client.waybill.create({
- *   payerType: PayerType.Sender,
- *   paymentMethod: PaymentMethod.Cash,
+ *   PayerType: PayerType.Sender,
+ *   PaymentMethod: PaymentMethod.Cash,
  *   // ... other properties
  * });
  *
@@ -84,11 +84,11 @@ export interface HealthCheckResult {
  * const pallets = await client.reference.getPalletsList();
  *
  * // Work with addresses
- * const cities = await client.address.getCities({ findByString: 'Kyiv' });
+ * const cities = await client.address.getCities({ FindByString: 'Kyiv' });
  * const settlements = await client.address.searchSettlements({
- *   cityName: 'kyiv',
- *   page: 1,
- *   limit: 50
+ *   CityName: 'kyiv',
+ *   Page: 1,
+ *   Limit: 50
  * });
  * ```
  */

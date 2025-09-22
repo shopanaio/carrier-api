@@ -58,11 +58,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.createWaybillRequest, request, 'createWaybill');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<CreateWaybillRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -84,11 +84,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.createWaybillWithOptionsRequest, request, 'createWaybillWithOptions');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<CreateWaybillWithOptionsRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -110,11 +110,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.createPoshtomatWaybillRequest, request, 'createPoshtomatWaybill');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<CreatePoshtomatWaybillRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -136,11 +136,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.updateWaybillRequest, request, 'updateWaybill');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<UpdateWaybillRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Update,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<UpdateWaybillResponse['data']>(apiRequest);
@@ -157,12 +157,12 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.deleteWaybillRequest, request, 'deleteWaybill');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<{ DocumentRefs: string }> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Delete,
       methodProperties: {
-        DocumentRefs: request.documentRefs.join(','),
+        DocumentRefs: request.DocumentRefs.join(','),
       },
     };
 
@@ -180,11 +180,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.deliveryDateRequest, request, 'getDeliveryDate');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<DeliveryDateRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentDeliveryDate,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<DeliveryDateResponse['data']>(apiRequest);
@@ -201,11 +201,11 @@ export class WaybillService {
       this.validator.validateOrThrow(schemas.priceCalculationRequest, request, 'getPriceCalculation');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<PriceCalculationRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentPrice,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<PriceCalculationResponse['data']>(apiRequest);
@@ -247,7 +247,7 @@ export class WaybillService {
    * Batch delete multiple waybills
    */
   async deleteBatch(documentRefs: string[]): Promise<DeleteWaybillResponse> {
-    return this.delete({ documentRefs: documentRefs as any });
+    return this.delete({ DocumentRefs: documentRefs as any });
   }
 
   /**
@@ -260,9 +260,9 @@ export class WaybillService {
     const [price, deliveryDate] = await Promise.all([
       this.getPrice(request),
       this.getDeliveryDate({
-        serviceType: request.serviceType,
-        citySender: request.citySender,
-        cityRecipient: request.cityRecipient,
+        ServiceType: request.ServiceType,
+        CitySender: request.CitySender,
+        CityRecipient: request.CityRecipient,
       }),
     ]);
 
@@ -288,17 +288,17 @@ export class WaybillService {
    */
   canDeliverToPostomat(request: Partial<CreateWaybillRequest>): boolean {
     // Check cargo type
-    if (!request.cargoType || !['Parcel', 'Documents'].includes(request.cargoType)) {
+    if (!request.CargoType || !['Parcel', 'Documents'].includes(request.CargoType)) {
       return false;
     }
 
     // Check service type
-    if (!request.serviceType || !['DoorsWarehouse', 'WarehouseWarehouse'].includes(request.serviceType)) {
+    if (!request.ServiceType || !['DoorsWarehouse', 'WarehouseWarehouse'].includes(request.ServiceType)) {
       return false;
     }
 
     // Check declared value
-    if (request.cost && request.cost > 10000) {
+    if (request.Cost && request.Cost > 10000) {
       return false;
     }
 

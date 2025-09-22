@@ -19,7 +19,7 @@ export type StreetTypeRef = BrandedString<'StreetTypeRef'>;
 
 export interface GetSettlementsRequest {
   /** Area identifier (optional) */
-  readonly ref?: SettlementAreaRef;
+  readonly Ref?: SettlementAreaRef;
 }
 
 export interface SettlementAreaData {
@@ -41,7 +41,7 @@ export type GetSettlementsResponse = NovaPoshtaResponse<SettlementAreaData[]>;
 
 export interface GetSettlementCountryRegionRequest {
   /** Area identifier */
-  readonly areaRef: SettlementAreaRef;
+  readonly AreaRef: SettlementAreaRef;
 }
 
 export interface SettlementRegionData {
@@ -63,13 +63,13 @@ export type GetSettlementCountryRegionResponse = NovaPoshtaResponse<SettlementRe
 
 export interface GetCitiesRequest {
   /** City identifier (optional) */
-  readonly ref?: CityRef;
+  readonly Ref?: CityRef;
   /** Search by city name (optional) */
-  readonly findByString?: string;
+  readonly FindByString?: string;
   /** Page number (optional) */
-  readonly page?: number;
+  readonly Page?: number;
   /** Records per page (optional) */
-  readonly limit?: number;
+  readonly Limit?: number;
 }
 
 export interface CityData {
@@ -119,13 +119,13 @@ export type GetCitiesResponse = NovaPoshtaResponse<CityData[]>;
 
 export interface GetStreetRequest {
   /** City identifier (required) */
-  readonly cityRef: CityRef;
+  readonly CityRef: CityRef;
   /** Search string (optional, but works better without it) */
-  readonly findByString?: string;
+  readonly FindByString?: string;
   /** Page number (optional, up to 500 records per page) */
-  readonly page?: number;
+  readonly Page?: number;
   /** Records per page (optional) */
-  readonly limit?: number;
+  readonly Limit?: number;
 }
 
 export interface StreetData {
@@ -147,11 +147,11 @@ export type GetStreetResponse = NovaPoshtaResponse<StreetData[]>;
 
 export interface SearchSettlementsRequest {
   /** City name or postal index (not required to be complete) */
-  readonly cityName: string;
+  readonly CityName: string;
   /** Page number (up to 500 records per page) */
-  readonly page: number;
+  readonly Page: number;
   /** Records per page limit */
-  readonly limit: number;
+  readonly Limit: number;
 }
 
 export interface SearchSettlementAddress {
@@ -186,11 +186,11 @@ export type SearchSettlementsResponse = NovaPoshtaResponse<SearchSettlementsData
 
 export interface SearchSettlementStreetsRequest {
   /** Street name */
-  readonly streetName: string;
+  readonly StreetName: string;
   /** Settlement identifier from settlements directory */
-  readonly settlementRef: SettlementRef;
+  readonly SettlementRef: SettlementRef;
   /** Response limit (optional) */
-  readonly limit?: number;
+  readonly Limit?: number;
 }
 
 export interface AddressLocation {

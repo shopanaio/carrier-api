@@ -8,7 +8,7 @@ import { ErrorCategory, ErrorSeverity } from '../types/errors';
 
 // HTTP transport interface for dependency injection
 export interface HttpTransport {
-  request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>>;
+  request<T = unknown>(request: NovaPoshtaRequest<any>): Promise<NovaPoshtaResponse<T>>;
 }
 
 // Transport configuration
@@ -180,7 +180,7 @@ export class FetchHttpTransport implements HttpTransport {
     this.errorInterceptors.push(interceptor);
   }
   
-  async request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
+  async request<T = unknown>(request: NovaPoshtaRequest<any>): Promise<NovaPoshtaResponse<T>> {
     return this.circuitBreaker.execute(async () => {
       await this.rateLimiter.waitIfNeeded();
       
@@ -235,7 +235,7 @@ export class FetchHttpTransport implements HttpTransport {
     }
   }
   
-  private async executeRequest<T>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
+  private async executeRequest<T>(request: NovaPoshtaRequest<any>): Promise<NovaPoshtaResponse<T>> {
     if (this.config.enableLogging) {
       console.log('Nova Poshta Request:', JSON.stringify(request, null, 2));
     }
@@ -270,7 +270,7 @@ export class FetchHttpTransport implements HttpTransport {
     }
   }
   
-  private createNovaPoshtaError(error: unknown, request: NovaPoshtaRequest): NovaPoshtaError {
+  private createNovaPoshtaError(error: unknown, request: NovaPoshtaRequest<any>): NovaPoshtaError {
     const baseError: NovaPoshtaError = {
       code: 'UNKNOWN_ERROR',
       message: 'An unknown error occurred',
@@ -377,7 +377,7 @@ export class MockHttpTransport implements HttpTransport {
   private delays: Map<string, number> = new Map();
   private errors: Map<string, Error> = new Map();
   
-  async request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
+  async request<T = unknown>(request: NovaPoshtaRequest<any>): Promise<NovaPoshtaResponse<T>> {
     const key = `${request.modelName}.${request.calledMethod}`;
     
     // Simulate delay

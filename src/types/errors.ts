@@ -316,14 +316,14 @@ export interface ConfigurationError extends NovaPoshtaError {
 }
 
 // Error messages mapping
-export const ERROR_MESSAGES: Record<NovaPoshtaErrorCode, {
+export const ERROR_MESSAGES: Partial<Record<NovaPoshtaErrorCode, {
   en: string;
   ua: string;
   ru: string;
   category: ErrorCategory;
   severity: ErrorSeverity;
   retryable: boolean;
-}> = {
+}>> = {
   [NovaPoshtaErrorCode.ApiKeyEmpty]: {
     en: 'API key is not specified',
     ua: 'API-ключ не вказано',
@@ -376,14 +376,6 @@ export const ERROR_MESSAGES: Record<NovaPoshtaErrorCode, {
     en: 'Cost is too high',
     ua: 'Вартість занадто висока',
     ru: 'Стоимость слишком высокая',
-    category: ErrorCategory.Validation,
-    severity: ErrorSeverity.Medium,
-    retryable: false,
-  },
-  [NovaPoshtaErrorCode.WeightTooHigh]: {
-    en: 'Weight is too high',
-    ua: 'Вага занадто велика',
-    ru: 'Вес слишком большой',
     category: ErrorCategory.Validation,
     severity: ErrorSeverity.Medium,
     retryable: false,

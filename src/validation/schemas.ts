@@ -39,62 +39,62 @@ export const languageSchema = z.nativeEnum(Language);
 
 // Cargo seat options schema
 export const optionsSeatSchema = z.object({
-  weight: weightSchema,
-  volumetricWidth: dimensionsSchema,
-  volumetricLength: dimensionsSchema,
-  volumetricHeight: dimensionsSchema,
-  volumetricVolume: volumeSchema.optional(),
-  packRef: novaPoshtaRefSchema.optional(),
-  cost: costSchema.optional(),
-  description: string36Schema.optional(),
-  specialCargo: z.enum(['0', '1']).optional(),
+  Weight: weightSchema,
+  VolumetricWidth: dimensionsSchema,
+  VolumetricLength: dimensionsSchema,
+  VolumetricHeight: dimensionsSchema,
+  VolumetricVolume: volumeSchema.optional(),
+  PackRef: novaPoshtaRefSchema.optional(),
+  Cost: costSchema.optional(),
+  Description: string36Schema.optional(),
+  SpecialCargo: z.enum(['0', '1']).optional(),
 });
 
 // Postomat-specific seat options with additional constraints
 export const poshtomatOptionsSeatSchema = optionsSeatSchema.extend({
-  weight: z.number().min(0.1).max(20, 'Postomat weight limit is 20 kg'),
-  volumetricWidth: z.number().min(1).max(40, 'Postomat width limit is 40 cm'),
-  volumetricLength: z.number().min(1).max(60, 'Postomat length limit is 60 cm'),
-  volumetricHeight: z.number().min(1).max(30, 'Postomat height limit is 30 cm'),
+  Weight: z.number().min(0.1).max(20, 'Postomat weight limit is 20 kg'),
+  VolumetricWidth: z.number().min(1).max(40, 'Postomat width limit is 40 cm'),
+  VolumetricLength: z.number().min(1).max(60, 'Postomat length limit is 60 cm'),
+  VolumetricHeight: z.number().min(1).max(30, 'Postomat height limit is 30 cm'),
 });
 
 // Backward delivery schema
 export const backwardDeliverySchema = z.object({
-  cargoType: cargoTypeSchema,
-  amount: costSchema.optional(),
-  serviceType: serviceTypeSchema.optional(),
-  payerType: payerTypeSchema.optional(),
-  paymentMethod: paymentMethodSchema.optional(),
+  CargoType: cargoTypeSchema,
+  Amount: costSchema.optional(),
+  ServiceType: serviceTypeSchema.optional(),
+  PayerType: payerTypeSchema.optional(),
+  PaymentMethod: paymentMethodSchema.optional(),
 });
 
 // Additional services schema
 export const additionalServicesSchema = z.object({
-  saturdayDelivery: z.enum(['0', '1']).optional(),
-  deliveryByHand: z.enum(['0', '1']).optional(),
-  deliveryByHandRecipients: z.array(z.string()).max(15, 'Maximum 15 authorized recipients').optional(),
-  afterpaymentOnGoodsCost: costSchema.optional(),
-  localExpress: z.enum(['0', '1']).optional(),
-  timeInterval: timeIntervalSchema.optional(),
-  preferredDeliveryDate: novaPoshtaDateSchema.optional(),
-  packingNumber: string36Schema.optional(),
-  infoRegClientBarcodes: string36Schema.optional(),
-  accompanyingDocuments: string36Schema.optional(),
-  additionalInformation: string36Schema.optional(),
-  numberOfFloorsLifting: z.number().int().min(1).max(50).optional(),
-  numberOfFloorsDescent: z.number().int().min(1).max(50).optional(),
-  elevator: z.enum(['0', '1']).optional(),
-  forwardingCount: z.number().int().min(1).optional(),
-  redBoxBarcode: string36Schema.optional(),
-  specialCargo: z.enum(['0', '1']).optional(),
-  sameDayDelivery: z.enum(['0', '1']).optional(),
-  expressWaybillPayment: z.enum(['0', '1']).optional(),
+  SaturdayDelivery: z.enum(['0', '1']).optional(),
+  DeliveryByHand: z.enum(['0', '1']).optional(),
+  DeliveryByHandRecipients: z.array(z.string()).max(15, 'Maximum 15 authorized recipients').optional(),
+  AfterpaymentOnGoodsCost: costSchema.optional(),
+  LocalExpress: z.enum(['0', '1']).optional(),
+  TimeInterval: timeIntervalSchema.optional(),
+  PreferredDeliveryDate: novaPoshtaDateSchema.optional(),
+  PackingNumber: string36Schema.optional(),
+  InfoRegClientBarcodes: string36Schema.optional(),
+  AccompanyingDocuments: string36Schema.optional(),
+  AdditionalInformation: string36Schema.optional(),
+  NumberOfFloorsLifting: z.number().int().min(1).max(50).optional(),
+  NumberOfFloorsDescent: z.number().int().min(1).max(50).optional(),
+  Elevator: z.enum(['0', '1']).optional(),
+  ForwardingCount: z.number().int().min(1).optional(),
+  RedBoxBarcode: string36Schema.optional(),
+  SpecialCargo: z.enum(['0', '1']).optional(),
+  SameDayDelivery: z.enum(['0', '1']).optional(),
+  ExpressWaybillPayment: z.enum(['0', '1']).optional(),
 }).refine(data => {
   // If deliveryByHand is enabled, deliveryByHandRecipients should be provided
-  if (data.deliveryByHand === '1' && (!data.deliveryByHandRecipients || data.deliveryByHandRecipients.length === 0)) {
+  if (data.DeliveryByHand === '1' && (!data.DeliveryByHandRecipients || data.DeliveryByHandRecipients.length === 0)) {
     return false;
   }
   // If timeInterval is specified, preferredDeliveryDate should also be specified
-  if (data.timeInterval && !data.preferredDeliveryDate) {
+  if (data.TimeInterval && !data.PreferredDeliveryDate) {
     return false;
   }
   return true;
@@ -103,94 +103,99 @@ export const additionalServicesSchema = z.object({
 });
 
 // Base waybill properties schema
-export const baseWaybillPropertiesSchema = z.object({
-  payerType: payerTypeSchema,
-  paymentMethod: paymentMethodSchema,
-  dateTime: novaPoshtaDateSchema,
-  cargoType: cargoTypeSchema,
-  weight: weightSchema,
-  serviceType: serviceTypeSchema,
-  seatsAmount: z.number().int().min(1, 'At least 1 seat is required'),
-  description: string36Schema,
-  cost: costSchema,
-  citySender: novaPoshtaRefSchema,
-  sender: novaPoshtaRefSchema,
-  senderAddress: novaPoshtaRefSchema,
-  contactSender: novaPoshtaRefSchema,
-  sendersPhone: phoneNumberSchema,
-  cityRecipient: novaPoshtaRefSchema,
-  recipient: novaPoshtaRefSchema,
-  recipientAddress: novaPoshtaRefSchema,
-  contactRecipient: novaPoshtaRefSchema,
-  recipientsPhone: phoneNumberSchema,
-}).refine(data => {
-  // For ThirdPerson payer type, paymentMethod must be NonCash
-  if (data.payerType === PayerType.ThirdPerson && data.paymentMethod !== PaymentMethod.NonCash) {
-    return false;
-  }
-  // For Documents cargo type, weight must be 0.1, 0.5, or 1
-  if (data.cargoType === CargoType.Documents && ![0.1, 0.5, 1].includes(data.weight)) {
-    return false;
-  }
-  return true;
-}, {
-  message: 'Invalid waybill properties configuration',
-});
+const baseWaybillPropertiesObject = {
+  PayerType: payerTypeSchema,
+  PaymentMethod: paymentMethodSchema,
+  DateTime: novaPoshtaDateSchema,
+  CargoType: cargoTypeSchema,
+  Weight: weightSchema,
+  ServiceType: serviceTypeSchema,
+  SeatsAmount: z.number().int().min(1, 'At least 1 seat is required'),
+  Description: string36Schema,
+  Cost: costSchema,
+  CitySender: novaPoshtaRefSchema,
+  Sender: novaPoshtaRefSchema,
+  SenderAddress: novaPoshtaRefSchema,
+  ContactSender: novaPoshtaRefSchema,
+  SendersPhone: phoneNumberSchema,
+  CityRecipient: novaPoshtaRefSchema,
+  Recipient: novaPoshtaRefSchema,
+  RecipientAddress: novaPoshtaRefSchema,
+  ContactRecipient: novaPoshtaRefSchema,
+  RecipientsPhone: phoneNumberSchema,
+} as const;
+
+const baseWaybillPropertiesCore = z.object(baseWaybillPropertiesObject);
+
+const applyBaseWaybillRules = <T extends z.ZodTypeAny>(schema: T) =>
+  schema.superRefine((data, ctx) => {
+    const payload = data as z.infer<typeof baseWaybillPropertiesCore>;
+    if (payload.PayerType === PayerType.ThirdPerson && payload.PaymentMethod !== PaymentMethod.NonCash) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid waybill properties configuration' });
+    }
+    if (payload.CargoType === CargoType.Documents && ![0.1, 0.5, 1].includes(payload.Weight)) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid waybill properties configuration' });
+    }
+  });
+
+export const baseWaybillPropertiesSchema = applyBaseWaybillRules(baseWaybillPropertiesCore);
 
 // Create waybill request schema
-export const createWaybillRequestSchema = baseWaybillPropertiesSchema.extend({
-  senderWarehouseIndex: string36Schema.optional(),
-  recipientWarehouseIndex: string36Schema.optional(),
-  volumeGeneral: volumeSchema.optional(),
-});
+export const createWaybillRequestSchema = applyBaseWaybillRules(
+  baseWaybillPropertiesCore.extend({
+    SenderWarehouseIndex: string36Schema.optional(),
+    RecipientWarehouseIndex: string36Schema.optional(),
+    VolumeGeneral: volumeSchema.optional(),
+  }),
+);
 
 // Create waybill with options request schema
-export const createWaybillWithOptionsRequestSchema = baseWaybillPropertiesSchema.extend({
-  senderWarehouseIndex: string36Schema.optional(),
-  recipientWarehouseIndex: string36Schema.optional(),
-  volumeGeneral: volumeSchema.optional(),
-  optionsSeat: z.array(optionsSeatSchema).min(1, 'At least one seat option is required'),
-  redBoxBarcode: string36Schema.optional(),
-  thirdPerson: novaPoshtaRefSchema.optional(),
-  backwardDeliveryData: z.array(backwardDeliverySchema).optional(),
-  additionalServices: additionalServicesSchema.optional(),
-}).refine(data => {
-  // If payerType is ThirdPerson, thirdPerson ref must be provided
-  if (data.payerType === PayerType.ThirdPerson && !data.thirdPerson) {
-    return false;
+export const createWaybillWithOptionsRequestSchema = applyBaseWaybillRules(
+  baseWaybillPropertiesCore.extend({
+    SenderWarehouseIndex: string36Schema.optional(),
+    RecipientWarehouseIndex: string36Schema.optional(),
+    VolumeGeneral: volumeSchema.optional(),
+    OptionsSeat: z.array(optionsSeatSchema).min(1, 'At least one seat option is required'),
+    RedBoxBarcode: string36Schema.optional(),
+    ThirdPerson: novaPoshtaRefSchema.optional(),
+    BackwardDeliveryData: z.array(backwardDeliverySchema).optional(),
+    AdditionalServices: additionalServicesSchema.optional(),
+  }),
+).superRefine((data, ctx) => {
+  if (data.PayerType === PayerType.ThirdPerson && !data.ThirdPerson) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid waybill with options configuration' });
   }
-  // If volumeGeneral is not provided, optionsSeat must be provided
-  if (!data.volumeGeneral && (!data.optionsSeat || data.optionsSeat.length === 0)) {
-    return false;
+  if (!data.VolumeGeneral && (!data.OptionsSeat || data.OptionsSeat.length === 0)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid waybill with options configuration' });
   }
-  // Validate total seats amount matches optionsSeat array length
-  if (data.optionsSeat && data.seatsAmount !== data.optionsSeat.length) {
-    return false;
+  if (data.OptionsSeat && data.SeatsAmount !== data.OptionsSeat.length) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: 'Invalid waybill with options configuration' });
   }
-  return true;
-}, {
-  message: 'Invalid waybill with options configuration',
 });
 
 // Create postomat waybill request schema
-export const createPoshtomatWaybillRequestSchema = baseWaybillPropertiesSchema.extend({
-  senderWarehouseIndex: string36Schema.optional(),
-  recipientWarehouseIndex: string36Schema.optional(),
-  optionsSeat: z.array(poshtomatOptionsSeatSchema).length(1, 'Postomat allows only one seat per shipment'),
-  cargoType: z.enum([CargoType.Parcel, CargoType.Documents]),
-  serviceType: z.enum([ServiceType.DoorsWarehouse, ServiceType.WarehouseWarehouse]),
-  cost: z.number().min(0).max(10000, 'Postomat declared value limit is 10000 UAH'),
-});
+export const createPoshtomatWaybillRequestSchema = applyBaseWaybillRules(
+  baseWaybillPropertiesCore.extend({
+    SenderWarehouseIndex: string36Schema.optional(),
+    RecipientWarehouseIndex: string36Schema.optional(),
+    OptionsSeat: z.array(poshtomatOptionsSeatSchema).length(1, 'Postomat allows only one seat per shipment'),
+    CargoType: z.enum([CargoType.Parcel, CargoType.Documents]),
+    ServiceType: z.enum([ServiceType.DoorsWarehouse, ServiceType.WarehouseWarehouse]),
+    Cost: z.number().min(0).max(10000, 'Postomat declared value limit is 10000 UAH'),
+  }),
+);
 
 // Update waybill request schema
-export const updateWaybillRequestSchema = baseWaybillPropertiesSchema.extend({
-  ref: novaPoshtaRefSchema,
-  volumeGeneral: volumeSchema.optional(),
-});
+export const updateWaybillRequestSchema = applyBaseWaybillRules(
+  baseWaybillPropertiesCore.extend({
+    Ref: novaPoshtaRefSchema,
+    VolumeGeneral: volumeSchema.optional(),
+  }),
+);
 
 // Delete waybill request schema
 export const deleteWaybillRequestSchema = z.object({
-  documentRefs: z.array(novaPoshtaRefSchema).min(1, 'At least one document reference is required'),
+  DocumentRefs: z.array(novaPoshtaRefSchema).min(1, 'At least one document reference is required'),
 });
 
 // Tracking request schemas
@@ -203,66 +208,70 @@ export const trackDocumentsRequestSchema = z.object({
   documents: z.array(trackDocumentItemSchema).min(1).max(100, 'Maximum 100 documents can be tracked at once'),
 });
 
+export const documentMovementRequestSchema = trackDocumentsRequestSchema.extend({
+  showDeliveryDetails: z.boolean().optional(),
+});
+
 // Delivery date request schema
 export const deliveryDateRequestSchema = z.object({
-  dateTime: novaPoshtaDateSchema.optional(),
-  serviceType: serviceTypeSchema,
-  citySender: novaPoshtaRefSchema,
-  cityRecipient: novaPoshtaRefSchema,
+  DateTime: novaPoshtaDateSchema.optional(),
+  ServiceType: serviceTypeSchema,
+  CitySender: novaPoshtaRefSchema,
+  CityRecipient: novaPoshtaRefSchema,
 });
 
 // Price calculation request schema
 export const priceCalculationRequestSchema = z.object({
-  citySender: novaPoshtaRefSchema,
-  cityRecipient: novaPoshtaRefSchema,
-  weight: weightSchema,
-  serviceType: serviceTypeSchema,
-  cost: costSchema,
-  cargoType: cargoTypeSchema,
-  seatsAmount: z.number().int().min(1),
-  redeliveryCalculate: z.object({
-    cargoType: cargoTypeSchema,
-    amount: costSchema,
+  CitySender: novaPoshtaRefSchema,
+  CityRecipient: novaPoshtaRefSchema,
+  Weight: weightSchema,
+  ServiceType: serviceTypeSchema,
+  Cost: costSchema,
+  CargoType: cargoTypeSchema,
+  SeatsAmount: z.number().int().min(1),
+  RedeliveryCalculate: z.object({
+    CargoType: cargoTypeSchema,
+    Amount: costSchema,
   }).optional(),
-  packCount: z.number().int().min(1).optional(),
-  packRef: novaPoshtaRefSchema.optional(),
-  amount: z.number().int().min(1).optional(),
-  cargoDetails: z.array(z.object({
-    cargoDescription: novaPoshtaRefSchema,
-    amount: z.number().int().min(1),
+  PackCount: z.number().int().min(1).optional(),
+  PackRef: novaPoshtaRefSchema.optional(),
+  Amount: z.number().int().min(1).optional(),
+  CargoDetails: z.array(z.object({
+    CargoDescription: novaPoshtaRefSchema,
+    Amount: z.number().int().min(1),
   })).optional(),
-  cargoDescription: novaPoshtaRefSchema.optional(),
-  optionsSeat: z.array(optionsSeatSchema).optional(),
+  CargoDescription: novaPoshtaRefSchema.optional(),
+  OptionsSeat: z.array(optionsSeatSchema).optional(),
 });
 
 // Address and reference data schemas
 export const searchSettlementsRequestSchema = z.object({
-  cityName: string36Schema,
-  page: z.number().int().min(1).default(1),
-  limit: z.number().int().min(1).max(500).default(50),
+  CityName: string36Schema,
+  Page: z.number().int().min(1).default(1),
+  Limit: z.number().int().min(1).max(500).default(50),
 });
 
 export const searchSettlementStreetsRequestSchema = z.object({
-  streetName: string36Schema,
-  settlementRef: novaPoshtaRefSchema,
-  limit: z.number().int().min(1).max(500).optional(),
+  StreetName: string36Schema,
+  SettlementRef: novaPoshtaRefSchema,
+  Limit: z.number().int().min(1).max(500).optional(),
 });
 
 export const citiesRequestSchema = z.object({
-  ref: novaPoshtaRefSchema.optional(),
-  findByString: string36Schema.optional(),
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(500).optional(),
+  Ref: novaPoshtaRefSchema.optional(),
+  FindByString: string36Schema.optional(),
+  Page: z.number().int().min(1).optional(),
+  Limit: z.number().int().min(1).max(500).optional(),
 });
 
 export const timeIntervalsRequestSchema = z.object({
-  recipientCityRef: novaPoshtaRefSchema,
-  dateTime: string36Schema.optional(),
+  RecipientCityRef: novaPoshtaRefSchema,
+  DateTime: string36Schema.optional(),
 });
 
 export const pickupTimeIntervalsRequestSchema = z.object({
-  senderCityRef: novaPoshtaRefSchema,
-  dateTime: novaPoshtaDateSchema,
+  SenderCityRef: novaPoshtaRefSchema,
+  DateTime: novaPoshtaDateSchema,
 });
 
 // Reference data request schemas
@@ -271,18 +280,18 @@ export const getCargoTypesRequestSchema = z.object({});
 export const getPalletsListRequestSchema = z.object({});
 
 export const getPackListRequestSchema = z.object({
-  length: z.number().int().min(1).optional(),
-  width: z.number().int().min(1).optional(),
-  height: z.number().int().min(1).optional(),
-  volumetricWeight: z.number().min(0).optional(),
-  typeOfPacking: z.string().optional(),
+  Length: z.number().int().min(1).optional(),
+  Width: z.number().int().min(1).optional(),
+  Height: z.number().int().min(1).optional(),
+  VolumetricWeight: z.number().min(0).optional(),
+  TypeOfPacking: z.string().optional(),
 });
 
 export const getTiresWheelsListRequestSchema = z.object({});
 
 export const getCargoDescriptionListRequestSchema = z.object({
-  findByString: string36Schema.optional(),
-  page: z.number().int().min(1).max(500).optional(),
+  FindByString: string36Schema.optional(),
+  Page: z.number().int().min(1).max(500).optional(),
 });
 
 export const getMessageCodeTextRequestSchema = z.object({});
@@ -297,18 +306,18 @@ export const getTypesOfPayersForRedeliveryRequestSchema = z.object({});
 
 // Address request schemas
 export const getSettlementsRequestSchema = z.object({
-  ref: novaPoshtaRefSchema.optional(),
+  Ref: novaPoshtaRefSchema.optional(),
 });
 
 export const getSettlementCountryRegionRequestSchema = z.object({
-  areaRef: novaPoshtaRefSchema,
+  AreaRef: novaPoshtaRefSchema,
 });
 
 export const getStreetRequestSchema = z.object({
-  cityRef: novaPoshtaRefSchema,
-  findByString: string36Schema.optional(),
-  page: z.number().int().min(1).optional(),
-  limit: z.number().int().min(1).max(500).optional(),
+  CityRef: novaPoshtaRefSchema,
+  FindByString: string36Schema.optional(),
+  Page: z.number().int().min(1).optional(),
+  Limit: z.number().int().min(1).max(500).optional(),
 });
 
 // Response validation schemas
@@ -402,6 +411,7 @@ export const schemas = {
   updateWaybillRequest: updateWaybillRequestSchema,
   deleteWaybillRequest: deleteWaybillRequestSchema,
   trackDocumentsRequest: trackDocumentsRequestSchema,
+  documentMovementRequest: documentMovementRequestSchema,
   deliveryDateRequest: deliveryDateRequestSchema,
   priceCalculationRequest: priceCalculationRequestSchema,
   searchSettlementsRequest: searchSettlementsRequestSchema,

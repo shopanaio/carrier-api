@@ -121,7 +121,7 @@ export class TrackingService {
   async getDocumentMovement(request: DocumentMovementRequest): Promise<DocumentMovementResponse> {
     // Validate request
     if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.trackDocumentsRequest, request, 'getDocumentMovement');
+      this.validator.validateOrThrow(schemas.documentMovementRequest, request, 'getDocumentMovement');
     }
 
     const apiRequest: NovaPoshtaRequest = {
@@ -355,7 +355,8 @@ export class TrackingService {
       // Add more status descriptions as needed
     };
 
-    return descriptions[status]?.[language] || `Unknown status: ${status}`;
+    const descriptionEntry = descriptions[status as keyof typeof descriptions];
+    return descriptionEntry?.[language] || `Unknown status: ${status}`;
   }
 
   /**

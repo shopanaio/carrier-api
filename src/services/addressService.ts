@@ -71,14 +71,14 @@ export interface SearchSuggestions {
  *
  * // Search for cities
  * const cities = await addressService.getCities({
- *   findByString: 'Kyiv'
+ *   FindByString: 'Kyiv'
  * });
  *
  * // Search settlements online
  * const searchResults = await addressService.searchSettlements({
- *   cityName: 'kyiv',
- *   page: 1,
- *   limit: 50
+ *   CityName: 'kyiv',
+ *   Page: 1,
+ *   Limit: 50
  * });
  * ```
  */
@@ -111,11 +111,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.getSettlementsRequest, request, 'getSettlements');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetSettlementsRequest> = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementAreas,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetSettlementsResponse['data']>(apiRequest);
@@ -141,7 +141,7 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getSettlementCountryRegion(request: GetSettlementCountryRegionRequest): Promise<GetSettlementCountryRegionResponse> {
-    const cacheKey = `settlementCountryRegion_${request.areaRef}`;
+    const cacheKey = `settlementCountryRegion_${request.AreaRef}`;
 
     // Check cache first
     if (this.config.enableCaching) {
@@ -154,11 +154,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.getSettlementCountryRegionRequest, request, 'getSettlementCountryRegion');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetSettlementCountryRegionRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementCountryRegion,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetSettlementCountryRegionResponse['data']>(apiRequest);
@@ -197,11 +197,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.citiesRequest, request, 'getCities');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetCitiesRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetCities,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetCitiesResponse['data']>(apiRequest);
@@ -219,8 +219,8 @@ export class AddressService {
     }
 
     // Track search query for suggestions
-    if (request.findByString) {
-      this.searchHistory.add(request.findByString.toLowerCase());
+    if (request.FindByString) {
+      this.searchHistory.add(request.FindByString.toLowerCase());
     }
 
     return result;
@@ -245,11 +245,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.getStreetRequest, request, 'getStreet');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<GetStreetRequest> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetStreet,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: request,
     };
 
     const response = await this.transport.request<GetStreetResponse['data']>(apiRequest);
@@ -267,8 +267,8 @@ export class AddressService {
     }
 
     // Track search query for suggestions
-    if (request.findByString) {
-      this.searchHistory.add(request.findByString.toLowerCase());
+    if (request.FindByString) {
+      this.searchHistory.add(request.FindByString.toLowerCase());
     }
 
     return result;
@@ -293,14 +293,14 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.searchSettlementsRequest, request, 'searchSettlements');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<{ CityName: string; Page: string; Limit: string }> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlements,
       methodProperties: {
-        CityName: request.cityName,
-        Page: request.page.toString(),
-        Limit: request.limit.toString(),
+        CityName: request.CityName,
+        Page: request.Page.toString(),
+        Limit: request.Limit.toString(),
       },
     };
 
@@ -319,7 +319,7 @@ export class AddressService {
     }
 
     // Track search query for suggestions
-    this.searchHistory.add(request.cityName.toLowerCase());
+    this.searchHistory.add(request.CityName.toLowerCase());
 
     return result;
   }
@@ -343,14 +343,14 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.searchSettlementStreetsRequest, request, 'searchSettlementStreets');
     }
 
-    const apiRequest: NovaPoshtaRequest = {
+    const apiRequest: NovaPoshtaRequest<{ StreetName: string; SettlementRef: string; Limit?: string }> = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlementStreets,
       methodProperties: {
-        StreetName: request.streetName,
-        SettlementRef: request.settlementRef,
-        Limit: request.limit?.toString(),
+        StreetName: request.StreetName,
+        SettlementRef: request.SettlementRef,
+        Limit: request.Limit?.toString(),
       },
     };
 
@@ -369,7 +369,7 @@ export class AddressService {
     }
 
     // Track search query for suggestions
-    this.searchHistory.add(request.streetName.toLowerCase());
+    this.searchHistory.add(request.StreetName.toLowerCase());
 
     return result;
   }
@@ -389,8 +389,8 @@ export class AddressService {
     } = options;
 
     const response = await this.getCities({
-      findByString: query,
-      limit: maxResults * 2, // Get more results for filtering
+      FindByString: query,
+      Limit: maxResults * 2, // Get more results for filtering
     });
 
     if (!response.success || !response.data) {
@@ -430,9 +430,9 @@ export class AddressService {
     } = options;
 
     const response = await this.getStreet({
-      cityRef: cityRef as any,
-      findByString: streetQuery,
-      limit: maxResults * 2,
+      CityRef: cityRef as any,
+      FindByString: streetQuery,
+      Limit: maxResults * 2,
     });
 
     if (!response.success || !response.data) {

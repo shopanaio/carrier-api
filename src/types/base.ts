@@ -56,11 +56,11 @@ export interface NovaPoshtaResponse<T = unknown> {
 }
 
 // API request base structure
-export interface NovaPoshtaRequest {
+export interface NovaPoshtaRequest<T extends object = Record<string, unknown>> {
   readonly apiKey: string;
   readonly modelName: string;
   readonly calledMethod: string;
-  readonly methodProperties: Record<string, unknown>;
+  readonly methodProperties: T;
 }
 
 // Pagination support
@@ -77,7 +77,7 @@ export interface PaginatedResponse<T> extends NovaPoshtaResponse<T> {
 
 // Search parameters
 export interface SearchParams extends PaginationParams {
-  readonly findByString?: string;
+  readonly FindByString?: string;
 }
 
 // Generic identifier with description
