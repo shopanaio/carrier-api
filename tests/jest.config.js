@@ -15,7 +15,7 @@ module.exports = {
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'html'],
   moduleNameMapper: {
-    '^@shopana/nova-poshta-api$': '<rootDir>/../packages/nova-poshta-api/src/index.ts',
+    '^@shopana/novaposhta-api-client$': '<rootDir>/../packages/novaposhta-api-client/src/index.ts',
   },
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
   verbose: true,

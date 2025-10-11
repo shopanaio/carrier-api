@@ -1,5 +1,5 @@
 {
-  "name": "@shopana/nova-poshta-api",
+  "name": "@shopana/novaposhta-api-client",
   "version": "1.0.0",
   "description": "Fully typed Nova Poshta API client for Node.js and browsers with enterprise-grade features",
   "main": "dist/index.js",

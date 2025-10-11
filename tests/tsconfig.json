@@ -11,7 +11,7 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "paths": {
-      "@shopana/nova-poshta-api": ["../packages/nova-poshta-api/src/index.ts"]
+      "@shopana/novaposhta-api-client": ["../packages/novaposhta-api-client/src/index.ts"]
     }
   },
   "include": [

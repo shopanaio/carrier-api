@@ -1,0 +1,35 @@
+{
+  "id": "novaposhta-api-environment",
+  "name": "Nova Poshta API - Production",
+  "values": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "default",
+      "enabled": true
+    },
+    {
+      "key": "API_KEY",
+      "value": "",
+      "type": "secret",
+      "enabled": true
+    },
+    {
+      "key": "SENDER_CITY_REF",
+      "value": "8d5a980d-391c-11dd-90d9-001a92567626",
+      "type": "default",
+      "enabled": true,
+      "description": "Kyiv city reference"
+    },
+    {
+      "key": "RECIPIENT_CITY_REF",
+      "value": "db5c88e0-391c-11dd-90d9-001a92567626",
+      "type": "default",
+      "enabled": true,
+      "description": "Lviv city reference"
+    }
+  ],
+  "_postman_variable_scope": "environment",
+  "_postman_exported_at": "2025-10-11T00:00:00.000Z",
+  "_postman_exported_using": "Postman/10.0.0"
+}

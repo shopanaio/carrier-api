@@ -1,0 +1,41 @@
+import { spec } from 'pactum';
+import { getApiKey } from '../../../setup/pactum.setup';
+
+describe('WaybillService - createForPostomat', () => {
+  it('should create a postomat waybill with restrictions', async () => {
+    await spec()
+      .post('/')
+      .withJson({
+        apiKey: getApiKey(),
+        modelName: 'InternetDocument',
+        calledMethod: 'save',
+        methodProperties: {
+          PayerType: 'Sender',
+          PaymentMethod: 'Cash',
+          DateTime: '25.12.2024',
+          CargoType: 'Parcel',
+          Weight: '1',
+          ServiceType: 'WarehouseWarehouse',
+          SeatsAmount: '1',
+          Description: 'Test package for Postomat',
+          Cost: '500', // Max 10000 for postomat
+          CitySender: '8d5a980d-391c-11dd-90d9-001a92567626',
+          Sender: '8d5a980d-391c-11dd-90d9-001a92567626',
+          SenderAddress: '8d5a980d-391c-11dd-90d9-001a92567626',
+          ContactSender: '8d5a980d-391c-11dd-90d9-001a92567626',
+          SendersPhone: '380501234567',
+          CityRecipient: '8d5a980d-391c-11dd-90d9-001a92567626',
+          Recipient: '8d5a980d-391c-11dd-90d9-001a92567626',
+          RecipientAddress: '8d5a980d-391c-11dd-90d9-001a92567626', // Postomat address
+          ContactRecipient: '8d5a980d-391c-11dd-90d9-001a92567626',
+          RecipientsPhone: '380507654321',
+        },
+      })
+      .expectStatus(200)
+      .expectJsonMatch({
+        success: true,
+      })
+      .inspect()
+      .toss();
+  });
+});

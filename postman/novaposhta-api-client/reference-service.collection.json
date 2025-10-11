@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "Nova Poshta - Reference Service",
+    "description": "Reference data: cargo types, service types, pack lists, etc.",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Cargo Types",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getCargoTypes\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of available cargo types (Parcel, Cargo, Documents, TiresWheels, Pallet)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Pallets List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getPalletsList\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of available pallets for cargo delivery"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Pack List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getPackList\",\n  \"methodProperties\": {\n    \"Length\": \"100\",\n    \"Width\": \"50\",\n    \"Height\": \"30\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of available packaging types. Optional: Length, Width, Height parameters for filtering"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Tires Wheels List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getTiresWheelsList\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of available tires and wheels types"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Cargo Description List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getCargoDescriptionList\",\n  \"methodProperties\": {\n    \"FindByString\": \"Одяг\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of cargo descriptions. Optional: FindByString for search, Page for pagination"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Message Code Text",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getMessageCodeText\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of error/warning codes and their descriptions"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Service Types",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getServiceTypes\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of delivery service types (WarehouseWarehouse, WarehouseDoors, DoorsWarehouse, DoorsDoors)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Ownership Forms List",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getOwnershipFormsList\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of ownership forms (PrivatePerson, Organization, etc.)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Time Intervals",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getTimeIntervals\",\n  \"methodProperties\": {\n    \"RecipientCityRef\": \"db5c88e0-391c-11dd-90d9-001a92567626\",\n    \"DateTime\": \"01.01.2025\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get available time intervals for delivery. Required: RecipientCityRef, DateTime"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Pickup Time Intervals",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getPickupTimeIntervals\",\n  \"methodProperties\": {\n    \"SenderCityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"DateTime\": \"01.01.2025\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get available time intervals for pickup. Required: SenderCityRef, DateTime"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Backward Delivery Cargo Types",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getBackwardDeliveryCargoTypes\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of cargo types for backward delivery (return shipments)"
+      },
+      "response": []
+    },
+    {
+      "name": "Get Types of Payers for Redelivery",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Common\",\n  \"calledMethod\": \"getTypesOfPayersForRedelivery\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get list of payer types for redelivery (cash on delivery return)"
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "string"
+    }
+  ]
+}

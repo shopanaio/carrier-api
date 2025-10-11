@@ -1,0 +1,10 @@
+# Игнорировать файлы с реальными API ключами
+*.local.json
+environment.local.json
+
+# Игнорировать файлы с приватными данными
+*private*
+*secret*
+
+# Postman generated files
+.postman/

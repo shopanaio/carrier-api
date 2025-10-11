@@ -8,13 +8,13 @@
     "tests"
   ],
   "scripts": {
-    "build": "yarn workspace @shopana/nova-poshta-api build",
-    "dev": "yarn workspace @shopana/nova-poshta-api dev",
+    "build": "yarn workspace @shopana/novaposhta-api-client build",
+    "dev": "yarn workspace @shopana/novaposhta-api-client dev",
     "test": "yarn workspace @shopana/tests test",
     "test:watch": "yarn workspace @shopana/tests test:watch",
     "test:coverage": "yarn workspace @shopana/tests test:coverage",
-    "lint": "eslint packages/nova-poshta-api/src/**/*.ts",
-    "lint:fix": "eslint packages/nova-poshta-api/src/**/*.ts --fix",
+    "lint": "eslint packages/novaposhta-api-client/src/**/*.ts",
+    "lint:fix": "eslint packages/novaposhta-api-client/src/**/*.ts --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
     "type-check": "yarn workspaces foreach run type-check"
