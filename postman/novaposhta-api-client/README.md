@@ -318,23 +318,68 @@ Tests run automatically after request execution.
 2. Get streets in city → `getStreet`
 
 ### Key Differences
-- `getCities` + `getStreet` - Works with **City Ref** (for warehouse addresses)
-- `searchSettlements` + `searchSettlementStreets` - Works with **Settlement Ref** (for door-to-door delivery)
 
-## Changelog
+#### getStreet vs searchSettlementStreets
 
-### v2.0.0 (2025-10-11)
-- ✨ Split address service into 6 specialized collections (30 requests total)
-- ✅ Demonstrated all unique parameter combinations
-- ✅ Removed duplicate requests with similar parameters
-- ✅ Added comprehensive pagination examples for streets (5 different scenarios)
-- ✅ Added examples for major Ukrainian cities
-- ✅ Included postal code search examples
-- ✅ Added GPS coordinates examples
-- ✅ Pagination, limits, and filtering demonstrations
+**`getStreet` (City-based):**
+- Uses **CityRef** from `getCities`
+- For **warehouse-to-warehouse** delivery
+- Returns: `ref`, `description`, `streetsType`, `streetsTypeRef`
+- Cached: **12 hours** (static data)
+- Optional: `FindByString`
+- Supports: Full pagination (Page + Limit)
 
-### v1.0.0 (2025-10-11)
-- ✨ Initial collection release
-- ✅ Added basic examples for all services
-- ✅ Configured environment variables
-- ✅ Added automatic tests
+**`searchSettlementStreets` (Settlement-based):**
+- Uses **SettlementRef** from `searchSettlements`
+- For **door-to-door** delivery
+- Returns: All above + **GPS coordinates (lat/lon)**, full name (`present`), both UA/RU names, `totalCount`
+- Cached: **1 hour** (online search, more dynamic)
+- Required: `StreetName`
+- Optional: `Limit` only (no Page parameter)
+- Includes: Geographical location for precise address
+
+**Quick Comparison:**
+
+| Feature | getStreet | searchSettlementStreets |
+|---------|-----------|------------------------|
+| **Input Ref** | CityRef | SettlementRef |
+| **Use Case** | Warehouse delivery | Door-to-door delivery |
+| **GPS Coordinates** | ❌ No | ✅ Yes (lat/lon) |
+| **Names** | UA only | UA + RU |
+| **Pagination** | Page + Limit | Limit only |
+| **Cache TTL** | 12 hours | 1 hour |
+| **Total Count** | ❌ No | ✅ Yes |
+| **Required Params** | CityRef | StreetName + SettlementRef |
+
+**When to use:**
+- `getCities` + `getStreet` → **City Ref** (for warehouse addresses)
+- `searchSettlements` + `searchSettlementStreets` → **Settlement Ref** (for door-to-door delivery with GPS)
+
+**Example Response Differences:**
+
+```javascript
+// getStreet response - minimal info for warehouse delivery
+{
+  ref: "8d5a980d-...",              // Street ref for waybill
+  description: "Хрещатик",
+  streetsType: "Street",
+  streetsTypeRef: "..."
+}
+
+// searchSettlementStreets response - full info for door-to-door
+{
+  settlementRef: "e718a680-...",           // Settlement ref
+  settlementStreetRef: "8d5a980d-...",     // Street ref for waybill
+  settlementStreetDescription: "Хрещатик", // Ukrainian name
+  settlementStreetDescriptionRu: "Крещатик", // Russian name
+  present: "вул. Хрещатик",                 // Full formatted name
+  streetsType: "Street",
+  streetsTypeDescription: "Street",
+  location: {
+    lat: "50.4501",  // ✅ GPS for mapping/navigation
+    lon: "30.5234"
+  }
+}
+```
+
+**Important:** Both return street refs that can be used in waybill creation, but `searchSettlementStreets` provides additional GPS data for precise geolocation.
