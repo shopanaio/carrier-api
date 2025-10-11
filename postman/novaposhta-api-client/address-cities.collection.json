@@ -1,0 +1,237 @@
+{
+  "info": {
+    "name": "Nova Poshta - Cities",
+    "description": "Search and retrieve cities with Nova Poshta offices",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get All Cities - Default",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {}\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all cities without filters. Returns cities with Nova Poshta offices. This is cached for 12 hours."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - Київ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"Київ\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for cities containing 'Київ'. Will return Київ and other cities with similar names."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - Львів",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"Львів\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for cities containing 'Львів'."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - With Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"Одес\",\n    \"Limit\": \"10\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for cities starting with 'Одес' and limit results to 10 records."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - With Pagination",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"Дніпр\",\n    \"Page\": \"1\",\n    \"Limit\": \"20\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with pagination. Get first page of 20 results for cities matching 'Дніпр'."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - Partial Match",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"Вин\",\n    \"Limit\": \"15\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with partial string 'Вин'. Will return Вінниця, Виноградів, etc."
+      },
+      "response": []
+    },
+    {
+      "name": "Get City by Ref - Київ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"Ref\": \"8d5a980d-391c-11dd-90d9-001a92567626\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get specific city by reference. This is Kyiv's city ref. Returns detailed information about the city."
+      },
+      "response": []
+    },
+    {
+      "name": "Get City by Ref - Львів",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"Ref\": \"db5c88e0-391c-11dd-90d9-001a92567626\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get Lviv city details by reference."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - Large Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"а\",\n    \"Limit\": \"100\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for all cities containing letter 'а' with large limit (100 results)."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Cities - Second Page",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getCities\",\n  \"methodProperties\": {\n    \"FindByString\": \"а\",\n    \"Page\": \"2\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get second page of results (records 51-100) for cities containing 'а'."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "string"
+    }
+  ]
+}

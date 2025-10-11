@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "Nova Poshta - Settlement Regions",
+    "description": "Get list of regions (districts) for specific settlement areas",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Get Kyiv Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"71508128-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Kyiv Oblast (Київська область). Returns regions like Бориспільський район, Броварський район, etc."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Lviv Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4ade6ea-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Lviv Oblast (Львівська область)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Kharkiv Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4ac7665-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Kharkiv Oblast (Харківська область)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Odesa Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4b6a00b-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Odesa Oblast (Одеська область)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Dnipro Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4a00310-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Dnipro Oblast (Дніпропетровська область)."
+      },
+      "response": []
+    },
+    {
+      "name": "Get Zaporizhzhia Oblast Regions",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4a6bae6-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get all districts/regions for Zaporizhzhia Oblast (Запорізька область)."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "string"
+    }
+  ]
+}

@@ -1,0 +1,325 @@
+{
+  "info": {
+    "name": "Nova Poshta - Search Streets",
+    "description": "Online search for streets in specific settlements - real-time fuzzy search with coordinates",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search Streets - Київ, Хрещатик",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Хрещатик\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Khreshchatyk street in Kyiv settlement. Returns street with coordinates, type, and full name. SettlementRef is from searchSettlements response."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Київ, Шевченка",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Шевченка\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Shevchenko boulevard/streets in Kyiv settlement."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Partial Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Банк\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"20\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with partial street name 'Банк'. Will find Bankova and similar streets."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - With Limit 10",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Київська\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"10\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for streets containing 'Київська' with limit of 10 results."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Without Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Грушевського\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Hrushevsky street without limit parameter. Returns default number of results."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Lviv, Svobody",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Свободи\",\n    \"SettlementRef\": \"0c41f7f9-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Freedom Avenue (Свободи) in Lviv settlement. Main street of Lviv."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Lviv, Kopernyka",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Коперника\",\n    \"SettlementRef\": \"0c41f7f9-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Kopernyka street in Lviv."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Odesa, Deribasivska",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Дерибасівська\",\n    \"SettlementRef\": \"a2d82b4e-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for famous Deribasivska street in Odesa settlement."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Kharkiv, Sumska",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Сумська\",\n    \"SettlementRef\": \"a9e6b4e3-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Sumska street in Kharkiv settlement - main street."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Dnipro, Embankment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Набережна\",\n    \"SettlementRef\": \"f3f4b936-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for embankment streets in Dnipro settlement."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Common Pattern",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"вул\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"100\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for streets with common pattern 'вул' (street abbreviation) in Kyiv."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Single Character",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Б\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with single character 'Б'. Returns all streets in Kyiv starting with Б."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Maximum Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"а\",\n    \"SettlementRef\": \"e718a680-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"500\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with maximum limit (500). Get many streets containing 'а' in Kyiv."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Zaporizhzhia",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlementStreets\",\n  \"methodProperties\": {\n    \"StreetName\": \"Соборний\",\n    \"SettlementRef\": \"aa8e1a36-4b33-11e4-ab6d-005056801329\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Soborny Avenue in Zaporizhzhia - main street."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "string"
+    }
+  ]
+}

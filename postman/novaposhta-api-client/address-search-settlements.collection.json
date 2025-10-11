@@ -1,0 +1,281 @@
+{
+  "info": {
+    "name": "Nova Poshta - Search Settlements",
+    "description": "Online search for settlements (населені пункти) - real-time fuzzy search",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Search Settlements - Київ",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Київ\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for settlements matching 'Київ'. Returns settlement name, region, number of warehouses. All parameters are required."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Львів",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Львів\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for settlements matching 'Львів'."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Partial Match",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Оде\",\n    \"Limit\": \"30\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with partial name 'Оде'. Will find Одеса and other matching settlements."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Small Village",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Бориспіль\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Boryspil (Бориспіль) - town near Kyiv airport."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - By Postal Code",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"01001\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search by postal code. Example: 01001 is central Kyiv postal code."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Common Name",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Нов\",\n    \"Limit\": \"100\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for common prefix 'Нов'. Will return many settlements: Новоград, Новомосковськ, etc."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Pagination Page 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Нов\",\n    \"Limit\": \"50\",\n    \"Page\": \"2\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Get second page of results (items 51-100) for settlements starting with 'Нов'."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Large Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"а\",\n    \"Limit\": \"500\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with large limit (500 - max per page). Get many settlements containing 'а'."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Ivano-Frankivsk",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Івано-Франківськ\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Ivano-Frankivsk (complex multi-word name with hyphen)."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Zaporizhzhia",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Запоріж\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Zaporizhzhia and related settlements."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Single Character",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"К\",\n    \"Limit\": \"100\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search with single character 'К'. Returns all settlements starting with К."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Settlements - Kharkiv Region",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"apiKey\": \"{{API_KEY}}\",\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Харків\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Search for Kharkiv settlements."
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "BASE_URL",
+      "value": "https://api.novaposhta.ua/v2.0/json/",
+      "type": "string"
+    }
+  ]
+}
