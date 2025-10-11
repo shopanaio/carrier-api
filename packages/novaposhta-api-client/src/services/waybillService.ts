@@ -23,23 +23,17 @@ import type {
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
 
-export interface WaybillServiceConfig {}
-
-export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {};
-
 /**
  * Service for managing waybills (express documents)
  */
 export class WaybillService {
   readonly namespace = 'waybill' as const;
   private transport!: HttpTransport;
-
-  constructor(
-    private readonly config: WaybillServiceConfig = DEFAULT_WAYBILL_CONFIG,
-  ) {}
+  private apiKey?: string;
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
+    this.apiKey = ctx.apiKey;
   }
 
   /**
@@ -47,6 +41,7 @@ export class WaybillService {
    */
   async create(request: CreateWaybillRequest): Promise<CreateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -60,6 +55,7 @@ export class WaybillService {
    */
   async createWithOptions(request: CreateWaybillWithOptionsRequest): Promise<CreateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -73,6 +69,7 @@ export class WaybillService {
    */
   async createForPostomat(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -86,6 +83,7 @@ export class WaybillService {
    */
   async update(request: UpdateWaybillRequest): Promise<UpdateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Update,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -99,6 +97,7 @@ export class WaybillService {
    */
   async delete(request: DeleteWaybillRequest): Promise<DeleteWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Delete,
       methodProperties: {
@@ -114,6 +113,7 @@ export class WaybillService {
    */
   async getDeliveryDate(request: DeliveryDateRequest): Promise<DeliveryDateResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentDeliveryDate,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -127,6 +127,7 @@ export class WaybillService {
    */
   async getPrice(request: PriceCalculationRequest): Promise<PriceCalculationResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentPrice,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -223,20 +224,6 @@ export class WaybillService {
     }
 
     return true;
-  }
-
-  /**
-   * Get service configuration
-   */
-  getConfig(): WaybillServiceConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * Update service configuration
-   */
-  updateConfig(newConfig: Partial<WaybillServiceConfig>): void {
-    Object.assign(this.config, newConfig);
   }
 
   // =============================================================================

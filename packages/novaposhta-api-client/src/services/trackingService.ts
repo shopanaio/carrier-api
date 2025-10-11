@@ -18,10 +18,6 @@ import type {
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod, DeliveryStatus } from '../types/enums';
 
-export interface TrackingServiceConfig {}
-
-export const DEFAULT_TRACKING_CONFIG: TrackingServiceConfig = {};
-
 export interface TrackingStatistics {
   readonly totalTracked: number;
   readonly delivered: number;
@@ -45,11 +41,11 @@ export interface TrackingFilter {
 export class TrackingService {
   readonly namespace = 'tracking' as const;
   private transport!: HttpTransport;
-
-  constructor(private readonly config: TrackingServiceConfig = DEFAULT_TRACKING_CONFIG) {}
+  private apiKey?: string;
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
+    this.apiKey = ctx.apiKey;
   }
 
   /**
@@ -57,6 +53,7 @@ export class TrackingService {
    */
   async trackDocuments(request: TrackDocumentsRequest): Promise<TrackingResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetStatusDocuments,
       methodProperties: {
@@ -90,6 +87,7 @@ export class TrackingService {
    */
   async getDocumentMovement(request: DocumentMovementRequest): Promise<DocumentMovementResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentsEWMovement,
       methodProperties: {
@@ -109,6 +107,7 @@ export class TrackingService {
    */
   async getDocumentList(request: DocumentListRequest): Promise<DocumentListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentList,
       methodProperties: {
@@ -341,20 +340,6 @@ export class TrackingService {
     return () => {
       clearInterval(intervalId);
     };
-  }
-
-  /**
-   * Get service configuration
-   */
-  getConfig(): TrackingServiceConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * Update service configuration
-   */
-  updateConfig(newConfig: Partial<TrackingServiceConfig>): void {
-    Object.assign(this.config, newConfig);
   }
 
   // =============================================================================

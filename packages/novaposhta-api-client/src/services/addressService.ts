@@ -23,10 +23,6 @@ import type {
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
 
-export interface AddressServiceConfig {}
-
-export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
-
 /**
  * Service for managing address operations
  *
@@ -51,13 +47,11 @@ export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
 export class AddressService {
   readonly namespace = 'address' as const;
   private transport!: HttpTransport;
-
-  constructor(
-    private readonly config: AddressServiceConfig = DEFAULT_ADDRESS_CONFIG,
-  ) {}
+  private apiKey?: string;
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
+    this.apiKey = ctx.apiKey;
   }
 
   /**
@@ -67,6 +61,7 @@ export class AddressService {
    */
   async getSettlements(request: GetSettlementsRequest = {}): Promise<GetSettlementsResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementAreas,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -84,6 +79,7 @@ export class AddressService {
     request: GetSettlementCountryRegionRequest,
   ): Promise<GetSettlementCountryRegionResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementCountryRegion,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -99,6 +95,7 @@ export class AddressService {
    */
   async getCities(request: GetCitiesRequest = {}): Promise<GetCitiesResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetCities,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -114,6 +111,7 @@ export class AddressService {
    */
   async getStreet(request: GetStreetRequest): Promise<GetStreetResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetStreet,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -129,6 +127,7 @@ export class AddressService {
    */
   async searchSettlements(request: SearchSettlementsRequest): Promise<SearchSettlementsResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlements,
       methodProperties: {
@@ -148,6 +147,7 @@ export class AddressService {
    */
   async searchSettlementStreets(request: SearchSettlementStreetsRequest): Promise<SearchSettlementStreetsResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlementStreets,
       methodProperties: {
@@ -158,19 +158,5 @@ export class AddressService {
     };
 
     return await this.transport.request<SearchSettlementStreetsResponse['data']>(apiRequest);
-  }
-
-  /**
-   * Get service configuration
-   */
-  getConfig(): AddressServiceConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * Update service configuration
-   */
-  updateConfig(newConfig: Partial<AddressServiceConfig>): void {
-    Object.assign(this.config, newConfig);
   }
 }

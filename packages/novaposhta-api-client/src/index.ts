@@ -77,27 +77,16 @@ export {
 } from './config';
 export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 
-// HTTP Transport (interface only)
 export type { HttpTransport } from './http/transport';
 
-// Services
-export { WaybillService, DEFAULT_WAYBILL_CONFIG } from './services/waybillService';
-export type { WaybillServiceConfig } from './services/waybillService';
+export { WaybillService } from './services/waybillService';
 
-export { TrackingService, DEFAULT_TRACKING_CONFIG } from './services/trackingService';
-export type {
-  TrackingServiceConfig,
-  TrackingStatistics,
-  TrackingFilter
-} from './services/trackingService';
+export { TrackingService } from './services/trackingService';
+export type { TrackingStatistics, TrackingFilter } from './services/trackingService';
 
-export { ReferenceService, DEFAULT_REFERENCE_CONFIG } from './services/referenceService';
-export type { ReferenceServiceConfig } from './services/referenceService';
+export { ReferenceService } from './services/referenceService';
 
-export { AddressService, DEFAULT_ADDRESS_CONFIG } from './services/addressService';
-export type { AddressServiceConfig } from './services/addressService';
-
-//
+export { AddressService } from './services/addressService';
 
 // Base types
 export type {

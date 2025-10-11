@@ -34,23 +34,6 @@ import type {
 } from '../types/reference';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
-//
-
-// Reference service configuration
-export interface ReferenceServiceConfig {
-  /** Default timeout for reference operations */
-  readonly timeout?: number;
-}
-
-// Default configuration
-export const DEFAULT_REFERENCE_CONFIG: ReferenceServiceConfig = {};
-
-// Cache entry interface
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  ttl: number;
-}
 
 /**
  * Service for managing reference data
@@ -74,13 +57,11 @@ interface CacheEntry<T> {
 export class ReferenceService {
   readonly namespace = 'reference' as const;
   private transport!: HttpTransport;
-
-  constructor(
-    private readonly config: ReferenceServiceConfig = DEFAULT_REFERENCE_CONFIG,
-  ) {}
+  private apiKey?: string;
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
+    this.apiKey = ctx.apiKey;
   }
 
   /**
@@ -90,6 +71,7 @@ export class ReferenceService {
    */
   async getCargoTypes(request: GetCargoTypesRequest = {}): Promise<GetCargoTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -105,6 +87,7 @@ export class ReferenceService {
    */
   async getPalletsList(request: GetPalletsListRequest = {}): Promise<GetPalletsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPalletsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -120,6 +103,7 @@ export class ReferenceService {
    */
   async getPackList(request: GetPackListRequest = {}): Promise<GetPackListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPackList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -135,6 +119,7 @@ export class ReferenceService {
    */
   async getTiresWheelsList(request: GetTiresWheelsListRequest = {}): Promise<GetTiresWheelsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTiresWheelsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -152,6 +137,7 @@ export class ReferenceService {
     request: GetCargoDescriptionListRequest = {},
   ): Promise<GetCargoDescriptionListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoDescriptionList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -167,6 +153,7 @@ export class ReferenceService {
    */
   async getMessageCodeText(request: GetMessageCodeTextRequest = {}): Promise<GetMessageCodeTextResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetMessageCodeText,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -182,6 +169,7 @@ export class ReferenceService {
    */
   async getServiceTypes(request: GetServiceTypesRequest = {}): Promise<GetServiceTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetServiceTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -197,6 +185,7 @@ export class ReferenceService {
    */
   async getOwnershipFormsList(request: GetOwnershipFormsListRequest = {}): Promise<GetOwnershipFormsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetOwnershipFormsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -214,6 +203,7 @@ export class ReferenceService {
     // Validation removed
 
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTimeIntervals,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -231,6 +221,7 @@ export class ReferenceService {
     // Validation removed
 
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPickupTimeIntervals,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -248,6 +239,7 @@ export class ReferenceService {
     request: GetBackwardDeliveryCargoTypesRequest = {},
   ): Promise<GetBackwardDeliveryCargoTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetBackwardDeliveryCargoTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -265,25 +257,12 @@ export class ReferenceService {
     request: GetTypesOfPayersForRedeliveryRequest = {},
   ): Promise<GetTypesOfPayersForRedeliveryResponse> {
     const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTypesOfPayersForRedelivery,
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetTypesOfPayersForRedeliveryResponse['data']>(apiRequest);
-  }
-
-  /**
-   * Get service configuration
-   */
-  getConfig(): ReferenceServiceConfig {
-    return { ...this.config };
-  }
-
-  /**
-   * Update service configuration
-   */
-  updateConfig(newConfig: Partial<ReferenceServiceConfig>): void {
-    Object.assign(this.config, newConfig);
   }
 }
