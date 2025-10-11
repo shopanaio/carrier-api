@@ -20,9 +20,10 @@ export interface ClientContext {
 export function toHttpTransport(ctx: ClientContext): HttpTransport {
   return {
     async request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
+      const { apiKey, ...rest } = request as NovaPoshtaRequest & { apiKey?: string };
       const finalRequest: NovaPoshtaRequest = {
-        ...request,
-        apiKey: request.apiKey || ctx.apiKey || '',
+        ...(rest as NovaPoshtaRequest),
+        ...(apiKey ? { apiKey } : {}),
       };
 
       const response = await ctx.transport<NovaPoshtaRequest, NovaPoshtaResponse<T>>({

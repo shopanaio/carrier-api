@@ -1,17 +1,8 @@
-// code and comments in English
-// Example: namespaced API client with custom Node.js HTTP(S) transport and all services installed
-
 import { request as httpRequest } from 'http';
 import { request as httpsRequest } from 'https';
 
-import { createClient } from './core/client';
-import { AddressService } from './services/addressService';
-import { ReferenceService } from './services/referenceService';
-import { TrackingService } from './services/trackingService';
-import { WaybillService } from './services/waybillService';
-
 // Minimal custom transport: HTTP POST JSON with Node's http/https modules
-function createNodeHttpTransport() {
+export function createNodeHttpTransport() {
   return async ({ url, body, signal }: { url: string; body: unknown; signal?: AbortSignal }) => {
     return new Promise<{ status: number; data: any }>((resolve, reject) => {
       try {
@@ -65,41 +56,4 @@ function createNodeHttpTransport() {
       }
     });
   };
-}
-
-async function main() {
-  const client = createClient({
-    transport: createNodeHttpTransport(),
-    baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-    apiKey: process.env.NP_API_KEY || 'your-api-key',
-  })
-    .use(new AddressService())
-    .use(new ReferenceService())
-    .use(new TrackingService())
-    .use(new WaybillService());
-
-  // Address API
-  const cities = await client.address.getCities({});
-  console.log('Cities success:', cities.success, 'items:', Array.isArray(cities.data) ? cities.data.length : 0);
-
-  // Reference API
-  const cargoTypes = await client.reference.getCargoTypes();
-  console.log(
-    'CargoTypes success:',
-    cargoTypes.success,
-    'items:',
-    Array.isArray(cargoTypes.data) ? cargoTypes.data.length : 0,
-  );
-
-  // Tracking API (example number)
-  const tracked = await client.tracking.trackDocument('20400048799000');
-  console.log('Track first item:', tracked);
-}
-
-// Run if executed directly
-if (require.main === module) {
-  main().catch(err => {
-    console.error(err);
-    process.exit(1);
-  });
 }

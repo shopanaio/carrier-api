@@ -90,7 +90,6 @@ export class ReferenceService {
    */
   async getCargoTypes(request: GetCargoTypesRequest = {}): Promise<GetCargoTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -106,7 +105,6 @@ export class ReferenceService {
    */
   async getPalletsList(request: GetPalletsListRequest = {}): Promise<GetPalletsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPalletsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -122,7 +120,6 @@ export class ReferenceService {
    */
   async getPackList(request: GetPackListRequest = {}): Promise<GetPackListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPackList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -138,7 +135,6 @@ export class ReferenceService {
    */
   async getTiresWheelsList(request: GetTiresWheelsListRequest = {}): Promise<GetTiresWheelsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTiresWheelsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -156,7 +152,6 @@ export class ReferenceService {
     request: GetCargoDescriptionListRequest = {},
   ): Promise<GetCargoDescriptionListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetCargoDescriptionList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -172,7 +167,6 @@ export class ReferenceService {
    */
   async getMessageCodeText(request: GetMessageCodeTextRequest = {}): Promise<GetMessageCodeTextResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetMessageCodeText,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -188,7 +182,6 @@ export class ReferenceService {
    */
   async getServiceTypes(request: GetServiceTypesRequest = {}): Promise<GetServiceTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetServiceTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -204,7 +197,6 @@ export class ReferenceService {
    */
   async getOwnershipFormsList(request: GetOwnershipFormsListRequest = {}): Promise<GetOwnershipFormsListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetOwnershipFormsList,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -222,7 +214,6 @@ export class ReferenceService {
     // Validation removed
 
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTimeIntervals,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -240,7 +231,6 @@ export class ReferenceService {
     // Validation removed
 
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPickupTimeIntervals,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -258,7 +248,6 @@ export class ReferenceService {
     request: GetBackwardDeliveryCargoTypesRequest = {},
   ): Promise<GetBackwardDeliveryCargoTypesResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetBackwardDeliveryCargoTypes,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -276,7 +265,6 @@ export class ReferenceService {
     request: GetTypesOfPayersForRedeliveryRequest = {},
   ): Promise<GetTypesOfPayersForRedeliveryResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTypesOfPayersForRedelivery,
       methodProperties: request as unknown as Record<string, unknown>,

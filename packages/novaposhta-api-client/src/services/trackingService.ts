@@ -46,9 +46,7 @@ export class TrackingService {
   readonly namespace = 'tracking' as const;
   private transport!: HttpTransport;
 
-  constructor(
-    private readonly config: TrackingServiceConfig = DEFAULT_TRACKING_CONFIG,
-  ) {}
+  constructor(private readonly config: TrackingServiceConfig = DEFAULT_TRACKING_CONFIG) {}
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
@@ -58,10 +56,7 @@ export class TrackingService {
    * Track multiple documents
    */
   async trackDocuments(request: TrackDocumentsRequest): Promise<TrackingResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetStatusDocuments,
       methodProperties: {
@@ -72,11 +67,7 @@ export class TrackingService {
       },
     };
 
-    const response = await this.transport.request<TrackingResponse['data']>(apiRequest);
-
-    //
-
-    return response as TrackingResponse;
+    return await this.transport.request<TrackingResponse['data']>(apiRequest);
   }
 
   /**
@@ -98,10 +89,7 @@ export class TrackingService {
    * Get document movement history
    */
   async getDocumentMovement(request: DocumentMovementRequest): Promise<DocumentMovementResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentsEWMovement,
       methodProperties: {
@@ -113,9 +101,7 @@ export class TrackingService {
       },
     };
 
-    const response = await this.transport.request<DocumentMovementResponse['data']>(apiRequest);
-
-    return response as DocumentMovementResponse;
+    return await this.transport.request<DocumentMovementResponse['data']>(apiRequest);
   }
 
   /**
@@ -123,7 +109,6 @@ export class TrackingService {
    */
   async getDocumentList(request: DocumentListRequest): Promise<DocumentListResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentList,
       methodProperties: {
@@ -135,9 +120,7 @@ export class TrackingService {
       },
     };
 
-    const response = await this.transport.request<DocumentListResponse['data']>(apiRequest);
-
-    return response as DocumentListResponse;
+    return await this.transport.request<DocumentListResponse['data']>(apiRequest);
   }
 
   /**

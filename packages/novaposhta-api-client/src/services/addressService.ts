@@ -67,7 +67,6 @@ export class AddressService {
    */
   async getSettlements(request: GetSettlementsRequest = {}): Promise<GetSettlementsResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementAreas,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -85,7 +84,6 @@ export class AddressService {
     request: GetSettlementCountryRegionRequest,
   ): Promise<GetSettlementCountryRegionResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetSettlementCountryRegion,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -101,7 +99,6 @@ export class AddressService {
    */
   async getCities(request: GetCitiesRequest = {}): Promise<GetCitiesResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetCities,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -117,7 +114,6 @@ export class AddressService {
    */
   async getStreet(request: GetStreetRequest): Promise<GetStreetResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetStreet,
       methodProperties: request as unknown as Record<string, unknown>,
@@ -133,7 +129,6 @@ export class AddressService {
    */
   async searchSettlements(request: SearchSettlementsRequest): Promise<SearchSettlementsResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlements,
       methodProperties: {
@@ -153,7 +148,6 @@ export class AddressService {
    */
   async searchSettlementStreets(request: SearchSettlementStreetsRequest): Promise<SearchSettlementStreetsResponse> {
     const apiRequest: NovaPoshtaRequest = {
-      apiKey: '',
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlementStreets,
       methodProperties: {

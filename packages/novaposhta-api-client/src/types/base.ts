@@ -57,7 +57,7 @@ export interface NovaPoshtaResponse<T = unknown> {
 
 // API request base structure
 export interface NovaPoshtaRequest {
-  readonly apiKey: string;
+  readonly apiKey?: string;
   readonly modelName: string;
   readonly calledMethod: string;
   readonly methodProperties: Record<string, unknown>;
