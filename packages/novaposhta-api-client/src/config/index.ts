@@ -2,16 +2,14 @@
  * Configuration management for Nova Poshta client
  */
 
-import type { TransportConfig } from '../http/transport';
-import { DEFAULT_TRANSPORT_CONFIG } from '../http/transport';
 import { Language } from '../types/enums';
 
 // Main client configuration interface
 export interface NovaPoshtaClientConfig {
   /** Nova Poshta API key */
   apiKey: string;
-  /** HTTP transport configuration */
-  transport: Partial<TransportConfig>;
+  /** Preferred language (optional) */
+  language?: Language;
 }
 
 // Required configuration (minimal setup)
@@ -20,9 +18,7 @@ export interface RequiredConfig {
 }
 
 // Default configuration values
-export const DEFAULT_CLIENT_CONFIG: Omit<NovaPoshtaClientConfig, 'apiKey'> = {
-  transport: {},
-};
+export const DEFAULT_CLIENT_CONFIG: Omit<NovaPoshtaClientConfig, 'apiKey'> = {};
 
 // Configuration builder class
 export class ConfigBuilder {
@@ -38,11 +34,7 @@ export class ConfigBuilder {
     return this;
   }
 
-  /** Configure transport settings */
-  transport(config: Partial<TransportConfig>): this {
-    (this.config as any).transport = { ...this.config.transport, ...config };
-    return this;
-  }
+  // transport configuration removed: external transport is now injected
 
   //
 
@@ -55,10 +47,6 @@ export class ConfigBuilder {
     return {
       ...DEFAULT_CLIENT_CONFIG,
       ...this.config,
-      transport: {
-        ...DEFAULT_TRANSPORT_CONFIG,
-        ...this.config.transport,
-      },
     } as NovaPoshtaClientConfig;
   }
 }
@@ -70,7 +58,6 @@ export function createConfig(apiKey: string): ConfigBuilder {
 
 export function createTestConfig(apiKey: string = 'test-key'): NovaPoshtaClientConfig {
   return createConfig(apiKey)
-    .transport({ timeout: 5000 })
     .build();
 }
 
@@ -87,10 +74,7 @@ export function validateConfig(config: NovaPoshtaClientConfig): void {
     errors.push('API key appears to be invalid (too short)');
   }
 
-  // Validate transport config
-  if (config.transport.timeout && config.transport.timeout < 1000) {
-    errors.push('Timeout must be at least 1000ms');
-  }
+  // No transport validation: transport is external
 
   if (errors.length > 0) {
     throw new Error(`Configuration validation failed:\n${errors.join('\n')}`);
@@ -101,13 +85,8 @@ export function validateConfig(config: NovaPoshtaClientConfig): void {
 export function loadConfigFromEnv(apiKey?: string): Partial<NovaPoshtaClientConfig> {
   const env = process.env;
 
-  const timeout = env['NOVA_POSHTA_TIMEOUT'] ? parseInt(env['NOVA_POSHTA_TIMEOUT'], 10) : undefined;
-
   return {
     apiKey: apiKey || env['NOVA_POSHTA_API_KEY'],
-    transport: {
-      ...(timeout !== undefined && { timeout }),
-    },
   };
 }
 
@@ -119,9 +98,5 @@ export function mergeConfigs(
   return {
     ...base,
     ...override,
-    transport: {
-      ...base.transport,
-      ...override.transport,
-    },
   };
 }

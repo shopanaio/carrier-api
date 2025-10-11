@@ -61,8 +61,9 @@
  * @packageDocumentation
  */
 
-// Core client
-export { NovaPoshtaClient } from './core/novaPoshtaClient';
+// Core client (plugin-based)
+export { createClient } from './core/client';
+export type { ServicePlugin, ClientContext } from './core/client';
 
 // Configuration
 export {
@@ -80,20 +81,20 @@ export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 export type { HttpTransport } from './http/transport';
 
 // Services
-export { WaybillService, DEFAULT_WAYBILL_CONFIG } from './services/waybillService';
+export { WaybillService, DEFAULT_WAYBILL_CONFIG, createWaybillService } from './services/waybillService';
 export type { WaybillServiceConfig } from './services/waybillService';
 
-export { TrackingService, DEFAULT_TRACKING_CONFIG } from './services/trackingService';
+export { TrackingService, DEFAULT_TRACKING_CONFIG, createTrackingService } from './services/trackingService';
 export type {
   TrackingServiceConfig,
   TrackingStatistics,
   TrackingFilter
 } from './services/trackingService';
 
-export { ReferenceService, DEFAULT_REFERENCE_CONFIG } from './services/referenceService';
+export { ReferenceService, DEFAULT_REFERENCE_CONFIG, createReferenceService } from './services/referenceService';
 export type { ReferenceServiceConfig } from './services/referenceService';
 
-export { AddressService, DEFAULT_ADDRESS_CONFIG } from './services/addressService';
+export { AddressService, DEFAULT_ADDRESS_CONFIG, createAddressService } from './services/addressService';
 export type { AddressServiceConfig } from './services/addressService';
 
 //
@@ -344,25 +345,3 @@ export type {
 // Version information
 export const VERSION = '1.0.0';
 export const SUPPORTED_API_VERSION = '2.0';
-
-// Default exports for convenience
-import { NovaPoshtaClient } from './core/novaPoshtaClient';
-import { createConfig } from './config';
-
-export default NovaPoshtaClient;
-
-/**
- * Quick start function for creating a client with minimal configuration
- *
- * @example
- * ```typescript
- * import { quickStart } from '@novaposhta/client';
- *
- * const client = quickStart('your-api-key');
- * const tracking = await client.tracking.trackDocument('20400048799000');
- * ```
- */
-export function quickStart(apiKey: string, transport: import('./http/transport').HttpTransport): NovaPoshtaClient {
-  const config = createConfig(apiKey).build();
-  return new NovaPoshtaClient(config, transport);
-}

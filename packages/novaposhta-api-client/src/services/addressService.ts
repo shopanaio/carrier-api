@@ -4,6 +4,8 @@
  */
 
 import type { HttpTransport } from '../http/transport';
+import type { ServicePlugin, ClientContext } from '../core/client';
+import { toHttpTransport } from '../core/client';
 import type {
   GetSettlementsRequest,
   GetSettlementsResponse,
@@ -172,3 +174,11 @@ export class AddressService {
     Object.assign(this.config, newConfig);
   }
 }
+
+/**
+ * Plugin factory for AddressService
+ */
+export const createAddressService = (): ServicePlugin<AddressService> => (ctx: ClientContext) => {
+  const transport = toHttpTransport(ctx);
+  return new AddressService(transport, {});
+};

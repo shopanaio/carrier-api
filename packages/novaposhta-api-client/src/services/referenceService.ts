@@ -4,6 +4,8 @@
  */
 
 import type { HttpTransport } from '../http/transport';
+import type { ServicePlugin, ClientContext } from '../core/client';
+import { toHttpTransport } from '../core/client';
 import type {
   GetCargoTypesRequest,
   GetCargoTypesResponse,
@@ -291,3 +293,11 @@ export class ReferenceService {
     Object.assign(this.config, newConfig);
   }
 }
+
+/**
+ * Plugin factory for ReferenceService
+ */
+export const createReferenceService = (): ServicePlugin<ReferenceService> => (ctx: ClientContext) => {
+  const transport = toHttpTransport(ctx);
+  return new ReferenceService(transport, {});
+};

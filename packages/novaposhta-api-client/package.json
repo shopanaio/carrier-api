@@ -11,10 +11,9 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "npm run clean && npm run build:types && rollup -c",
-    "build:types": "tsc --declaration --emitDeclarationOnly --outDir dist/types",
+    "build": "npm run clean && tsc -p tsconfig.json",
     "clean": "rm -rf dist",
-    "dev": "rollup -c -w",
+    "dev": "tsc -w -p tsconfig.json",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
@@ -45,8 +44,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js"
+      "import": "./dist/index.js"
     },
     "./package.json": "./package.json"
   },

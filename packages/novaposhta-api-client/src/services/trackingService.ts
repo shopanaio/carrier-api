@@ -4,6 +4,8 @@
  */
 
 import type { HttpTransport } from '../http/transport';
+import type { ServicePlugin, ClientContext } from '../core/client';
+import { toHttpTransport } from '../core/client';
 import type {
   TrackDocumentsRequest,
   TrackingResponse,
@@ -396,3 +398,11 @@ export class TrackingService {
     return this.trackDocuments(request);
   }
 }
+
+/**
+ * Plugin factory for TrackingService
+ */
+export const createTrackingService = (): ServicePlugin<TrackingService> => (ctx: ClientContext) => {
+  const transport = toHttpTransport(ctx);
+  return new TrackingService(transport, {});
+};

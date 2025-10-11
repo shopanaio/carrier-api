@@ -4,6 +4,8 @@
  */
 
 import type { HttpTransport } from '../http/transport';
+import type { ServicePlugin, ClientContext } from '../core/client';
+import { toHttpTransport } from '../core/client';
 import type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
@@ -306,3 +308,11 @@ export class WaybillService {
     return this.getPrice(request);
   }
 }
+
+/**
+ * Plugin factory for WaybillService
+ */
+export const createWaybillService = (): ServicePlugin<WaybillService> => (ctx: ClientContext) => {
+  const transport = toHttpTransport(ctx);
+  return new WaybillService(transport, {});
+};
