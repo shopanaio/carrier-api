@@ -73,7 +73,7 @@
       "response": []
     },
     {
-      "name": "Search Streets with Pagination",
+      "name": "Search Streets - Page 1",
       "request": {
         "method": "POST",
         "header": [
@@ -90,7 +90,95 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Use Page and Limit for pagination through many results."
+        "description": "First page of streets (records 1-50). Use Page and Limit for pagination through many results."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Page 2",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"а\",\n    \"Page\": \"2\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Second page of streets (records 51-100). Continue pagination by incrementing Page."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Page 3",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"а\",\n    \"Page\": \"3\",\n    \"Limit\": \"50\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Third page of streets (records 101-150). Shows how to continue paginating."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Large Page Size",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"Page\": \"1\",\n    \"Limit\": \"500\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Maximum page size (500 records per page). Get all streets in city without search filter."
+      },
+      "response": []
+    },
+    {
+      "name": "Search Streets - Page 2 with Max Limit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"Page\": \"2\",\n    \"Limit\": \"500\"\n  }\n}"
+        },
+        "url": {
+          "raw": "{{BASE_URL}}",
+          "host": ["{{BASE_URL}}"]
+        },
+        "description": "Second page with maximum limit (records 501-1000). For cities with many streets."
       },
       "response": []
     },

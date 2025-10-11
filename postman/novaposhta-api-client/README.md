@@ -10,7 +10,7 @@ postman/novaposhta-api-client/
 ├── address-settlement-areas.collection.json       # Settlement areas/regions (2 requests)
 ├── address-settlement-regions.collection.json     # Settlement regions/districts (2 requests)
 ├── address-cities.collection.json                 # Cities search (5 requests)
-├── address-streets.collection.json                # Streets search (5 requests)
+├── address-streets.collection.json                # Streets search (9 requests)
 ├── address-search-settlements.collection.json     # Online settlement search (5 requests)
 ├── address-search-streets.collection.json         # Online street search (5 requests)
 ├── environment.json                               # Environment variables
@@ -81,16 +81,21 @@ Search and retrieve cities with Nova Poshta offices
 **Features:** Search by name, pagination, filtering by ref
 **Cached:** 12 hours
 
-### 📁 Address - Streets (5 requests)
+### 📁 Address - Streets (9 requests)
 Search for streets in specific cities
 
 - **Get All Streets in City** - All streets in city (CityRef required)
 - **Search Street by Name** - Search streets by name in city
 - **Search Streets with Limit** - Limit results (max 500 per page)
-- **Search Streets with Pagination** - Use Page and Limit
+- **Search Streets - Page 1** - First page (records 1-50)
+- **Search Streets - Page 2** - Second page (records 51-100)
+- **Search Streets - Page 3** - Third page (records 101-150)
+- **Search Streets - Large Page Size** - Max 500 records per page
+- **Search Streets - Page 2 with Max Limit** - Page 2 with 500 limit (records 501-1000)
 - **Search Streets - Different City** - Example for different city
 
 **Features:** Search by CityRef and name, pagination, partial matching
+**Pagination:** Supports Page + Limit, up to 500 records per page
 **Cached:** 12 hours
 
 ### 📁 Address - Search Settlements (5 requests)
@@ -319,9 +324,10 @@ Tests run automatically after request execution.
 ## Changelog
 
 ### v2.0.0 (2025-10-11)
-- ✨ Split address service into 6 specialized collections (26 requests total)
+- ✨ Split address service into 6 specialized collections (30 requests total)
 - ✅ Demonstrated all unique parameter combinations
 - ✅ Removed duplicate requests with similar parameters
+- ✅ Added comprehensive pagination examples for streets (5 different scenarios)
 - ✅ Added examples for major Ukrainian cities
 - ✅ Included postal code search examples
 - ✅ Added GPS coordinates examples
