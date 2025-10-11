@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get all streets in city. CityRef is required parameter (Kyiv example). Cached for 12 hours."
+        "description": "Get all streets in city. CityRef is required parameter (Kyiv example)."
       },
       "response": []
     },

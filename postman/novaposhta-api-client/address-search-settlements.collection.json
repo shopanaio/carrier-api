@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search settlements by name. All parameters required: CityName, Limit, Page. Returns SettlementRef + deliveryCity (CityRef) + warehouse count + area/region info. Cached 1 hour."
+        "description": "Search settlements by name. All parameters required: CityName, Limit, Page. Returns SettlementRef + deliveryCity (CityRef) + warehouse count + area/region info."
       },
       "response": []
     },

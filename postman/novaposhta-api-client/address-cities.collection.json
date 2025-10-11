@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get all cities without filters. Returns cities with Nova Poshta offices. Cached for 12 hours."
+        "description": "Get all cities without filters. Returns cities with Nova Poshta offices."
       },
       "response": []
     },

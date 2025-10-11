@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search streets in settlement. Required: StreetName, SettlementRef (from searchSettlements). Returns street with GPS coordinates (lat/lon), UA/RU names, full formatted name, and type. Cached 1 hour."
+        "description": "Search streets in settlement. Required: StreetName, SettlementRef (from searchSettlements). Returns street with GPS coordinates (lat/lon), UA/RU names, full formatted name, and type."
       },
       "response": []
     },

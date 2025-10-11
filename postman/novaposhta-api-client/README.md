@@ -58,8 +58,6 @@ Get list of Ukrainian regions/areas (oblasti) - Київська область,
 - **Get All Settlement Areas** - Complete list of all areas
 - **Get Settlement Area by Ref** - Get specific area by reference
 
-**Cached:** 12 hours
-
 ### 📁 Address - Settlement Regions (2 requests)
 Get districts/regions within specific areas
 
@@ -67,7 +65,6 @@ Get districts/regions within specific areas
 - **Get Oblast Regions - Lviv Example** - All districts in Lviv Oblast
 
 **Required:** AreaRef from getSettlementAreas
-**Cached:** 12 hours
 
 ### 📁 Address - Cities (5 requests)
 Search and retrieve cities with Nova Poshta offices
@@ -79,7 +76,6 @@ Search and retrieve cities with Nova Poshta offices
 - **Get City by Ref** - Get specific city by reference
 
 **Features:** Search by name, pagination, filtering by ref
-**Cached:** 12 hours
 
 ### 📁 Address - Streets (9 requests)
 Search for streets in specific cities
@@ -96,7 +92,6 @@ Search for streets in specific cities
 
 **Features:** Search by CityRef and name, pagination, partial matching
 **Pagination:** Supports Page + Limit, up to 500 records per page
-**Cached:** 12 hours
 
 ### 📁 Address - Search Settlements (5 requests)
 Online fuzzy search for any settlement (cities, towns, villages) with warehouse information
@@ -110,7 +105,6 @@ Online fuzzy search for any settlement (cities, towns, villages) with warehouse 
 **Features:** Fuzzy search, postal code search, warehouse count, area/region info, pagination
 **Returns:** SettlementRef, **deliveryCity (CityRef for waybills)**, region, area, warehouse count, settlement type
 **Use when:** Finding small villages/towns, checking warehouse availability, or getting CityRef for any settlement
-**Cached:** 1 hour
 
 ### 📁 Address - Search Streets (5 requests)
 Online fuzzy search for streets in settlements with GPS coordinates
@@ -124,7 +118,6 @@ Online fuzzy search for streets in settlements with GPS coordinates
 **Features:** Real-time search, **GPS coordinates (lat/lon)**, street types, UA/RU names
 **Returns:** SettlementRef, street ref, full formatted name, type, **GPS coordinates**
 **Use when:** Need precise geolocation, working with settlement-based addresses, or mapping
-**Cached:** 1 hour
 
 ### 📁 Reference Service (12 requests)
 Reference data for deliveries
@@ -339,7 +332,6 @@ Tests run automatically after request execution.
 - Uses **CityRef** from `getCities`
 - For working with **known major cities**
 - Returns: `ref`, `description`, `streetsType`, `streetsTypeRef`
-- Cached: **12 hours** (static data)
 - Optional: `FindByString`
 - Supports: Full pagination (Page + Limit)
 - Use when: You already know the city (Kyiv, Lviv, etc.)
@@ -349,7 +341,6 @@ Tests run automatically after request execution.
 - For **finding any settlement** (cities, towns, villages)
 - `searchSettlements` returns **both** `SettlementRef` AND `deliveryCity` (CityRef)
 - Returns: All above + **GPS coordinates (lat/lon)**, full name (`present`), both UA/RU names, `totalCount`
-- Cached: **1 hour** (online search, more dynamic)
 - Required: `StreetName` + `SettlementRef`
 - Optional: `Limit` only (no Page parameter)
 - Includes: Geographical location for precise address
@@ -364,7 +355,6 @@ Tests run automatically after request execution.
 | **GPS Coordinates** | ❌ No | ✅ Yes (lat/lon) |
 | **Names** | UA only | UA + RU |
 | **Pagination** | Page + Limit | Limit only |
-| **Cache TTL** | 12 hours | 1 hour |
 | **Total Count** | ❌ No | ✅ Yes |
 | **Settlement Info** | ❌ No | ✅ Returns warehouse count, area, region |
 
@@ -408,9 +398,3 @@ Tests run automatically after request execution.
   }
 }
 ```
-
-**Important:**
-- **Both methods work for any delivery type** (warehouse-to-warehouse, door-to-door, etc.)
-- `searchSettlements` returns `deliveryCity` (CityRef) which is used in waybill creation
-- Main advantage of `searchSettlementStreets`: **GPS coordinates** for precise geolocation
-- Use `searchSettlements` when you need to find small villages/towns or get warehouse availability info

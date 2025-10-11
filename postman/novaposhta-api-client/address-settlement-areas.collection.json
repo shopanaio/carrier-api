@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get complete list of all settlement areas in Ukraine. Returns areas like Київська область, Львівська область, etc. This is cached for 12 hours."
+        "description": "Get complete list of all settlement areas in Ukraine. Returns areas like Київська область, Львівська область, etc."
       },
       "response": []
     },
