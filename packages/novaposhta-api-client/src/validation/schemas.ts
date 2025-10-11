@@ -375,29 +375,13 @@ export const waybillCreationResponseSchema = novaPoshtaResponseSchema.extend({
 export const transportConfigSchema = z.object({
   baseUrl: z.string().url().optional(),
   timeout: z.number().int().min(1000).optional(),
-  maxRetries: z.number().int().min(0).max(10).optional(),
-  retryDelay: z.number().int().min(100).optional(),
-  maxRetryDelay: z.number().int().min(1000).optional(),
-  backoffMultiplier: z.number().min(1).max(10).optional(),
-  rateLimit: z.number().int().min(1).max(100).optional(),
   headers: z.record(z.string()).optional(),
-  enableLogging: z.boolean().optional(),
 });
 
 export const clientConfigSchema = z.object({
   apiKey: z.string().min(32, 'API key must be at least 32 characters'),
-  language: languageSchema.optional(),
   transport: transportConfigSchema.optional(),
   enableValidation: z.boolean().optional(),
-  enableCaching: z.boolean().optional(),
-  cacheTtl: z.number().int().min(0).optional(),
-  enableMetrics: z.boolean().optional(),
-  enableLogging: z.boolean().optional(),
-  userAgent: z.string().optional(),
-  clientInfo: z.object({
-    name: z.string(),
-    version: z.string(),
-  }).optional(),
 });
 
 // Export all schemas for use in validation

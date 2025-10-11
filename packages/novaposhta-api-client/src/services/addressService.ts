@@ -31,10 +31,6 @@ export interface AddressServiceConfig {
   readonly validateRequests: boolean;
   /** Enable response validation */
   readonly validateResponses: boolean;
-  /** Enable caching of address data */
-  readonly enableCaching: boolean;
-  /** Cache TTL for address data in milliseconds */
-  readonly cacheTtl: number;
   /** Default timeout for address operations */
   readonly timeout?: number;
 }
@@ -43,16 +39,10 @@ export interface AddressServiceConfig {
 export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {
   validateRequests: true,
   validateResponses: true,
-  enableCaching: true,
-  cacheTtl: 43200000, // 12 hours
 };
 
 // Cache entry interface
-interface CacheEntry<T> {
-  data: T;
-  timestamp: number;
-  ttl: number;
-}
+// Cache types removed
 
 // Search suggestions interface
 export interface SearchSuggestions {
@@ -83,7 +73,6 @@ export interface SearchSuggestions {
  * ```
  */
 export class AddressService {
-  private readonly cache = new Map<string, CacheEntry<any>>();
   private readonly searchHistory = new Set<string>();
 
   constructor(
@@ -98,14 +87,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getSettlements(request: GetSettlementsRequest = {}): Promise<GetSettlementsResponse> {
-    const cacheKey = `settlements_${JSON.stringify(request)}`;
-
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetSettlementsResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getSettlementsRequest, request, 'getSettlements');
@@ -125,14 +106,7 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getSettlementsResponse');
     }
 
-    const result = response as GetSettlementsResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetSettlementsResponse;
   }
 
   /**
@@ -141,14 +115,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getSettlementCountryRegion(request: GetSettlementCountryRegionRequest): Promise<GetSettlementCountryRegionResponse> {
-    const cacheKey = `settlementCountryRegion_${request.areaRef}`;
-
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetSettlementCountryRegionResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getSettlementCountryRegionRequest, request, 'getSettlementCountryRegion');
@@ -168,14 +134,7 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getSettlementCountryRegionResponse');
     }
 
-    const result = response as GetSettlementCountryRegionResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetSettlementCountryRegionResponse;
   }
 
   /**
@@ -184,14 +143,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getCities(request: GetCitiesRequest = {}): Promise<GetCitiesResponse> {
-    const cacheKey = `cities_${JSON.stringify(request)}`;
-
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetCitiesResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.citiesRequest, request, 'getCities');
@@ -211,19 +162,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getCitiesResponse');
     }
 
-    const result = response as GetCitiesResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
     // Track search query for suggestions
     if (request.findByString) {
       this.searchHistory.add(request.findByString.toLowerCase());
     }
-
-    return result;
+    return response as GetCitiesResponse;
   }
 
   /**
@@ -232,14 +175,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getStreet(request: GetStreetRequest): Promise<GetStreetResponse> {
-    const cacheKey = `streets_${JSON.stringify(request)}`;
-
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetStreetResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getStreetRequest, request, 'getStreet');
@@ -259,19 +194,11 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getStreetResponse');
     }
 
-    const result = response as GetStreetResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
     // Track search query for suggestions
     if (request.findByString) {
       this.searchHistory.add(request.findByString.toLowerCase());
     }
-
-    return result;
+    return response as GetStreetResponse;
   }
 
   /**
@@ -280,14 +207,6 @@ export class AddressService {
    * @cacheable 1 hour
    */
   async searchSettlements(request: SearchSettlementsRequest): Promise<SearchSettlementsResponse> {
-    const cacheKey = `searchSettlements_${JSON.stringify(request)}`;
-
-    // Check cache first (shorter TTL for search results)
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<SearchSettlementsResponse>(cacheKey, 3600000); // 1 hour
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.searchSettlementsRequest, request, 'searchSettlements');
@@ -311,17 +230,9 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'searchSettlementsResponse');
     }
 
-    const result = response as SearchSettlementsResponse;
-
-    // Cache the result with shorter TTL
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, 3600000); // 1 hour
-    }
-
     // Track search query for suggestions
     this.searchHistory.add(request.cityName.toLowerCase());
-
-    return result;
+    return response as SearchSettlementsResponse;
   }
 
   /**
@@ -330,14 +241,6 @@ export class AddressService {
    * @cacheable 1 hour
    */
   async searchSettlementStreets(request: SearchSettlementStreetsRequest): Promise<SearchSettlementStreetsResponse> {
-    const cacheKey = `searchSettlementStreets_${JSON.stringify(request)}`;
-
-    // Check cache first (shorter TTL for search results)
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<SearchSettlementStreetsResponse>(cacheKey, 3600000); // 1 hour
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.searchSettlementStreetsRequest, request, 'searchSettlementStreets');
@@ -361,17 +264,9 @@ export class AddressService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'searchSettlementStreetsResponse');
     }
 
-    const result = response as SearchSettlementStreetsResponse;
-
-    // Cache the result with shorter TTL
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, 3600000); // 1 hour
-    }
-
     // Track search query for suggestions
     this.searchHistory.add(request.streetName.toLowerCase());
-
-    return result;
+    return response as SearchSettlementStreetsResponse;
   }
 
   /**
@@ -503,16 +398,12 @@ export class AddressService {
   /**
    * Clear all cached address data
    */
-  clearCache(): void {
-    this.cache.clear();
-  }
+  // Cache cleared method removed
 
   /**
    * Clear specific cached entry
    */
-  clearCacheEntry(key: string): void {
-    this.cache.delete(key);
-  }
+  // Cache entry clearing removed
 
   /**
    * Clear search history
@@ -542,17 +433,10 @@ export class AddressService {
 
     const now = Date.now();
 
-    for (const [key, entry] of this.cache.entries()) {
-      entries.push({
-        key,
-        timestamp: entry.timestamp,
-        ttl: entry.ttl,
-        expired: now > entry.timestamp + entry.ttl,
-      });
-    }
+    // Cache removed
 
     return {
-      size: this.cache.size,
+      size: 0,
       entries,
     };
   }
@@ -590,26 +474,12 @@ export class AddressService {
 
   // Private helper methods
   private getCachedData<T>(key: string, customTtl?: number): T | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    const ttl = customTtl || entry.ttl;
-    const now = Date.now();
-
-    if (now > entry.timestamp + ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.data;
+    // Cache removed
+    return null;
   }
 
   private setCachedData<T>(key: string, data: T, ttl: number): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    });
+    // Cache removed
   }
 
   private calculateRelevanceScore(query: string, target: string): number {

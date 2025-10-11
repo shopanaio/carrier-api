@@ -41,10 +41,6 @@ export interface ReferenceServiceConfig {
   readonly validateRequests: boolean;
   /** Enable response validation */
   readonly validateResponses: boolean;
-  /** Enable caching of reference data */
-  readonly enableCaching: boolean;
-  /** Cache TTL for reference data in milliseconds */
-  readonly cacheTtl: number;
   /** Default timeout for reference operations */
   readonly timeout?: number;
 }
@@ -53,8 +49,6 @@ export interface ReferenceServiceConfig {
 export const DEFAULT_REFERENCE_CONFIG: ReferenceServiceConfig = {
   validateRequests: true,
   validateResponses: true,
-  enableCaching: true,
-  cacheTtl: 86400000, // 24 hours
 };
 
 // Cache entry interface
@@ -66,15 +60,15 @@ interface CacheEntry<T> {
 
 /**
  * Service for managing reference data
- * 
+ *
  * @example
  * ```typescript
  * // Get cargo types
  * const cargoTypes = await referenceService.getCargoTypes();
- * 
+ *
  * // Get pallets list
  * const pallets = await referenceService.getPalletsList();
- * 
+ *
  * // Get pack list with filters
  * const packs = await referenceService.getPackList({
  *   length: 100,
@@ -84,7 +78,6 @@ interface CacheEntry<T> {
  * ```
  */
 export class ReferenceService {
-  private readonly cache = new Map<string, CacheEntry<any>>();
 
   constructor(
     private readonly transport: HttpTransport,
@@ -98,14 +91,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getCargoTypes(request: GetCargoTypesRequest = {}): Promise<GetCargoTypesResponse> {
-    const cacheKey = 'cargoTypes';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetCargoTypesResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getCargoTypesRequest, request, 'getCargoTypes');
@@ -125,14 +110,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getCargoTypesResponse');
     }
 
-    const result = response as GetCargoTypesResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetCargoTypesResponse;
   }
 
   /**
@@ -141,14 +119,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getPalletsList(request: GetPalletsListRequest = {}): Promise<GetPalletsListResponse> {
-    const cacheKey = 'palletsList';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetPalletsListResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getPalletsListRequest, request, 'getPalletsList');
@@ -168,14 +138,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getPalletsListResponse');
     }
 
-    const result = response as GetPalletsListResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetPalletsListResponse;
   }
 
   /**
@@ -184,14 +147,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getPackList(request: GetPackListRequest = {}): Promise<GetPackListResponse> {
-    const cacheKey = `packList_${JSON.stringify(request)}`;
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetPackListResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getPackListRequest, request, 'getPackList');
@@ -211,14 +166,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getPackListResponse');
     }
 
-    const result = response as GetPackListResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetPackListResponse;
   }
 
   /**
@@ -227,14 +175,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getTiresWheelsList(request: GetTiresWheelsListRequest = {}): Promise<GetTiresWheelsListResponse> {
-    const cacheKey = 'tiresWheelsList';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetTiresWheelsListResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getTiresWheelsListRequest, request, 'getTiresWheelsList');
@@ -254,14 +194,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getTiresWheelsListResponse');
     }
 
-    const result = response as GetTiresWheelsListResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetTiresWheelsListResponse;
   }
 
   /**
@@ -270,14 +203,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getCargoDescriptionList(request: GetCargoDescriptionListRequest = {}): Promise<GetCargoDescriptionListResponse> {
-    const cacheKey = `cargoDescriptionList_${JSON.stringify(request)}`;
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetCargoDescriptionListResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getCargoDescriptionListRequest, request, 'getCargoDescriptionList');
@@ -297,14 +222,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getCargoDescriptionListResponse');
     }
 
-    const result = response as GetCargoDescriptionListResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetCargoDescriptionListResponse;
   }
 
   /**
@@ -313,14 +231,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getMessageCodeText(request: GetMessageCodeTextRequest = {}): Promise<GetMessageCodeTextResponse> {
-    const cacheKey = 'messageCodeText';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetMessageCodeTextResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getMessageCodeTextRequest, request, 'getMessageCodeText');
@@ -340,14 +250,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getMessageCodeTextResponse');
     }
 
-    const result = response as GetMessageCodeTextResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetMessageCodeTextResponse;
   }
 
   /**
@@ -356,14 +259,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getServiceTypes(request: GetServiceTypesRequest = {}): Promise<GetServiceTypesResponse> {
-    const cacheKey = 'serviceTypes';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetServiceTypesResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getServiceTypesRequest, request, 'getServiceTypes');
@@ -383,14 +278,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getServiceTypesResponse');
     }
 
-    const result = response as GetServiceTypesResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetServiceTypesResponse;
   }
 
   /**
@@ -399,14 +287,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getOwnershipFormsList(request: GetOwnershipFormsListRequest = {}): Promise<GetOwnershipFormsListResponse> {
-    const cacheKey = 'ownershipFormsList';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetOwnershipFormsListResponse>(cacheKey);
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.getOwnershipFormsListRequest, request, 'getOwnershipFormsList');
@@ -426,14 +306,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getOwnershipFormsListResponse');
     }
 
-    const result = response as GetOwnershipFormsListResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetOwnershipFormsListResponse;
   }
 
   /**
@@ -442,14 +315,6 @@ export class ReferenceService {
    * @cacheable 1 hour
    */
   async getTimeIntervals(request: GetTimeIntervalsRequest): Promise<GetTimeIntervalsResponse> {
-    const cacheKey = `timeIntervals_${JSON.stringify(request)}`;
-    
-    // Check cache first (shorter TTL for time-sensitive data)
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetTimeIntervalsResponse>(cacheKey, 3600000); // 1 hour
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.timeIntervalsRequest, request, 'getTimeIntervals');
@@ -469,14 +334,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getTimeIntervalsResponse');
     }
 
-    const result = response as GetTimeIntervalsResponse;
-
-    // Cache the result with shorter TTL
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, 3600000); // 1 hour
-    }
-
-    return result;
+    return response as GetTimeIntervalsResponse;
   }
 
   /**
@@ -485,14 +343,6 @@ export class ReferenceService {
    * @cacheable 1 hour
    */
   async getPickupTimeIntervals(request: GetPickupTimeIntervalsRequest): Promise<GetPickupTimeIntervalsResponse> {
-    const cacheKey = `pickupTimeIntervals_${JSON.stringify(request)}`;
-    
-    // Check cache first (shorter TTL for time-sensitive data)
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetPickupTimeIntervalsResponse>(cacheKey, 3600000); // 1 hour
-      if (cached) return cached;
-    }
-
     // Validate request
     if (this.config.validateRequests) {
       this.validator.validateOrThrow(schemas.pickupTimeIntervalsRequest, request, 'getPickupTimeIntervals');
@@ -512,14 +362,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getPickupTimeIntervalsResponse');
     }
 
-    const result = response as GetPickupTimeIntervalsResponse;
-
-    // Cache the result with shorter TTL
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, 3600000); // 1 hour
-    }
-
-    return result;
+    return response as GetPickupTimeIntervalsResponse;
   }
 
   /**
@@ -528,13 +371,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getBackwardDeliveryCargoTypes(request: GetBackwardDeliveryCargoTypesRequest = {}): Promise<GetBackwardDeliveryCargoTypesResponse> {
-    const cacheKey = 'backwardDeliveryCargoTypes';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetBackwardDeliveryCargoTypesResponse>(cacheKey);
-      if (cached) return cached;
-    }
 
     // Validate request
     if (this.config.validateRequests) {
@@ -555,14 +391,7 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getBackwardDeliveryCargoTypesResponse');
     }
 
-    const result = response as GetBackwardDeliveryCargoTypesResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetBackwardDeliveryCargoTypesResponse;
   }
 
   /**
@@ -571,13 +400,6 @@ export class ReferenceService {
    * @cacheable 24 hours
    */
   async getTypesOfPayersForRedelivery(request: GetTypesOfPayersForRedeliveryRequest = {}): Promise<GetTypesOfPayersForRedeliveryResponse> {
-    const cacheKey = 'typesOfPayersForRedelivery';
-    
-    // Check cache first
-    if (this.config.enableCaching) {
-      const cached = this.getCachedData<GetTypesOfPayersForRedeliveryResponse>(cacheKey);
-      if (cached) return cached;
-    }
 
     // Validate request
     if (this.config.validateRequests) {
@@ -598,65 +420,10 @@ export class ReferenceService {
       this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getTypesOfPayersForRedeliveryResponse');
     }
 
-    const result = response as GetTypesOfPayersForRedeliveryResponse;
-
-    // Cache the result
-    if (this.config.enableCaching && result.success) {
-      this.setCachedData(cacheKey, result, this.config.cacheTtl);
-    }
-
-    return result;
+    return response as GetTypesOfPayersForRedeliveryResponse;
   }
 
-  /**
-   * Clear all cached reference data
-   */
-  clearCache(): void {
-    this.cache.clear();
-  }
-
-  /**
-   * Clear specific cached entry
-   */
-  clearCacheEntry(key: string): void {
-    this.cache.delete(key);
-  }
-
-  /**
-   * Get cache statistics
-   */
-  getCacheStats(): {
-    size: number;
-    entries: Array<{
-      key: string;
-      timestamp: number;
-      ttl: number;
-      expired: boolean;
-    }>;
-  } {
-    const entries: Array<{
-      key: string;
-      timestamp: number;
-      ttl: number;
-      expired: boolean;
-    }> = [];
-
-    const now = Date.now();
-    
-    for (const [key, entry] of this.cache.entries()) {
-      entries.push({
-        key,
-        timestamp: entry.timestamp,
-        ttl: entry.ttl,
-        expired: now > entry.timestamp + entry.ttl,
-      });
-    }
-
-    return {
-      size: this.cache.size,
-      entries,
-    };
-  }
+  // Cache functionality removed
 
   /**
    * Get service configuration
@@ -673,26 +440,5 @@ export class ReferenceService {
   }
 
   // Private cache management methods
-  private getCachedData<T>(key: string, customTtl?: number): T | null {
-    const entry = this.cache.get(key);
-    if (!entry) return null;
-
-    const ttl = customTtl || entry.ttl;
-    const now = Date.now();
-    
-    if (now > entry.timestamp + ttl) {
-      this.cache.delete(key);
-      return null;
-    }
-
-    return entry.data;
-  }
-
-  private setCachedData<T>(key: string, data: T, ttl: number): void {
-    this.cache.set(key, {
-      data,
-      timestamp: Date.now(),
-      ttl,
-    });
-  }
+  // Cache helpers removed
 }

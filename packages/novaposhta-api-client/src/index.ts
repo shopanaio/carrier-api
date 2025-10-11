@@ -63,7 +63,6 @@
 
 // Core client
 export { NovaPoshtaClient } from './core/novaPoshtaClient';
-export type { ClientState, ClientMetrics, HealthCheckResult } from './core/novaPoshtaClient';
 
 // Configuration
 export {
@@ -79,23 +78,7 @@ export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 
 // HTTP Transport
 export { FetchHttpTransport, MockHttpTransport, DEFAULT_TRANSPORT_CONFIG } from './http/transport';
-export type { HttpTransport, TransportConfig, RequestInterceptor, ResponseInterceptor, ErrorInterceptor } from './http/transport';
-
-// Interceptors
-export {
-  LoggingInterceptor,
-  ApiKeyInterceptor,
-  RequestIdInterceptor,
-  ResponseValidationInterceptor,
-  MetricsInterceptor,
-  CachingInterceptor,
-  RateLimitingInterceptor,
-  UserAgentInterceptor,
-  TimeoutInterceptor,
-  ErrorTransformInterceptor,
-  RetryPolicyInterceptor,
-} from './http/interceptors';
-export type { MetricsCollector, CacheStorage } from './http/interceptors';
+export type { HttpTransport, TransportConfig } from './http/transport';
 
 // Services
 export { WaybillService, DEFAULT_WAYBILL_CONFIG } from './services/waybillService';

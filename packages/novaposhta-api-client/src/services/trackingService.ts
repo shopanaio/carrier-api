@@ -26,18 +26,12 @@ export interface TrackingServiceConfig {
   readonly validateResponses: boolean;
   /** Default timeout for tracking operations */
   readonly timeout?: number;
-  /** Enable caching of tracking results */
-  readonly enableCaching: boolean;
-  /** Cache TTL for tracking data in milliseconds */
-  readonly trackingCacheTtl: number;
 }
 
 // Default configuration
 export const DEFAULT_TRACKING_CONFIG: TrackingServiceConfig = {
   validateRequests: true,
   validateResponses: true,
-  enableCaching: true,
-  trackingCacheTtl: 300000, // 5 minutes
 };
 
 // Tracking statistics
