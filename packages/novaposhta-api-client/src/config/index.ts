@@ -12,8 +12,6 @@ export interface NovaPoshtaClientConfig {
   apiKey: string;
   /** HTTP transport configuration */
   transport: Partial<TransportConfig>;
-  /** Enable validation of requests and responses */
-  enableValidation: boolean;
 }
 
 // Required configuration (minimal setup)
@@ -24,7 +22,6 @@ export interface RequiredConfig {
 // Default configuration values
 export const DEFAULT_CLIENT_CONFIG: Omit<NovaPoshtaClientConfig, 'apiKey'> = {
   transport: {},
-  enableValidation: true,
 };
 
 // Configuration builder class
@@ -47,11 +44,7 @@ export class ConfigBuilder {
     return this;
   }
 
-  /** Enable/disable validation */
-  validation(enabled: boolean): this {
-    (this.config as any).enableValidation = enabled;
-    return this;
-  }
+  //
 
   /** Build final configuration */
   build(): NovaPoshtaClientConfig {
@@ -77,7 +70,6 @@ export function createConfig(apiKey: string): ConfigBuilder {
 
 export function createTestConfig(apiKey: string = 'test-key'): NovaPoshtaClientConfig {
   return createConfig(apiKey)
-    .validation(false)
     .transport({ timeout: 5000 })
     .build();
 }
@@ -113,7 +105,6 @@ export function loadConfigFromEnv(apiKey?: string): Partial<NovaPoshtaClientConf
 
   return {
     apiKey: apiKey || env['NOVA_POSHTA_API_KEY'],
-    enableValidation: env['NOVA_POSHTA_ENABLE_VALIDATION'] !== 'false',
     transport: {
       ...(timeout !== undefined && { timeout }),
     },

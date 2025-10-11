@@ -77,7 +77,7 @@ export {
 export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 
 // HTTP Transport
-export { FetchHttpTransport, MockHttpTransport, DEFAULT_TRANSPORT_CONFIG } from './http/transport';
+export { FetchHttpTransport, DEFAULT_TRANSPORT_CONFIG } from './http/transport';
 export type { HttpTransport, TransportConfig } from './http/transport';
 
 // Services
@@ -97,21 +97,7 @@ export type { ReferenceServiceConfig } from './services/referenceService';
 export { AddressService, DEFAULT_ADDRESS_CONFIG } from './services/addressService';
 export type { AddressServiceConfig, SearchSuggestions } from './services/addressService';
 
-// Validation
-export { NovaPoshtaValidator, ValidationException, validator, DEFAULT_VALIDATOR_CONFIG } from './validation/validator';
-export type { ValidationResult, ValidatorConfig } from './validation/validator';
-export { schemas } from './validation/schemas';
-
-// Validation utilities
-export {
-  isValidNovaPoshtaRef,
-  isValidPhoneNumber,
-  isValidNovaPoshtaDate,
-  isValidWeight,
-  isValidCost,
-  validateAndCast,
-  validateAsync,
-} from './validation/validator';
+//
 
 // Base types
 export type {

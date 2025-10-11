@@ -4,7 +4,6 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { NovaPoshtaValidator } from '../validation/validator';
 import type {
   GetSettlementsRequest,
   GetSettlementsResponse,
@@ -23,33 +22,20 @@ import type {
 } from '../types/address';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
-import { schemas } from '../validation/schemas';
 
 // Address service configuration
 export interface AddressServiceConfig {
-  /** Enable request validation */
-  readonly validateRequests: boolean;
-  /** Enable response validation */
-  readonly validateResponses: boolean;
   /** Default timeout for address operations */
   readonly timeout?: number;
 }
 
 // Default configuration
-export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {
-  validateRequests: true,
-  validateResponses: true,
-};
+export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
 
 // Cache entry interface
 // Cache types removed
 
-// Search suggestions interface
-export interface SearchSuggestions {
-  cities: string[];
-  streets: string[];
-  settlements: string[];
-}
+//
 
 /**
  * Service for managing address operations
@@ -73,11 +59,8 @@ export interface SearchSuggestions {
  * ```
  */
 export class AddressService {
-  private readonly searchHistory = new Set<string>();
-
   constructor(
     private readonly transport: HttpTransport,
-    private readonly validator: NovaPoshtaValidator,
     private readonly config: AddressServiceConfig = DEFAULT_ADDRESS_CONFIG,
   ) {}
 
@@ -87,11 +70,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getSettlements(request: GetSettlementsRequest = {}): Promise<GetSettlementsResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.getSettlementsRequest, request, 'getSettlements');
-    }
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.Address,
@@ -101,11 +79,6 @@ export class AddressService {
 
     const response = await this.transport.request<GetSettlementsResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getSettlementsResponse');
-    }
-
     return response as GetSettlementsResponse;
   }
 
@@ -114,12 +87,9 @@ export class AddressService {
    * @description Retrieves list of settlement regions for a specific area
    * @cacheable 12 hours
    */
-  async getSettlementCountryRegion(request: GetSettlementCountryRegionRequest): Promise<GetSettlementCountryRegionResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.getSettlementCountryRegionRequest, request, 'getSettlementCountryRegion');
-    }
-
+  async getSettlementCountryRegion(
+    request: GetSettlementCountryRegionRequest,
+  ): Promise<GetSettlementCountryRegionResponse> {
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
@@ -128,12 +98,6 @@ export class AddressService {
     };
 
     const response = await this.transport.request<GetSettlementCountryRegionResponse['data']>(apiRequest);
-
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getSettlementCountryRegionResponse');
-    }
-
     return response as GetSettlementCountryRegionResponse;
   }
 
@@ -143,11 +107,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getCities(request: GetCitiesRequest = {}): Promise<GetCitiesResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.citiesRequest, request, 'getCities');
-    }
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
@@ -157,15 +116,6 @@ export class AddressService {
 
     const response = await this.transport.request<GetCitiesResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getCitiesResponse');
-    }
-
-    // Track search query for suggestions
-    if (request.findByString) {
-      this.searchHistory.add(request.findByString.toLowerCase());
-    }
     return response as GetCitiesResponse;
   }
 
@@ -175,11 +125,6 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getStreet(request: GetStreetRequest): Promise<GetStreetResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.getStreetRequest, request, 'getStreet');
-    }
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
@@ -189,15 +134,6 @@ export class AddressService {
 
     const response = await this.transport.request<GetStreetResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'getStreetResponse');
-    }
-
-    // Track search query for suggestions
-    if (request.findByString) {
-      this.searchHistory.add(request.findByString.toLowerCase());
-    }
     return response as GetStreetResponse;
   }
 
@@ -207,11 +143,6 @@ export class AddressService {
    * @cacheable 1 hour
    */
   async searchSettlements(request: SearchSettlementsRequest): Promise<SearchSettlementsResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.searchSettlementsRequest, request, 'searchSettlements');
-    }
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
@@ -225,13 +156,6 @@ export class AddressService {
 
     const response = await this.transport.request<SearchSettlementsResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'searchSettlementsResponse');
-    }
-
-    // Track search query for suggestions
-    this.searchHistory.add(request.cityName.toLowerCase());
     return response as SearchSettlementsResponse;
   }
 
@@ -241,11 +165,6 @@ export class AddressService {
    * @cacheable 1 hour
    */
   async searchSettlementStreets(request: SearchSettlementStreetsRequest): Promise<SearchSettlementStreetsResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.searchSettlementStreetsRequest, request, 'searchSettlementStreets');
-    }
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Address,
@@ -259,29 +178,21 @@ export class AddressService {
 
     const response = await this.transport.request<SearchSettlementStreetsResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'searchSettlementStreetsResponse');
-    }
-
-    // Track search query for suggestions
-    this.searchHistory.add(request.streetName.toLowerCase());
     return response as SearchSettlementStreetsResponse;
   }
 
   /**
    * Enhanced city search with fuzzy matching
    */
-  async searchCitiesEnhanced(query: string, options: {
-    maxResults?: number;
-    fuzzyMatch?: boolean;
-    includeRelevanceScore?: boolean;
-  } = {}): Promise<CitySearchResult[]> {
-    const {
-      maxResults = 20,
-      fuzzyMatch = true,
-      includeRelevanceScore = true,
-    } = options;
+  async searchCitiesEnhanced(
+    query: string,
+    options: {
+      maxResults?: number;
+      fuzzyMatch?: boolean;
+      includeRelevanceScore?: boolean;
+    } = {},
+  ): Promise<CitySearchResult[]> {
+    const { maxResults = 20, fuzzyMatch = true, includeRelevanceScore = true } = options;
 
     const response = await this.getCities({
       findByString: query,
@@ -313,16 +224,16 @@ export class AddressService {
   /**
    * Enhanced street search with city context
    */
-  async searchStreetsEnhanced(streetQuery: string, cityRef: string, options: {
-    maxResults?: number;
-    fuzzyMatch?: boolean;
-    includeRelevanceScore?: boolean;
-  } = {}): Promise<StreetSearchResult[]> {
-    const {
-      maxResults = 20,
-      fuzzyMatch = true,
-      includeRelevanceScore = true,
-    } = options;
+  async searchStreetsEnhanced(
+    streetQuery: string,
+    cityRef: string,
+    options: {
+      maxResults?: number;
+      fuzzyMatch?: boolean;
+      includeRelevanceScore?: boolean;
+    } = {},
+  ): Promise<StreetSearchResult[]> {
+    const { maxResults = 20, fuzzyMatch = true, includeRelevanceScore = true } = options;
 
     const response = await this.getStreet({
       cityRef: cityRef as any,
@@ -350,23 +261,6 @@ export class AddressService {
     }
 
     return results.slice(0, maxResults);
-  }
-
-  /**
-   * Get search suggestions based on history
-   */
-  getSearchSuggestions(query: string, maxSuggestions: number = 10): SearchSuggestions {
-    const lowerQuery = query.toLowerCase();
-
-    const suggestions = Array.from(this.searchHistory)
-      .filter(term => term.includes(lowerQuery) && term !== lowerQuery)
-      .slice(0, maxSuggestions);
-
-    return {
-      cities: suggestions.filter(s => s.length > 2),
-      streets: suggestions.filter(s => s.includes('вул.') || s.includes('просп.') || s.includes('бул.')),
-      settlements: suggestions.filter(s => !s.includes('вул.') && !s.includes('просп.') && !s.includes('бул.')),
-    };
   }
 
   /**
@@ -406,13 +300,6 @@ export class AddressService {
   // Cache entry clearing removed
 
   /**
-   * Clear search history
-   */
-  clearSearchHistory(): void {
-    this.searchHistory.clear();
-  }
-
-  /**
    * Get cache statistics
    */
   getCacheStats(): {
@@ -438,23 +325,6 @@ export class AddressService {
     return {
       size: 0,
       entries,
-    };
-  }
-
-  /**
-   * Get search history statistics
-   */
-  getSearchHistoryStats(): {
-    totalQueries: number;
-    uniqueQueries: number;
-    topQueries: string[];
-  } {
-    const queryArray = Array.from(this.searchHistory);
-
-    return {
-      totalQueries: this.searchHistory.size,
-      uniqueQueries: this.searchHistory.size,
-      topQueries: queryArray.slice(0, 10),
     };
   }
 
@@ -505,7 +375,9 @@ export class AddressService {
   }
 
   private levenshteinDistance(a: string, b: string): number {
-    const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(null));
+    const matrix = Array(b.length + 1)
+      .fill(null)
+      .map(() => Array(a.length + 1).fill(null));
 
     for (let i = 0; i <= a.length; i += 1) {
       matrix[0][i] = i;

@@ -4,7 +4,6 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { NovaPoshtaValidator } from '../validation/validator';
 import type {
   TrackDocumentsRequest,
   TrackingResponse,
@@ -16,23 +15,16 @@ import type {
 } from '../types/tracking';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod, DeliveryStatus } from '../types/enums';
-import { schemas } from '../validation/schemas';
+//
 
 // Tracking service configuration
 export interface TrackingServiceConfig {
-  /** Enable request validation */
-  readonly validateRequests: boolean;
-  /** Enable response validation */
-  readonly validateResponses: boolean;
   /** Default timeout for tracking operations */
   readonly timeout?: number;
 }
 
 // Default configuration
-export const DEFAULT_TRACKING_CONFIG: TrackingServiceConfig = {
-  validateRequests: true,
-  validateResponses: true,
-};
+export const DEFAULT_TRACKING_CONFIG: TrackingServiceConfig = {};
 
 // Tracking statistics
 export interface TrackingStatistics {
@@ -59,7 +51,6 @@ export interface TrackingFilter {
 export class TrackingService {
   constructor(
     private readonly transport: HttpTransport,
-    private readonly validator: NovaPoshtaValidator,
     private readonly config: TrackingServiceConfig = DEFAULT_TRACKING_CONFIG,
   ) {}
 
@@ -67,10 +58,7 @@ export class TrackingService {
    * Track multiple documents
    */
   async trackDocuments(request: TrackDocumentsRequest): Promise<TrackingResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.trackDocumentsRequest, request, 'trackDocuments');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -86,10 +74,7 @@ export class TrackingService {
 
     const response = await this.transport.request<TrackingResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.novaPoshtaResponse, response, 'trackDocumentsResponse');
-    }
+    //
 
     return response as TrackingResponse;
   }
@@ -113,10 +98,7 @@ export class TrackingService {
    * Get document movement history
    */
   async getDocumentMovement(request: DocumentMovementRequest): Promise<DocumentMovementResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.trackDocumentsRequest, request, 'getDocumentMovement');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor

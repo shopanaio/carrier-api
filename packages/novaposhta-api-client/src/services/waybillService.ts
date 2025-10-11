@@ -4,7 +4,6 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { NovaPoshtaValidator } from '../validation/validator';
 import type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
@@ -21,23 +20,16 @@ import type {
 } from '../types/waybill';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
-import { schemas } from '../validation/schemas';
+//
 
 // Waybill service configuration
 export interface WaybillServiceConfig {
-  /** Enable request validation */
-  readonly validateRequests: boolean;
-  /** Enable response validation */
-  readonly validateResponses: boolean;
   /** Default timeout for waybill operations */
   readonly timeout?: number;
 }
 
 // Default configuration
-export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {
-  validateRequests: true,
-  validateResponses: true,
-};
+export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {};
 
 /**
  * Service for managing waybills (express documents)
@@ -45,7 +37,6 @@ export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {
 export class WaybillService {
   constructor(
     private readonly transport: HttpTransport,
-    private readonly validator: NovaPoshtaValidator,
     private readonly config: WaybillServiceConfig = DEFAULT_WAYBILL_CONFIG,
   ) {}
 
@@ -53,10 +44,7 @@ export class WaybillService {
    * Create a standard waybill
    */
   async create(request: CreateWaybillRequest): Promise<CreateWaybillResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.createWaybillRequest, request, 'createWaybill');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -66,11 +54,6 @@ export class WaybillService {
     };
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
-
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.waybillCreationResponse, response, 'createWaybillResponse');
-    }
 
     return response as CreateWaybillResponse;
   }
@@ -79,10 +62,7 @@ export class WaybillService {
    * Create a waybill with additional options and services
    */
   async createWithOptions(request: CreateWaybillWithOptionsRequest): Promise<CreateWaybillResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.createWaybillWithOptionsRequest, request, 'createWaybillWithOptions');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -92,12 +72,6 @@ export class WaybillService {
     };
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
-
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.waybillCreationResponse, response, 'createWaybillWithOptionsResponse');
-    }
-
     return response as CreateWaybillResponse;
   }
 
@@ -105,10 +79,7 @@ export class WaybillService {
    * Create a postomat waybill (with restrictions)
    */
   async createForPostomat(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
-    // Validate request with postomat-specific constraints
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.createPoshtomatWaybillRequest, request, 'createPoshtomatWaybill');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -119,10 +90,7 @@ export class WaybillService {
 
     const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
 
-    // Validate response
-    if (this.config.validateResponses) {
-      this.validator.validateOrThrow(schemas.waybillCreationResponse, response, 'createPoshtomatWaybillResponse');
-    }
+    //
 
     return response as CreateWaybillResponse;
   }
@@ -131,10 +99,7 @@ export class WaybillService {
    * Update an existing waybill
    */
   async update(request: UpdateWaybillRequest): Promise<UpdateWaybillResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.updateWaybillRequest, request, 'updateWaybill');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -152,10 +117,7 @@ export class WaybillService {
    * Delete waybills
    */
   async delete(request: DeleteWaybillRequest): Promise<DeleteWaybillResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.deleteWaybillRequest, request, 'deleteWaybill');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -175,10 +137,7 @@ export class WaybillService {
    * Calculate delivery date
    */
   async getDeliveryDate(request: DeliveryDateRequest): Promise<DeliveryDateResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.deliveryDateRequest, request, 'getDeliveryDate');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -196,10 +155,7 @@ export class WaybillService {
    * Calculate delivery price
    */
   async getPrice(request: PriceCalculationRequest): Promise<PriceCalculationResponse> {
-    // Validate request
-    if (this.config.validateRequests) {
-      this.validator.validateOrThrow(schemas.priceCalculationRequest, request, 'getPriceCalculation');
-    }
+    //
 
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
@@ -218,7 +174,7 @@ export class WaybillService {
    */
   async createBatch(requests: CreateWaybillRequest[]): Promise<CreateWaybillResponse[]> {
     const results: CreateWaybillResponse[] = [];
-    
+
     // Process requests sequentially to avoid rate limiting
     for (const request of requests) {
       try {
@@ -239,7 +195,7 @@ export class WaybillService {
         });
       }
     }
-    
+
     return results;
   }
 
@@ -274,9 +230,7 @@ export class WaybillService {
    */
   async validateWaybill(request: CreateWaybillRequest): Promise<boolean> {
     try {
-      if (this.config.validateRequests) {
-        this.validator.validateOrThrow(schemas.createWaybillRequest, request, 'validateWaybill');
-      }
+      // Validation removed
       return true;
     } catch {
       return false;

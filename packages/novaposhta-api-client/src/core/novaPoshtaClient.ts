@@ -4,16 +4,14 @@
 
 import type { NovaPoshtaClientConfig } from '../config';
 import type { HttpTransport } from '../http/transport';
-import type { NovaPoshtaValidator } from '../validation/validator';
-import { FetchHttpTransport, MockHttpTransport, DEFAULT_TRANSPORT_CONFIG } from '../http/transport';
-import { NovaPoshtaValidator as ValidatorImpl } from '../validation/validator';
+import { FetchHttpTransport, DEFAULT_TRANSPORT_CONFIG } from '../http/transport';
 import { WaybillService } from '../services/waybillService';
 import { TrackingService } from '../services/trackingService';
 import { ReferenceService } from '../services/referenceService';
 import { AddressService } from '../services/addressService';
 import { validateConfig } from '../config';
 
-// Note: Legacy state/metrics/health-check removed for simplification
+//
 
 /**
  * Main Nova Poshta API client
@@ -55,7 +53,6 @@ import { validateConfig } from '../config';
  */
 export class NovaPoshtaClient {
   private readonly transport: HttpTransport;
-  private readonly validator: NovaPoshtaValidator;
   private readonly config: NovaPoshtaClientConfig;
 
   // Service instances
@@ -70,12 +67,7 @@ export class NovaPoshtaClient {
 
     this.config = { ...config };
 
-    // Initialize validator
-    this.validator = new ValidatorImpl({
-      strict: config.enableValidation,
-      transform: true,
-      includeContext: true,
-    });
+    //
 
     // Initialize transport
     this.transport = transport || new FetchHttpTransport(
@@ -87,51 +79,19 @@ export class NovaPoshtaClient {
     );
 
     // Initialize services
-    this.waybill = new WaybillService(this.transport, this.validator, {
-      validateRequests: config.enableValidation,
-      validateResponses: config.enableValidation,
-    });
+    this.waybill = new WaybillService(this.transport, {});
 
-    this.tracking = new TrackingService(this.transport, this.validator, {
-      validateRequests: config.enableValidation,
-      validateResponses: config.enableValidation,
-    });
+    this.tracking = new TrackingService(this.transport, {});
 
-    this.reference = new ReferenceService(this.transport, this.validator, {
-      validateRequests: config.enableValidation,
-      validateResponses: config.enableValidation,
-    });
+    this.reference = new ReferenceService(this.transport, {});
 
-    this.address = new AddressService(this.transport, this.validator, {
-      validateRequests: config.enableValidation,
-      validateResponses: config.enableValidation,
-    });
+    this.address = new AddressService(this.transport, {});
   }
   // Simplified configuration update
   updateConfig(updates: Partial<NovaPoshtaClientConfig>): void {
     Object.assign(this.config, updates);
 
-    if (updates.enableValidation !== undefined) {
-      this.waybill.updateConfig({
-        validateRequests: updates.enableValidation,
-        validateResponses: updates.enableValidation,
-      });
-
-      this.tracking.updateConfig({
-        validateRequests: updates.enableValidation,
-        validateResponses: updates.enableValidation,
-      });
-
-      this.reference.updateConfig({
-        validateRequests: updates.enableValidation,
-        validateResponses: updates.enableValidation,
-      });
-
-      this.address.updateConfig({
-        validateRequests: updates.enableValidation,
-        validateResponses: updates.enableValidation,
-      });
-    }
+    //
   }
 
   /**
@@ -142,13 +102,7 @@ export class NovaPoshtaClient {
     return new NovaPoshtaClient(newConfig);
   }
 
-  /**
-   * Create a test client with mock transport
-   */
-  static createTestClient(config: NovaPoshtaClientConfig): NovaPoshtaClient {
-    const mockTransport = new MockHttpTransport();
-    return new NovaPoshtaClient(config, mockTransport);
-  }
+
 
   /**
    * Get version information
@@ -168,7 +122,6 @@ export class NovaPoshtaClient {
    * Dispose of client resources
    */
   dispose(): void {
-    // Clean up any resources, timers, etc.
-    // This is a placeholder for future cleanup logic
+    //
   }
 }
