@@ -6,14 +6,10 @@
  *
  * @example
  * ```typescript
- * import { NovaPoshtaClient, createConfig, Language, PayerType, PaymentMethod } from '@novaposhta/client';
+ * import { createClient, PayerType, PaymentMethod } from '@novaposhta/client';
  *
  * // Create configuration
- * const config = createConfig(process.env.NOVA_POSHTA_API_KEY!)
- *   .language(Language.Ukrainian)
- *   .validation(true)
- *   .caching(true)
- *   .build();
+ * const config = { apiKey: process.env.NOVA_POSHTA_API_KEY! };
  *
  * // Initialize client
  * const client = new NovaPoshtaClient(config);
@@ -66,16 +62,7 @@ export { createClient } from './core/client';
 export type { ClientContext, Client, ServiceAPI } from './core/client';
 
 // Configuration
-export {
-  createConfig,
-  createTestConfig,
-  validateConfig,
-  loadConfigFromEnv,
-  mergeConfigs,
-  ConfigBuilder,
-  DEFAULT_CLIENT_CONFIG,
-} from './config';
-export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
+export type { NovaPoshtaClientConfig } from './config';
 
 export type { HttpTransport } from './http/transport';
 
@@ -145,7 +132,6 @@ export {
   AdditionalService,
   DocumentType,
   Currency,
-  Language,
   DeliveryDay,
   PackingType,
   TireWheelType,
