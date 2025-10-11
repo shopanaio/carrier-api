@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Get Streets - Київ, All Streets",
+      "name": "Get All Streets in City",
       "request": {
         "method": "POST",
         "header": [
@@ -24,12 +24,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get all streets in Kyiv without search filter. CityRef is required parameter. This is cached for 12 hours."
+        "description": "Get all streets in city. CityRef is required parameter (Kyiv example). Cached for 12 hours."
       },
       "response": []
     },
     {
-      "name": "Search Street - Київ, Хрещатик",
+      "name": "Search Street by Name",
       "request": {
         "method": "POST",
         "header": [
@@ -46,34 +46,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search for 'Хрещатик' street in Kyiv. Returns main Khreshchatyk street."
+        "description": "Search streets by name in specific city. Example: Khreshchatyk street in Kyiv."
       },
       "response": []
     },
     {
-      "name": "Search Street - Київ, Шевченка",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"Шевченка\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for streets containing 'Шевченка' in Kyiv (Shevchenko streets)."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Київ, with Limit",
+      "name": "Search Streets with Limit",
       "request": {
         "method": "POST",
         "header": [
@@ -90,12 +68,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search for streets containing 'Київська' in Kyiv, limit to 10 results."
+        "description": "Limit number of results. Maximum 500 records per page."
       },
       "response": []
     },
     {
-      "name": "Search Street - Київ, with Pagination",
+      "name": "Search Streets with Pagination",
       "request": {
         "method": "POST",
         "header": [
@@ -112,34 +90,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search for streets in Kyiv with pagination. Get first page of streets containing 'а'."
+        "description": "Use Page and Limit for pagination through many results."
       },
       "response": []
     },
     {
-      "name": "Get Streets - Львів, All Streets",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"db5c88e0-391c-11dd-90d9-001a92567626\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get all streets in Lviv (Львів)."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Львів, Свободи",
+      "name": "Search Streets - Different City",
       "request": {
         "method": "POST",
         "header": [
@@ -156,117 +112,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search for 'Свободи' avenue in Lviv - main street of the city."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Одеса, Дерибасівська",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"db5c88d0-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"Дерибасівська\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Deribasivska street in Odesa (Одеса) - famous pedestrian street."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Харків, Сумська",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"db5c88de-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"Сумська\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Sumska street in Kharkiv (Харків) - main street."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Partial Match",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"Бан\",\n    \"Limit\": \"20\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search streets in Kyiv starting with 'Бан'. Will return streets like Bankova, etc."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Дніпро, Набережна",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"db5c88f5-391c-11dd-90d9-001a92567626\",\n    \"FindByString\": \"Набережна\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for embankment streets (Набережна) in Dnipro."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Street - Large Limit",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getStreet\",\n  \"methodProperties\": {\n    \"CityRef\": \"8d5a980d-391c-11dd-90d9-001a92567626\",\n    \"Limit\": \"500\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get up to 500 streets in Kyiv (maximum per page). Use pagination for more."
+        "description": "Search in different city. Example: Svobody Avenue in Lviv."
       },
       "response": []
     }

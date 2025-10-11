@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Get Kyiv Oblast Regions",
+      "name": "Get Oblast Regions - Kyiv Example",
       "request": {
         "method": "POST",
         "header": [
@@ -24,12 +24,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get all districts/regions for Kyiv Oblast (Київська область). Returns regions like Бориспільський район, Броварський район, etc."
+        "description": "Get all districts/regions for Kyiv Oblast (Київська область). Returns regions like Бориспільський район, Броварський район, etc. Required parameter: AreaRef from getSettlementAreas."
       },
       "response": []
     },
     {
-      "name": "Get Lviv Oblast Regions",
+      "name": "Get Oblast Regions - Lviv Example",
       "request": {
         "method": "POST",
         "header": [
@@ -46,95 +46,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get all districts/regions for Lviv Oblast (Львівська область)."
-      },
-      "response": []
-    },
-    {
-      "name": "Get Kharkiv Oblast Regions",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4ac7665-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get all districts/regions for Kharkiv Oblast (Харківська область)."
-      },
-      "response": []
-    },
-    {
-      "name": "Get Odesa Oblast Regions",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4b6a00b-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get all districts/regions for Odesa Oblast (Одеська область)."
-      },
-      "response": []
-    },
-    {
-      "name": "Get Dnipro Oblast Regions",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4a00310-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get all districts/regions for Dnipro Oblast (Дніпропетровська область)."
-      },
-      "response": []
-    },
-    {
-      "name": "Get Zaporizhzhia Oblast Regions",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"getSettlementCountryRegion\",\n  \"methodProperties\": {\n    \"AreaRef\": \"e4a6bae6-9b87-11de-822f-000c2965ae0e\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Get all districts/regions for Zaporizhzhia Oblast (Запорізька область)."
+        "description": "Get all districts/regions for Lviv Oblast (Львівська область). Use any AreaRef from getSettlementAreas response."
       },
       "response": []
     }

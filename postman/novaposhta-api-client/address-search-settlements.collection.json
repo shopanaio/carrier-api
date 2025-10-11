@@ -7,7 +7,7 @@
   },
   "item": [
     {
-      "name": "Search Settlements - Київ",
+      "name": "Search Settlements - Basic",
       "request": {
         "method": "POST",
         "header": [
@@ -24,29 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search for settlements matching 'Київ'. Returns settlement name, region, number of warehouses. All parameters are required."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Львів",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Львів\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for settlements matching 'Львів'."
+        "description": "Search settlements by name. All parameters required: CityName, Limit, Page. Returns settlement info with warehouse count. Cached 1 hour."
       },
       "response": []
     },
@@ -68,29 +46,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search with partial name 'Оде'. Will find Одеса and other matching settlements."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Small Village",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Бориспіль\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Boryspil (Бориспіль) - town near Kyiv airport."
+        "description": "Fuzzy search with partial name. Will find all matching settlements (Одеса, etc.)."
       },
       "response": []
     },
@@ -112,34 +68,12 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search by postal code. Example: 01001 is central Kyiv postal code."
+        "description": "Search by postal code. Example: 01001 for central Kyiv."
       },
       "response": []
     },
     {
-      "name": "Search Settlements - Common Name",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Нов\",\n    \"Limit\": \"100\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for common prefix 'Нов'. Will return many settlements: Новоград, Новомосковськ, etc."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Pagination Page 2",
+      "name": "Search Settlements - With Pagination",
       "request": {
         "method": "POST",
         "header": [
@@ -156,7 +90,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Get second page of results (items 51-100) for settlements starting with 'Нов'."
+        "description": "Get second page of results (items 51-100). Useful for common prefixes with many matches."
       },
       "response": []
     },
@@ -178,95 +112,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search with large limit (500 - max per page). Get many settlements containing 'а'."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Ivano-Frankivsk",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Івано-Франківськ\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Ivano-Frankivsk (complex multi-word name with hyphen)."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Zaporizhzhia",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Запоріж\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Zaporizhzhia and related settlements."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Single Character",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"К\",\n    \"Limit\": \"100\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search with single character 'К'. Returns all settlements starting with К."
-      },
-      "response": []
-    },
-    {
-      "name": "Search Settlements - Kharkiv Region",
-      "request": {
-        "method": "POST",
-        "header": [
-          {
-            "key": "Content-Type",
-            "value": "application/json"
-          }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"modelName\": \"Address\",\n  \"calledMethod\": \"searchSettlements\",\n  \"methodProperties\": {\n    \"CityName\": \"Харків\",\n    \"Limit\": \"50\",\n    \"Page\": \"1\"\n  }\n}"
-        },
-        "url": {
-          "raw": "{{BASE_URL}}",
-          "host": ["{{BASE_URL}}"]
-        },
-        "description": "Search for Kharkiv settlements."
+        "description": "Maximum limit per page is 500 records. Use for broad searches."
       },
       "response": []
     }
