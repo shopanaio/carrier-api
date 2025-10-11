@@ -1,14 +1,15 @@
 import { client } from '../../../setup/client.setup';
+import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 
 describe('WaybillService - createWithOptions', () => {
   it('should create a waybill with additional options', async () => {
     const response = await client.waybill.createWithOptions({
-      payerType: 'Sender',
-      paymentMethod: 'Cash',
+      payerType: PayerType.Sender,
+      paymentMethod: PaymentMethod.Cash,
       dateTime: '25.12.2024',
-      cargoType: 'Parcel',
+      cargoType: CargoType.Parcel,
       weight: 1,
-      serviceType: 'WarehouseWarehouse',
+      serviceType: ServiceType.WarehouseWarehouse,
       seatsAmount: 1,
       description: 'Test package',
       cost: 1000,
@@ -24,11 +25,11 @@ describe('WaybillService - createWithOptions', () => {
       recipientsPhone: '380507654321',
       optionsSeat: [
         {
-          volumetricVolume: '0.01',
-          volumetricWidth: '10',
-          volumetricLength: '10',
-          volumetricHeight: '10',
-          weight: '1',
+          volumetricVolume: 0.01,
+          volumetricWidth: 10,
+          volumetricLength: 10,
+          volumetricHeight: 10,
+          weight: 1,
         },
       ],
     });

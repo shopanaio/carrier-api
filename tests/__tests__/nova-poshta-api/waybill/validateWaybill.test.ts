@@ -1,15 +1,16 @@
 import { client } from '../../../setup/client.setup';
+import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 
 describe('WaybillService - validateWaybill', () => {
   it('should validate waybill data without creating', async () => {
     // This test validates the structure by checking required fields
     const isValid = await client.waybill.validateWaybill({
-      payerType: 'Sender',
-      paymentMethod: 'Cash',
+      payerType: PayerType.Sender,
+      paymentMethod: PaymentMethod.Cash,
       dateTime: '25.12.2024',
-      cargoType: 'Parcel',
+      cargoType: CargoType.Parcel,
       weight: 1,
-      serviceType: 'WarehouseWarehouse',
+      serviceType: ServiceType.WarehouseWarehouse,
       seatsAmount: 1,
     } as any);
 

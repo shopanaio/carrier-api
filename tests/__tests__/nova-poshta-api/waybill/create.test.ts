@@ -1,14 +1,15 @@
 import { client } from '../../../setup/client.setup';
+import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 
 describe('WaybillService - create', () => {
   it('should create a standard waybill', async () => {
     const response = await client.waybill.create({
-      payerType: 'Sender',
-      paymentMethod: 'Cash',
+      payerType: PayerType.Sender,
+      paymentMethod: PaymentMethod.Cash,
       dateTime: '25.12.2024',
-      cargoType: 'Parcel',
+      cargoType: CargoType.Parcel,
       weight: 1,
-      serviceType: 'WarehouseWarehouse',
+      serviceType: ServiceType.WarehouseWarehouse,
       seatsAmount: 1,
       description: 'Test package',
       cost: 1000,

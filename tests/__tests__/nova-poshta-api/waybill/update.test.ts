@@ -1,4 +1,5 @@
 import { client } from '../../../setup/client.setup';
+import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 
 describe('WaybillService - update', () => {
   it('should update an existing waybill', async () => {
@@ -7,12 +8,12 @@ describe('WaybillService - update', () => {
 
     const response = await client.waybill.update({
       ref: documentRef,
-      payerType: 'Sender',
-      paymentMethod: 'Cash',
+      payerType: PayerType.Sender,
+      paymentMethod: PaymentMethod.Cash,
       dateTime: '26.12.2024',
-      cargoType: 'Parcel',
+      cargoType: CargoType.Parcel,
       weight: 2, // Updated weight
-      serviceType: 'WarehouseWarehouse',
+      serviceType: ServiceType.WarehouseWarehouse,
       seatsAmount: 1,
       description: 'Updated test package',
       cost: 1500, // Updated cost

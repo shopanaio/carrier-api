@@ -1,15 +1,16 @@
 import { client } from '../../../setup/client.setup';
+import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 
 describe('WaybillService - createBatch', () => {
   it('should create multiple waybills sequentially', async () => {
     const waybills = [
       {
-        payerType: 'Sender',
-        paymentMethod: 'Cash',
+        payerType: PayerType.Sender,
+        paymentMethod: PaymentMethod.Cash,
         dateTime: '25.12.2024',
-        cargoType: 'Parcel',
+        cargoType: CargoType.Parcel,
         weight: 1,
-        serviceType: 'WarehouseWarehouse',
+        serviceType: ServiceType.WarehouseWarehouse,
         seatsAmount: 1,
         description: 'Batch test package 1',
         cost: 1000,
@@ -25,12 +26,12 @@ describe('WaybillService - createBatch', () => {
         recipientsPhone: '380507654321',
       },
       {
-        payerType: 'Sender',
-        paymentMethod: 'Cash',
+        payerType: PayerType.Sender,
+        paymentMethod: PaymentMethod.Cash,
         dateTime: '25.12.2024',
-        cargoType: 'Parcel',
+        cargoType: CargoType.Parcel,
         weight: 2,
-        serviceType: 'WarehouseWarehouse',
+        serviceType: ServiceType.WarehouseWarehouse,
         seatsAmount: 1,
         description: 'Batch test package 2',
         cost: 1500,
