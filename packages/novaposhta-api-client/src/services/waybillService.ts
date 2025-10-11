@@ -20,15 +20,9 @@ import type {
 } from '../types/waybill';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
-//
 
-// Waybill service configuration
-export interface WaybillServiceConfig {
-  /** Default timeout for waybill operations */
-  readonly timeout?: number;
-}
+export interface WaybillServiceConfig {}
 
-// Default configuration
 export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {};
 
 /**
@@ -44,8 +38,6 @@ export class WaybillService {
    * Create a standard waybill
    */
   async create(request: CreateWaybillRequest): Promise<CreateWaybillResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -53,17 +45,13 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
-
-    return response as CreateWaybillResponse;
+    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
   }
 
   /**
    * Create a waybill with additional options and services
    */
   async createWithOptions(request: CreateWaybillWithOptionsRequest): Promise<CreateWaybillResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -71,16 +59,13 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
-    return response as CreateWaybillResponse;
+    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
   }
 
   /**
    * Create a postomat waybill (with restrictions)
    */
   async createForPostomat(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -88,19 +73,13 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
-
-    //
-
-    return response as CreateWaybillResponse;
+    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
   }
 
   /**
    * Update an existing waybill
    */
   async update(request: UpdateWaybillRequest): Promise<UpdateWaybillResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -108,17 +87,13 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<UpdateWaybillResponse['data']>(apiRequest);
-
-    return response as UpdateWaybillResponse;
+    return await this.transport.request<UpdateWaybillResponse['data']>(apiRequest);
   }
 
   /**
    * Delete waybills
    */
   async delete(request: DeleteWaybillRequest): Promise<DeleteWaybillResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -128,17 +103,13 @@ export class WaybillService {
       },
     };
 
-    const response = await this.transport.request<DeleteWaybillResponse['data']>(apiRequest);
-
-    return response as DeleteWaybillResponse;
+    return await this.transport.request<DeleteWaybillResponse['data']>(apiRequest);
   }
 
   /**
    * Calculate delivery date
    */
   async getDeliveryDate(request: DeliveryDateRequest): Promise<DeliveryDateResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -146,17 +117,13 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<DeliveryDateResponse['data']>(apiRequest);
-
-    return response as DeliveryDateResponse;
+    return await this.transport.request<DeliveryDateResponse['data']>(apiRequest);
   }
 
   /**
    * Calculate delivery price
    */
   async getPrice(request: PriceCalculationRequest): Promise<PriceCalculationResponse> {
-    //
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '', // Will be injected by interceptor
       modelName: NovaPoshtaModel.InternetDocument,
@@ -164,9 +131,7 @@ export class WaybillService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<PriceCalculationResponse['data']>(apiRequest);
-
-    return response as PriceCalculationResponse;
+    return await this.transport.request<PriceCalculationResponse['data']>(apiRequest);
   }
 
   /**

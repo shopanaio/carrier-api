@@ -88,9 +88,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetCargoTypesResponse['data']>(apiRequest);
-
-    return response as GetCargoTypesResponse;
+    return await this.transport.request<GetCargoTypesResponse['data']>(apiRequest);
   }
 
   /**
@@ -106,9 +104,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetPalletsListResponse['data']>(apiRequest);
-
-    return response as GetPalletsListResponse;
+    return await this.transport.request<GetPalletsListResponse['data']>(apiRequest);
   }
 
   /**
@@ -124,9 +120,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetPackListResponse['data']>(apiRequest);
-
-    return response as GetPackListResponse;
+    return await this.transport.request<GetPackListResponse['data']>(apiRequest);
   }
 
   /**
@@ -142,8 +136,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetTiresWheelsListResponse['data']>(apiRequest);
-    return response as GetTiresWheelsListResponse;
+    return await this.transport.request<GetTiresWheelsListResponse['data']>(apiRequest);
   }
 
   /**
@@ -161,9 +154,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetCargoDescriptionListResponse['data']>(apiRequest);
-
-    return response as GetCargoDescriptionListResponse;
+    return await this.transport.request<GetCargoDescriptionListResponse['data']>(apiRequest);
   }
 
   /**
@@ -179,9 +170,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetMessageCodeTextResponse['data']>(apiRequest);
-
-    return response as GetMessageCodeTextResponse;
+    return await this.transport.request<GetMessageCodeTextResponse['data']>(apiRequest);
   }
 
   /**
@@ -197,9 +186,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetServiceTypesResponse['data']>(apiRequest);
-
-    return response as GetServiceTypesResponse;
+    return await this.transport.request<GetServiceTypesResponse['data']>(apiRequest);
   }
 
   /**
@@ -215,11 +202,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetOwnershipFormsListResponse['data']>(apiRequest);
-
-    // Validation removed
-
-    return response as GetOwnershipFormsListResponse;
+    return await this.transport.request<GetOwnershipFormsListResponse['data']>(apiRequest);
   }
 
   /**
@@ -237,11 +220,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetTimeIntervalsResponse['data']>(apiRequest);
-
-    // Validation removed
-
-    return response as GetTimeIntervalsResponse;
+    return await this.transport.request<GetTimeIntervalsResponse['data']>(apiRequest);
   }
 
   /**
@@ -259,11 +238,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetPickupTimeIntervalsResponse['data']>(apiRequest);
-
-    // Validation removed
-
-    return response as GetPickupTimeIntervalsResponse;
+    return await this.transport.request<GetPickupTimeIntervalsResponse['data']>(apiRequest);
   }
 
   /**
@@ -274,8 +249,6 @@ export class ReferenceService {
   async getBackwardDeliveryCargoTypes(
     request: GetBackwardDeliveryCargoTypesRequest = {},
   ): Promise<GetBackwardDeliveryCargoTypesResponse> {
-    // Validation removed
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
@@ -283,11 +256,7 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetBackwardDeliveryCargoTypesResponse['data']>(apiRequest);
-
-    // Validation removed
-
-    return response as GetBackwardDeliveryCargoTypesResponse;
+    return await this.transport.request<GetBackwardDeliveryCargoTypesResponse['data']>(apiRequest);
   }
 
   /**
@@ -298,8 +267,6 @@ export class ReferenceService {
   async getTypesOfPayersForRedelivery(
     request: GetTypesOfPayersForRedeliveryRequest = {},
   ): Promise<GetTypesOfPayersForRedeliveryResponse> {
-    // Validation removed
-
     const apiRequest: NovaPoshtaRequest = {
       apiKey: '',
       modelName: NovaPoshtaModel.Common,
@@ -307,14 +274,8 @@ export class ReferenceService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetTypesOfPayersForRedeliveryResponse['data']>(apiRequest);
-
-    // Validation removed
-
-    return response as GetTypesOfPayersForRedeliveryResponse;
+    return await this.transport.request<GetTypesOfPayersForRedeliveryResponse['data']>(apiRequest);
   }
-
-  //
 
   /**
    * Get service configuration
@@ -329,7 +290,4 @@ export class ReferenceService {
   updateConfig(newConfig: Partial<ReferenceServiceConfig>): void {
     Object.assign(this.config, newConfig);
   }
-
-  // Private cache management methods
-  //
 }

@@ -76,9 +76,8 @@ export {
 } from './config';
 export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 
-// HTTP Transport
-export { FetchHttpTransport, DEFAULT_TRANSPORT_CONFIG } from './http/transport';
-export type { HttpTransport, TransportConfig } from './http/transport';
+// HTTP Transport (interface only)
+export type { HttpTransport } from './http/transport';
 
 // Services
 export { WaybillService, DEFAULT_WAYBILL_CONFIG } from './services/waybillService';
@@ -363,7 +362,7 @@ export default NovaPoshtaClient;
  * const tracking = await client.tracking.trackDocument('20400048799000');
  * ```
  */
-export function quickStart(apiKey: string): NovaPoshtaClient {
+export function quickStart(apiKey: string, transport: import('./http/transport').HttpTransport): NovaPoshtaClient {
   const config = createConfig(apiKey).build();
-  return new NovaPoshtaClient(config);
+  return new NovaPoshtaClient(config, transport);
 }

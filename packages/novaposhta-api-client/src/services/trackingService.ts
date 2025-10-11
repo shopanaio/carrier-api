@@ -15,18 +15,11 @@ import type {
 } from '../types/tracking';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod, DeliveryStatus } from '../types/enums';
-//
 
-// Tracking service configuration
-export interface TrackingServiceConfig {
-  /** Default timeout for tracking operations */
-  readonly timeout?: number;
-}
+export interface TrackingServiceConfig {}
 
-// Default configuration
 export const DEFAULT_TRACKING_CONFIG: TrackingServiceConfig = {};
 
-// Tracking statistics
 export interface TrackingStatistics {
   readonly totalTracked: number;
   readonly delivered: number;
@@ -36,7 +29,6 @@ export interface TrackingStatistics {
   readonly unknown: number;
 }
 
-// Tracking filter options
 export interface TrackingFilter {
   readonly status?: DeliveryStatus[];
   readonly dateFrom?: string;
@@ -178,10 +170,7 @@ export class TrackingService {
   /**
    * Filter tracking results by criteria
    */
-  filterTrackingResults(
-    results: TrackingStatusData[],
-    filter: TrackingFilter
-  ): TrackingStatusData[] {
+  filterTrackingResults(results: TrackingStatusData[], filter: TrackingFilter): TrackingStatusData[] {
     return results.filter(result => {
       // Filter by status
       if (filter.status && filter.status.length > 0) {

@@ -1,0 +1,40 @@
+{
+  "name": "@shopana/novaposhta-transport-fetch",
+  "version": "1.0.0",
+  "description": "Fetch-based HTTP JSON transport for Nova Poshta API",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "dev": "tsc -w -p tsconfig.json",
+    "type-check": "tsc --noEmit"
+  },
+  "keywords": [
+    "nova-poshta",
+    "transport",
+    "fetch",
+    "typescript"
+  ],
+  "author": "Nova Poshta Client Team",
+  "license": "MIT",
+  "dependencies": {
+    "cross-fetch": "^4.0.0"
+  },
+  "peerDependencies": {
+    "typescript": ">=4.9.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false
+}

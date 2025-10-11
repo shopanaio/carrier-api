@@ -4,7 +4,6 @@
 
 import type { NovaPoshtaClientConfig } from '../config';
 import type { HttpTransport } from '../http/transport';
-import { FetchHttpTransport, DEFAULT_TRANSPORT_CONFIG } from '../http/transport';
 import { WaybillService } from '../services/waybillService';
 import { TrackingService } from '../services/trackingService';
 import { ReferenceService } from '../services/referenceService';
@@ -61,7 +60,7 @@ export class NovaPoshtaClient {
   public readonly reference: ReferenceService;
   public readonly address: AddressService;
 
-  constructor(config: NovaPoshtaClientConfig, transport?: HttpTransport) {
+  constructor(config: NovaPoshtaClientConfig, transport: HttpTransport) {
     // Validate configuration
     validateConfig(config);
 
@@ -69,14 +68,8 @@ export class NovaPoshtaClient {
 
     //
 
-    // Initialize transport
-    this.transport = transport || new FetchHttpTransport(
-      this.config.apiKey,
-      {
-        ...DEFAULT_TRANSPORT_CONFIG,
-        ...config.transport,
-      }
-    );
+    // Initialize injected transport
+    this.transport = transport;
 
     // Initialize services
     this.waybill = new WaybillService(this.transport, {});
@@ -99,7 +92,7 @@ export class NovaPoshtaClient {
    */
   withConfig(configUpdates: Partial<NovaPoshtaClientConfig>): NovaPoshtaClient {
     const newConfig = { ...this.config, ...configUpdates };
-    return new NovaPoshtaClient(newConfig);
+    return new NovaPoshtaClient(newConfig, this.transport);
   }
 
 

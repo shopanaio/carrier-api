@@ -21,19 +21,9 @@ import type {
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
 
-// Address service configuration
-export interface AddressServiceConfig {
-  /** Default timeout for address operations */
-  readonly timeout?: number;
-}
+export interface AddressServiceConfig {}
 
-// Default configuration
 export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
-
-// Cache entry interface
-// Cache types removed
-
-//
 
 /**
  * Service for managing address operations
@@ -75,9 +65,7 @@ export class AddressService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetSettlementsResponse['data']>(apiRequest);
-
-    return response as GetSettlementsResponse;
+    return await this.transport.request<GetSettlementsResponse['data']>(apiRequest);
   }
 
   /**
@@ -95,8 +83,7 @@ export class AddressService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetSettlementCountryRegionResponse['data']>(apiRequest);
-    return response as GetSettlementCountryRegionResponse;
+    return await this.transport.request<GetSettlementCountryRegionResponse['data']>(apiRequest);
   }
 
   /**
@@ -112,9 +99,7 @@ export class AddressService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetCitiesResponse['data']>(apiRequest);
-
-    return response as GetCitiesResponse;
+    return await this.transport.request<GetCitiesResponse['data']>(apiRequest);
   }
 
   /**
@@ -130,9 +115,7 @@ export class AddressService {
       methodProperties: request as unknown as Record<string, unknown>,
     };
 
-    const response = await this.transport.request<GetStreetResponse['data']>(apiRequest);
-
-    return response as GetStreetResponse;
+    return await this.transport.request<GetStreetResponse['data']>(apiRequest);
   }
 
   /**
@@ -152,9 +135,7 @@ export class AddressService {
       },
     };
 
-    const response = await this.transport.request<SearchSettlementsResponse['data']>(apiRequest);
-
-    return response as SearchSettlementsResponse;
+    return await this.transport.request<SearchSettlementsResponse['data']>(apiRequest);
   }
 
   /**
@@ -174,36 +155,7 @@ export class AddressService {
       },
     };
 
-    const response = await this.transport.request<SearchSettlementStreetsResponse['data']>(apiRequest);
-
-    return response as SearchSettlementStreetsResponse;
-  }
-
-  /**
-   * Get cache statistics
-   */
-  getCacheStats(): {
-    size: number;
-    entries: Array<{
-      key: string;
-      timestamp: number;
-      ttl: number;
-      expired: boolean;
-    }>;
-  } {
-    const entries: Array<{
-      key: string;
-      timestamp: number;
-      ttl: number;
-      expired: boolean;
-    }> = [];
-
-    const now = Date.now();
-
-    return {
-      size: 0,
-      entries,
-    };
+    return await this.transport.request<SearchSettlementStreetsResponse['data']>(apiRequest);
   }
 
   /**

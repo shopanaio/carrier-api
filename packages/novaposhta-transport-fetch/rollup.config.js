@@ -3,10 +3,9 @@ import commonjs from '@rollup/plugin-commonjs';
 import typescript from '@rollup/plugin-typescript';
 import dts from 'rollup-plugin-dts';
 
-const external = ['zod'];
+const external = ['cross-fetch'];
 
 const config = [
-  // ES Module build
   {
     input: 'src/index.ts',
     output: {
@@ -16,9 +15,7 @@ const config = [
     },
     external,
     plugins: [
-      resolve({
-        preferBuiltins: true,
-      }),
+      resolve({ preferBuiltins: true }),
       commonjs(),
       typescript({
         tsconfig: './tsconfig.json',
@@ -27,7 +24,6 @@ const config = [
       }),
     ],
   },
-  // CommonJS build
   {
     input: 'src/index.ts',
     output: {
@@ -37,9 +33,7 @@ const config = [
     },
     external,
     plugins: [
-      resolve({
-        preferBuiltins: true,
-      }),
+      resolve({ preferBuiltins: true }),
       commonjs(),
       typescript({
         tsconfig: './tsconfig.json',
@@ -48,7 +42,6 @@ const config = [
       }),
     ],
   },
-  // Type definitions
   {
     input: 'dist/types/index.d.ts',
     output: {

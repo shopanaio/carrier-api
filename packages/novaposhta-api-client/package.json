@@ -38,9 +38,7 @@
     "url": "https://github.com/phl-portal/novaposhta-client/issues"
   },
   "homepage": "https://github.com/phl-portal/novaposhta-client#readme",
-  "dependencies": {
-    "cross-fetch": "^4.0.0"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "typescript": ">=4.9.0"
   },

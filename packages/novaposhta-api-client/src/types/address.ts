@@ -258,7 +258,3 @@ export type AddressData =
   | StreetData
   | SearchSettlementsData
   | SearchSettlementStreetsData;
-
-// =============================================================================
-// HELPER TYPES
-// =============================================================================
