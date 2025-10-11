@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Nova Poshta - Search Streets",
-    "description": "Online search for streets in specific settlements - real-time fuzzy search with coordinates",
+    "description": "Online search for streets in settlements - returns GPS coordinates (lat/lon) for precise geolocation",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search streets in settlement. Required: StreetName, SettlementRef. Returns street with GPS coordinates, type, and full name. SettlementRef from searchSettlements. Cached 1 hour."
+        "description": "Search streets in settlement. Required: StreetName, SettlementRef (from searchSettlements). Returns street with GPS coordinates (lat/lon), UA/RU names, full formatted name, and type. Cached 1 hour."
       },
       "response": []
     },

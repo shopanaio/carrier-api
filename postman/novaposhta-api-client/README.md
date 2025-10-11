@@ -99,7 +99,7 @@ Search for streets in specific cities
 **Cached:** 12 hours
 
 ### 📁 Address - Search Settlements (5 requests)
-Online fuzzy search for settlements with warehouse information
+Online fuzzy search for any settlement (cities, towns, villages) with warehouse information
 
 - **Search Settlements - Basic** - Standard search with all parameters
 - **Search Settlements - Partial Match** - Fuzzy search with partial name
@@ -107,12 +107,13 @@ Online fuzzy search for settlements with warehouse information
 - **Search Settlements - With Pagination** - Get next pages of results
 - **Search Settlements - Large Limit** - Maximum 500 records per page
 
-**Features:** Fuzzy search, postal code search, warehouse count, pagination
-**Returns:** Settlement ref, delivery city ref, region, area, warehouse count
+**Features:** Fuzzy search, postal code search, warehouse count, area/region info, pagination
+**Returns:** SettlementRef, **deliveryCity (CityRef for waybills)**, region, area, warehouse count, settlement type
+**Use when:** Finding small villages/towns, checking warehouse availability, or getting CityRef for any settlement
 **Cached:** 1 hour
 
 ### 📁 Address - Search Streets (5 requests)
-Online fuzzy search for streets with GPS coordinates
+Online fuzzy search for streets in settlements with GPS coordinates
 
 - **Search Streets - Basic** - Standard search with GPS coordinates
 - **Search Streets - Partial Name** - Fuzzy search with partial name
@@ -120,8 +121,9 @@ Online fuzzy search for streets with GPS coordinates
 - **Search Streets - Different Settlement** - Example for different settlement
 - **Search Streets - Maximum Limit** - Maximum 500 records per page
 
-**Features:** Real-time search, GPS coordinates (lat/lon), street types
-**Returns:** Settlement ref, street ref, full name, type, coordinates (lat/lon)
+**Features:** Real-time search, **GPS coordinates (lat/lon)**, street types, UA/RU names
+**Returns:** SettlementRef, street ref, full formatted name, type, **GPS coordinates**
+**Use when:** Need precise geolocation, working with settlement-based addresses, or mapping
 **Cached:** 1 hour
 
 ### 📁 Reference Service (12 requests)
@@ -307,79 +309,108 @@ Tests run automatically after request execution.
 
 ## Common Patterns
 
-### Hierarchical Address Flow
-1. Get settlement areas → `getSettlementAreas`
-2. Get regions in area → `getSettlementCountryRegion`
-3. Search for settlement → `searchSettlements`
-4. Search for street → `searchSettlementStreets`
+### Pattern 1: Direct City Search (for known cities)
+1. Search cities → `getCities` → get **CityRef**
+2. Get streets in city → `getStreet` (using CityRef)
+3. Use CityRef + street info for waybill creation
 
-### Direct City/Street Flow
-1. Search cities → `getCities`
-2. Get streets in city → `getStreet`
+**Best for:** Working with major known cities (Kyiv, Lviv, Odesa, etc.)
+
+### Pattern 2: Universal Settlement Search (for any location)
+1. Search settlement → `searchSettlements` → get **SettlementRef** + **deliveryCity (CityRef)**
+2. Search streets → `searchSettlementStreets` (using SettlementRef) → get **GPS coordinates**
+3. Use deliveryCity (CityRef) + street info + GPS for waybill creation
+
+**Best for:** Finding small villages/towns, checking warehouse availability, needing GPS coordinates
+
+### Pattern 3: Hierarchical Browse
+1. Get settlement areas → `getSettlementAreas` (list all oblasti)
+2. Get regions in area → `getSettlementCountryRegion` (list districts)
+3. Search for settlement → `searchSettlements` (find specific town/village)
+4. Search for street → `searchSettlementStreets` (get street with GPS)
+
+**Best for:** Building address selection UI with region/area filters
 
 ### Key Differences
 
 #### getStreet vs searchSettlementStreets
 
-**`getStreet` (City-based):**
+**`getStreet` (Direct city search):**
 - Uses **CityRef** from `getCities`
-- For **warehouse-to-warehouse** delivery
+- For working with **known major cities**
 - Returns: `ref`, `description`, `streetsType`, `streetsTypeRef`
 - Cached: **12 hours** (static data)
 - Optional: `FindByString`
 - Supports: Full pagination (Page + Limit)
+- Use when: You already know the city (Kyiv, Lviv, etc.)
 
-**`searchSettlementStreets` (Settlement-based):**
+**`searchSettlements` + `searchSettlementStreets` (Universal search):**
 - Uses **SettlementRef** from `searchSettlements`
-- For **door-to-door** delivery
+- For **finding any settlement** (cities, towns, villages)
+- `searchSettlements` returns **both** `SettlementRef` AND `deliveryCity` (CityRef)
 - Returns: All above + **GPS coordinates (lat/lon)**, full name (`present`), both UA/RU names, `totalCount`
 - Cached: **1 hour** (online search, more dynamic)
-- Required: `StreetName`
+- Required: `StreetName` + `SettlementRef`
 - Optional: `Limit` only (no Page parameter)
 - Includes: Geographical location for precise address
+- Use when: Searching for any settlement or need GPS coordinates
 
 **Quick Comparison:**
 
 | Feature | getStreet | searchSettlementStreets |
 |---------|-----------|------------------------|
 | **Input Ref** | CityRef | SettlementRef |
-| **Use Case** | Warehouse delivery | Door-to-door delivery |
+| **Use Case** | Known cities | Universal settlement search |
 | **GPS Coordinates** | ❌ No | ✅ Yes (lat/lon) |
 | **Names** | UA only | UA + RU |
 | **Pagination** | Page + Limit | Limit only |
 | **Cache TTL** | 12 hours | 1 hour |
 | **Total Count** | ❌ No | ✅ Yes |
-| **Required Params** | CityRef | StreetName + SettlementRef |
+| **Settlement Info** | ❌ No | ✅ Returns warehouse count, area, region |
 
 **When to use:**
-- `getCities` + `getStreet` → **City Ref** (for warehouse addresses)
-- `searchSettlements` + `searchSettlementStreets` → **Settlement Ref** (for door-to-door delivery with GPS)
+- `getCities` + `getStreet` → When working with **known major cities**
+- `searchSettlements` + `searchSettlementStreets` → When need to **find any settlement** (including villages), get warehouse info, or need **GPS coordinates**
 
 **Example Response Differences:**
 
 ```javascript
-// getStreet response - minimal info for warehouse delivery
+// getStreet response - simple street info
 {
-  ref: "8d5a980d-...",              // Street ref for waybill
+  ref: "8d5a980d-...",              // Street ref
   description: "Хрещатик",
   streetsType: "Street",
   streetsTypeRef: "..."
 }
 
-// searchSettlementStreets response - full info for door-to-door
+// searchSettlements response - includes deliveryCity!
+{
+  ref: "e718a680-...",              // SettlementRef
+  deliveryCity: "8d5a980d-...",    // ← CityRef for waybill creation!
+  mainDescription: "Київ",
+  area: "Київська область",
+  warehouses: 150,                  // Number of warehouses
+  settlementTypeCode: "city"
+}
+
+// searchSettlementStreets response - full info with GPS
 {
   settlementRef: "e718a680-...",           // Settlement ref
-  settlementStreetRef: "8d5a980d-...",     // Street ref for waybill
+  settlementStreetRef: "8d5a980d-...",     // Street ref
   settlementStreetDescription: "Хрещатик", // Ukrainian name
   settlementStreetDescriptionRu: "Крещатик", // Russian name
   present: "вул. Хрещатик",                 // Full formatted name
   streetsType: "Street",
   streetsTypeDescription: "Street",
   location: {
-    lat: "50.4501",  // ✅ GPS for mapping/navigation
+    lat: "50.4501",  // ✅ GPS for maps/navigation
     lon: "30.5234"
   }
 }
 ```
 
-**Important:** Both return street refs that can be used in waybill creation, but `searchSettlementStreets` provides additional GPS data for precise geolocation.
+**Important:**
+- **Both methods work for any delivery type** (warehouse-to-warehouse, door-to-door, etc.)
+- `searchSettlements` returns `deliveryCity` (CityRef) which is used in waybill creation
+- Main advantage of `searchSettlementStreets`: **GPS coordinates** for precise geolocation
+- Use `searchSettlements` when you need to find small villages/towns or get warehouse availability info

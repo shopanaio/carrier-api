@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Nova Poshta - Search Settlements",
-    "description": "Online search for settlements (населені пункти) - real-time fuzzy search",
+    "description": "Online search for any settlement (cities, towns, villages) - returns SettlementRef AND deliveryCity (CityRef for waybills)",
     "version": "1.0.0",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
@@ -24,7 +24,7 @@
           "raw": "{{BASE_URL}}",
           "host": ["{{BASE_URL}}"]
         },
-        "description": "Search settlements by name. All parameters required: CityName, Limit, Page. Returns settlement info with warehouse count. Cached 1 hour."
+        "description": "Search settlements by name. All parameters required: CityName, Limit, Page. Returns SettlementRef + deliveryCity (CityRef) + warehouse count + area/region info. Cached 1 hour."
       },
       "response": []
     },
