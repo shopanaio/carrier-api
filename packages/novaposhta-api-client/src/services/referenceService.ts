@@ -72,6 +72,7 @@ interface CacheEntry<T> {
  * ```
  */
 export class ReferenceService {
+  readonly namespace = 'reference' as const;
   private transport!: HttpTransport;
 
   constructor(

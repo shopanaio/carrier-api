@@ -31,6 +31,7 @@ export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {};
  * Service for managing waybills (express documents)
  */
 export class WaybillService {
+  readonly namespace = 'waybill' as const;
   private transport!: HttpTransport;
 
   constructor(

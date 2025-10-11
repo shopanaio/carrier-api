@@ -43,6 +43,7 @@ export interface TrackingFilter {
  * Service for tracking documents and monitoring delivery status
  */
 export class TrackingService {
+  readonly namespace = 'tracking' as const;
   private transport!: HttpTransport;
 
   constructor(

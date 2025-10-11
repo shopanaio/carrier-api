@@ -49,6 +49,7 @@ export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
  * ```
  */
 export class AddressService {
+  readonly namespace = 'address' as const;
   private transport!: HttpTransport;
 
   constructor(

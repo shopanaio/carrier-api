@@ -1,5 +1,5 @@
 // code and comments in English
-// Example: flat API client with custom Node.js HTTP(S) transport and all services installed
+// Example: namespaced API client with custom Node.js HTTP(S) transport and all services installed
 
 import { request as httpRequest } from 'http';
 import { request as httpsRequest } from 'https';
@@ -79,11 +79,11 @@ async function main() {
     .use(new WaybillService());
 
   // Address API
-  const cities = await client.getCities({});
+  const cities = await client.address.getCities({});
   console.log('Cities success:', cities.success, 'items:', Array.isArray(cities.data) ? cities.data.length : 0);
 
   // Reference API
-  const cargoTypes = await client.getCargoTypes();
+  const cargoTypes = await client.reference.getCargoTypes();
   console.log(
     'CargoTypes success:',
     cargoTypes.success,
@@ -92,7 +92,7 @@ async function main() {
   );
 
   // Tracking API (example number)
-  const tracked = await client.trackDocument('20400048799000');
+  const tracked = await client.tracking.trackDocument('20400048799000');
   console.log('Track first item:', tracked);
 }
 
