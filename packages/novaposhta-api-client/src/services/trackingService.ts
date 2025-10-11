@@ -4,7 +4,7 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { ServicePlugin, ClientContext } from '../core/client';
+import type { ClientContext } from '../core/client';
 import { toHttpTransport } from '../core/client';
 import type {
   TrackDocumentsRequest,
@@ -43,10 +43,15 @@ export interface TrackingFilter {
  * Service for tracking documents and monitoring delivery status
  */
 export class TrackingService {
+  private transport!: HttpTransport;
+
   constructor(
-    private readonly transport: HttpTransport,
     private readonly config: TrackingServiceConfig = DEFAULT_TRACKING_CONFIG,
   ) {}
+
+  attach(ctx: ClientContext) {
+    this.transport = toHttpTransport(ctx);
+  }
 
   /**
    * Track multiple documents
@@ -398,11 +403,3 @@ export class TrackingService {
     return this.trackDocuments(request);
   }
 }
-
-/**
- * Plugin factory for TrackingService
- */
-export const createTrackingService = (): ServicePlugin<TrackingService> => (ctx: ClientContext) => {
-  const transport = toHttpTransport(ctx);
-  return new TrackingService(transport, {});
-};

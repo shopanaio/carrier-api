@@ -61,9 +61,9 @@
  * @packageDocumentation
  */
 
-// Core client (plugin-based)
+// Core client (flat API via use(new Service()))
 export { createClient } from './core/client';
-export type { ServicePlugin, ClientContext } from './core/client';
+export type { ClientContext, Client, ServiceAPI } from './core/client';
 
 // Configuration
 export {
@@ -81,20 +81,20 @@ export type { NovaPoshtaClientConfig, RequiredConfig } from './config';
 export type { HttpTransport } from './http/transport';
 
 // Services
-export { WaybillService, DEFAULT_WAYBILL_CONFIG, createWaybillService } from './services/waybillService';
+export { WaybillService, DEFAULT_WAYBILL_CONFIG } from './services/waybillService';
 export type { WaybillServiceConfig } from './services/waybillService';
 
-export { TrackingService, DEFAULT_TRACKING_CONFIG, createTrackingService } from './services/trackingService';
+export { TrackingService, DEFAULT_TRACKING_CONFIG } from './services/trackingService';
 export type {
   TrackingServiceConfig,
   TrackingStatistics,
   TrackingFilter
 } from './services/trackingService';
 
-export { ReferenceService, DEFAULT_REFERENCE_CONFIG, createReferenceService } from './services/referenceService';
+export { ReferenceService, DEFAULT_REFERENCE_CONFIG } from './services/referenceService';
 export type { ReferenceServiceConfig } from './services/referenceService';
 
-export { AddressService, DEFAULT_ADDRESS_CONFIG, createAddressService } from './services/addressService';
+export { AddressService, DEFAULT_ADDRESS_CONFIG } from './services/addressService';
 export type { AddressServiceConfig } from './services/addressService';
 
 //

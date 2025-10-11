@@ -4,7 +4,7 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { ServicePlugin, ClientContext } from '../core/client';
+import type { ClientContext } from '../core/client';
 import { toHttpTransport } from '../core/client';
 import type {
   CreateWaybillRequest,
@@ -31,10 +31,15 @@ export const DEFAULT_WAYBILL_CONFIG: WaybillServiceConfig = {};
  * Service for managing waybills (express documents)
  */
 export class WaybillService {
+  private transport!: HttpTransport;
+
   constructor(
-    private readonly transport: HttpTransport,
     private readonly config: WaybillServiceConfig = DEFAULT_WAYBILL_CONFIG,
   ) {}
+
+  attach(ctx: ClientContext) {
+    this.transport = toHttpTransport(ctx);
+  }
 
   /**
    * Create a standard waybill
@@ -308,11 +313,3 @@ export class WaybillService {
     return this.getPrice(request);
   }
 }
-
-/**
- * Plugin factory for WaybillService
- */
-export const createWaybillService = (): ServicePlugin<WaybillService> => (ctx: ClientContext) => {
-  const transport = toHttpTransport(ctx);
-  return new WaybillService(transport, {});
-};

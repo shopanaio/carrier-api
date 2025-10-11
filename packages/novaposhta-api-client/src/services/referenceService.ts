@@ -4,7 +4,7 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { ServicePlugin, ClientContext } from '../core/client';
+import type { ClientContext } from '../core/client';
 import { toHttpTransport } from '../core/client';
 import type {
   GetCargoTypesRequest,
@@ -72,10 +72,15 @@ interface CacheEntry<T> {
  * ```
  */
 export class ReferenceService {
+  private transport!: HttpTransport;
+
   constructor(
-    private readonly transport: HttpTransport,
     private readonly config: ReferenceServiceConfig = DEFAULT_REFERENCE_CONFIG,
   ) {}
+
+  attach(ctx: ClientContext) {
+    this.transport = toHttpTransport(ctx);
+  }
 
   /**
    * Get cargo types
@@ -293,11 +298,3 @@ export class ReferenceService {
     Object.assign(this.config, newConfig);
   }
 }
-
-/**
- * Plugin factory for ReferenceService
- */
-export const createReferenceService = (): ServicePlugin<ReferenceService> => (ctx: ClientContext) => {
-  const transport = toHttpTransport(ctx);
-  return new ReferenceService(transport, {});
-};

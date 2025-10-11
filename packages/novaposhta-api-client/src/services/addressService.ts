@@ -4,7 +4,7 @@
  */
 
 import type { HttpTransport } from '../http/transport';
-import type { ServicePlugin, ClientContext } from '../core/client';
+import type { ClientContext } from '../core/client';
 import { toHttpTransport } from '../core/client';
 import type {
   GetSettlementsRequest,
@@ -49,10 +49,15 @@ export const DEFAULT_ADDRESS_CONFIG: AddressServiceConfig = {};
  * ```
  */
 export class AddressService {
+  private transport!: HttpTransport;
+
   constructor(
-    private readonly transport: HttpTransport,
     private readonly config: AddressServiceConfig = DEFAULT_ADDRESS_CONFIG,
   ) {}
+
+  attach(ctx: ClientContext) {
+    this.transport = toHttpTransport(ctx);
+  }
 
   /**
    * Get settlements (areas)
@@ -174,11 +179,3 @@ export class AddressService {
     Object.assign(this.config, newConfig);
   }
 }
-
-/**
- * Plugin factory for AddressService
- */
-export const createAddressService = (): ServicePlugin<AddressService> => (ctx: ClientContext) => {
-  const transport = toHttpTransport(ctx);
-  return new AddressService(transport, {});
-};
