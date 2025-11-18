@@ -1,6 +1,6 @@
 {
   "name": "@shopana/novaposhta-api-client",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "Fully typed Nova Poshta API client for Node.js and browsers with enterprise-grade features",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
@@ -34,12 +34,13 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/phl-portal/novaposhta-client.git"
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/novaposhta-api-client"
   },
   "bugs": {
-    "url": "https://github.com/phl-portal/novaposhta-client/issues"
+    "url": "https://github.com/shopanaio/carrier-api/issues"
   },
-  "homepage": "https://github.com/phl-portal/novaposhta-client#readme",
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/novaposhta-api-client#readme",
   "dependencies": {},
   "devDependencies": {
     "@types/jest": "^29.5.8",

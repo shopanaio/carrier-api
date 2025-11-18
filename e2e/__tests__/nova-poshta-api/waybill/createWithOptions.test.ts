@@ -1,8 +1,9 @@
 import { client } from '../../../setup/client.setup';
 import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
+import { itWithApiKey } from '../../../setup/testHelpers';
 
 describe('WaybillService - createWithOptions', () => {
-  it('should create a waybill with additional options', async () => {
+  itWithApiKey('should create a waybill with additional options', async () => {
     const response = await client.waybill.createWithOptions({
       payerType: PayerType.Sender,
       paymentMethod: PaymentMethod.Cash,

@@ -1,8 +1,9 @@
 import { client } from '../../../setup/client.setup';
 import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
+import { itWithApiKey } from '../../../setup/testHelpers';
 
 describe('WaybillService - createForPostomat', () => {
-  it('should create a postomat waybill with restrictions', async () => {
+  itWithApiKey('should create a postomat waybill with restrictions', async () => {
     const response = await client.waybill.createForPostomat({
       payerType: PayerType.Sender,
       paymentMethod: PaymentMethod.Cash,

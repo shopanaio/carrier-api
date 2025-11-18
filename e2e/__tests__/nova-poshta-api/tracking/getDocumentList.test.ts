@@ -1,7 +1,8 @@
 import { client } from '../../../setup/client.setup';
 
 describe('TrackingService - getDocumentList', () => {
-  it('should get list of documents for a date range', async () => {
+  // TODO: Requires valid API key with associated waybills
+  it.skip('should get list of documents for a date range', async () => {
     const response = await client.tracking.getDocumentList({
       dateTimeFrom: '01.01.2024',
       dateTimeTo: '31.01.2024',
@@ -13,7 +14,8 @@ describe('TrackingService - getDocumentList', () => {
     expect(response.data).toBeDefined();
   });
 
-  it('should get full document list', async () => {
+  // TODO: Requires valid API key with associated waybills
+  it.skip('should get full document list', async () => {
     const response = await client.tracking.getDocumentList({
       dateTimeFrom: '01.01.2024',
       dateTimeTo: '31.01.2024',
@@ -24,7 +26,8 @@ describe('TrackingService - getDocumentList', () => {
     expect(response.data).toBeDefined();
   });
 
-  it('should get documents by specific date', async () => {
+  // TODO: Requires valid API key with associated waybills
+  it.skip('should get documents by specific date', async () => {
     const response = await client.tracking.getDocumentList({
       dateTime: '15.01.2024',
       page: 1,

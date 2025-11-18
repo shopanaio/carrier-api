@@ -9,7 +9,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@shopana/novaposhta-api-client": "*"
+    "@shopana/novaposhta-api-client": "*",
+    "@shopana/novaposhta-transport-fetch": "*"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",

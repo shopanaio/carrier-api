@@ -1,8 +1,9 @@
 import { client } from '../../../setup/client.setup';
 import { ServiceType, CargoType } from '@shopana/novaposhta-api-client';
+import { itWithApiKey } from '../../../setup/testHelpers';
 
 describe('WaybillService - getEstimate', () => {
-  it('should get both price and delivery date estimation', async () => {
+  itWithApiKey('should get both price and delivery date estimation', async () => {
     const response = await client.waybill.getEstimate({
       citySender: '8d5a980d-391c-11dd-90d9-001a92567626',
       cityRecipient: 'db5c88e0-391c-11dd-90d9-001a92567626',

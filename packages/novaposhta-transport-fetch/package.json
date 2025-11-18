@@ -1,6 +1,6 @@
 {
   "name": "@shopana/novaposhta-transport-fetch",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha.0",
   "description": "Fetch-based HTTP JSON transport for Nova Poshta API",
   "type": "module",
   "main": "dist/index.js",
@@ -23,6 +23,15 @@
   ],
   "author": "Nova Poshta Client Team",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/novaposhta-transport-fetch"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/novaposhta-transport-fetch#readme",
   "dependencies": {
     "cross-fetch": "^4.0.0"
   },
