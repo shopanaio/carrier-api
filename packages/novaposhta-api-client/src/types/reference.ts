@@ -29,9 +29,9 @@ export interface GetCargoTypesRequest {
 
 export interface CargoTypeData {
   /** Cargo type identifier */
-  readonly ref: CargoTypeRef;
+  readonly Ref: CargoTypeRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
 }
 
 export type GetCargoTypesResponse = NovaPoshtaResponse<CargoTypeData[]>;
@@ -46,13 +46,13 @@ export interface GetPalletsListRequest {
 
 export interface PalletData {
   /** Pallet identifier */
-  readonly ref: PalletRef;
+  readonly Ref: PalletRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Description in Russian */
-  readonly descriptionRu: string;
+  readonly DescriptionRu: string;
   /** Weight in kg */
-  readonly weight: string;
+  readonly Weight: string;
 }
 
 export type GetPalletsListResponse = NovaPoshtaResponse<PalletData[]>;
@@ -76,21 +76,21 @@ export interface GetPackListRequest {
 
 export interface PackData {
   /** Pack identifier */
-  readonly ref: PackRef;
+  readonly Ref: PackRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Description in Russian */
-  readonly descriptionRu: string;
+  readonly DescriptionRu: string;
   /** Length in mm */
-  readonly length: string;
+  readonly Length: string;
   /** Width in mm */
-  readonly width: string;
+  readonly Width: string;
   /** Height in mm */
-  readonly height: string;
+  readonly Height: string;
   /** Volumetric weight */
-  readonly volumetricWeight: string;
+  readonly VolumetricWeight: string;
   /** Type of packing */
-  readonly typeOfPacking: string;
+  readonly TypeOfPacking: string;
 }
 
 export type GetPackListResponse = NovaPoshtaResponse<PackData[]>;
@@ -105,15 +105,15 @@ export interface GetTiresWheelsListRequest {
 
 export interface TireWheelData {
   /** Tire/wheel identifier */
-  readonly ref: TireWheelRef;
+  readonly Ref: TireWheelRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Description in Russian */
-  readonly descriptionRu: string;
+  readonly DescriptionRu: string;
   /** Weight in kg */
-  readonly weight: string;
+  readonly Weight: string;
   /** Type description (Tires or Wheels) */
-  readonly descriptionType: 'Tires' | 'Wheels';
+  readonly DescriptionType: 'Tires' | 'Wheels';
 }
 
 export type GetTiresWheelsListResponse = NovaPoshtaResponse<TireWheelData[]>;
@@ -133,11 +133,11 @@ export interface GetCargoDescriptionListRequest {
 
 export interface CargoDescriptionData {
   /** Cargo description identifier */
-  readonly ref: CargoDescriptionRef;
+  readonly Ref: CargoDescriptionRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Description in Russian */
-  readonly descriptionRu: string;
+  readonly DescriptionRu: string;
 }
 
 export type GetCargoDescriptionListResponse = NovaPoshtaResponse<CargoDescriptionData[]>;
@@ -152,13 +152,13 @@ export interface GetMessageCodeTextRequest {
 
 export interface MessageCodeData {
   /** Message code */
-  readonly messageCode: MessageCodeRef;
+  readonly MessageCode: MessageCodeRef;
   /** Message text in English */
-  readonly messageText: string;
+  readonly MessageText: string;
   /** Message description in Russian */
-  readonly messageDescriptionRU: string;
+  readonly MessageDescriptionRU: string;
   /** Message description in Ukrainian */
-  readonly messageDescriptionUA: string;
+  readonly MessageDescriptionUA: string;
 }
 
 export type GetMessageCodeTextResponse = NovaPoshtaResponse<MessageCodeData[]>;
@@ -173,9 +173,9 @@ export interface GetServiceTypesRequest {
 
 export interface ServiceTypeData {
   /** Service type identifier */
-  readonly ref: ServiceTypeRef;
+  readonly Ref: ServiceTypeRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
 }
 
 export type GetServiceTypesResponse = NovaPoshtaResponse<ServiceTypeData[]>;
@@ -190,11 +190,11 @@ export interface GetOwnershipFormsListRequest {
 
 export interface OwnershipFormData {
   /** Ownership form identifier */
-  readonly ref: OwnershipFormRef;
+  readonly Ref: OwnershipFormRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Full name */
-  readonly fullName: string;
+  readonly FullName: string;
 }
 
 export type GetOwnershipFormsListResponse = NovaPoshtaResponse<OwnershipFormData[]>;
@@ -212,11 +212,11 @@ export interface GetTimeIntervalsRequest {
 
 export interface TimeIntervalData {
   /** Time interval identifier */
-  readonly number: TimeIntervalRef;
+  readonly Number: TimeIntervalRef;
   /** Start time (e.g., "12:00") */
-  readonly start: string;
+  readonly Start: string;
   /** End time (e.g., "15:00") */
-  readonly end: string;
+  readonly End: string;
 }
 
 export type GetTimeIntervalsResponse = NovaPoshtaResponse<TimeIntervalData[]>;
@@ -234,13 +234,13 @@ export interface GetPickupTimeIntervalsRequest {
 
 export interface PickupTimeIntervalData {
   /** Time interval name */
-  readonly number: PickupTimeIntervalRef;
+  readonly Number: PickupTimeIntervalRef;
   /** Start time */
-  readonly start: string;
+  readonly Start: string;
   /** End time */
-  readonly end: string;
+  readonly End: string;
   /** Boundary time for pickup */
-  readonly boundaryTime: string;
+  readonly BoundaryTime: string;
 }
 
 export type GetPickupTimeIntervalsResponse = NovaPoshtaResponse<PickupTimeIntervalData[]>;
@@ -255,9 +255,9 @@ export interface GetBackwardDeliveryCargoTypesRequest {
 
 export interface BackwardDeliveryCargoTypeData {
   /** Backward delivery cargo type identifier */
-  readonly ref: BackwardDeliveryCargoTypeRef;
+  readonly Ref: BackwardDeliveryCargoTypeRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
 }
 
 export type GetBackwardDeliveryCargoTypesResponse = NovaPoshtaResponse<BackwardDeliveryCargoTypeData[]>;
@@ -272,9 +272,9 @@ export interface GetTypesOfPayersForRedeliveryRequest {
 
 export interface PayerForRedeliveryData {
   /** Payer type identifier */
-  readonly ref: PayerTypeRef;
+  readonly Ref: PayerTypeRef;
   /** Description in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
 }
 
 export type GetTypesOfPayersForRedeliveryResponse = NovaPoshtaResponse<PayerForRedeliveryData[]>;

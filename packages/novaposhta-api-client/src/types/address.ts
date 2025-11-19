@@ -21,13 +21,13 @@ export interface GetSettlementsRequest {
 
 export interface SettlementAreaData {
   /** Area name */
-  readonly description: string;
+  readonly Description: string;
   /** Area identifier */
-  readonly ref: SettlementAreaRef;
+  readonly Ref: SettlementAreaRef;
   /** Administrative center of the area */
-  readonly areasCenter: ObjectRef;
+  readonly AreasCenter: ObjectRef;
   /** Region type (e.g., "region") */
-  readonly regionType: string;
+  readonly RegionType: string;
 }
 
 export type GetSettlementsResponse = NovaPoshtaResponse<SettlementAreaData[]>;
@@ -43,13 +43,13 @@ export interface GetSettlementCountryRegionRequest {
 
 export interface SettlementRegionData {
   /** Region identifier */
-  readonly ref: SettlementRegionRef;
+  readonly Ref: SettlementRegionRef;
   /** Region name */
-  readonly description: string;
+  readonly Description: string;
   /** Region type (e.g., "district") */
-  readonly regionType: string;
+  readonly RegionType: string;
   /** Administrative center */
-  readonly areasCenter: ObjectRef;
+  readonly AreasCenter: ObjectRef;
 }
 
 export type GetSettlementCountryRegionResponse = NovaPoshtaResponse<SettlementRegionData[]>;
@@ -71,41 +71,41 @@ export interface GetCitiesRequest {
 
 export interface CityData {
   /** City name in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** City name in Russian */
-  readonly descriptionRu: string;
+  readonly DescriptionRu: string;
   /** City identifier */
-  readonly ref: CityRef;
+  readonly Ref: CityRef;
   /** Delivery availability (Monday) */
-  readonly delivery1: string;
+  readonly Delivery1: string;
   /** Delivery availability (Tuesday) */
-  readonly delivery2: string;
+  readonly Delivery2: string;
   /** Delivery availability (Wednesday) */
-  readonly delivery3: string;
+  readonly Delivery3: string;
   /** Delivery availability (Thursday) */
-  readonly delivery4: string;
+  readonly Delivery4: string;
   /** Delivery availability (Friday) */
-  readonly delivery5: string;
+  readonly Delivery5: string;
   /** Delivery availability (Saturday) */
-  readonly delivery6: string;
+  readonly Delivery6: string;
   /** Delivery availability (Sunday) */
-  readonly delivery7: string;
+  readonly Delivery7: string;
   /** Area identifier */
-  readonly area: ObjectRef;
+  readonly Area: ObjectRef;
   /** Settlement type identifier */
-  readonly settlementType: ObjectRef;
+  readonly SettlementType: ObjectRef;
   /** Is branch flag (1 - branch, 0 - partner) */
-  readonly isBranch: string;
+  readonly IsBranch: string;
   /** Prevent new streets entry flag */
-  readonly preventEntryNewStreetsUser: string;
+  readonly PreventEntryNewStreetsUser: string;
   /** Conglomerates */
-  readonly conglomerates: string;
+  readonly Conglomerates: string;
   /** City ID */
-  readonly cityID: string;
+  readonly CityID: string;
   /** Settlement type description in Russian */
-  readonly settlementTypeDescriptionRu: string;
+  readonly SettlementTypeDescriptionRu: string;
   /** Settlement type description in Ukrainian */
-  readonly settlementTypeDescription: string;
+  readonly SettlementTypeDescription: string;
 }
 
 export type GetCitiesResponse = NovaPoshtaResponse<CityData[]>;
@@ -127,13 +127,13 @@ export interface GetStreetRequest {
 
 export interface StreetData {
   /** Street identifier */
-  readonly ref: StreetRef;
+  readonly Ref: StreetRef;
   /** Street name in Ukrainian */
-  readonly description: string;
+  readonly Description: string;
   /** Street type identifier */
-  readonly streetsTypeRef: StreetTypeRef;
+  readonly StreetsTypeRef: StreetTypeRef;
   /** Street type (e.g., "line") */
-  readonly streetsType: string;
+  readonly StreetsType: string;
 }
 
 export type GetStreetResponse = NovaPoshtaResponse<StreetData[]>;
@@ -153,26 +153,26 @@ export interface SearchSettlementsRequest {
 
 export interface SearchSettlementAddress {
   /** Number of warehouses */
-  readonly warehouses: number;
+  readonly Warehouses: number;
   /** Main description (city name) */
-  readonly mainDescription: string;
+  readonly MainDescription: string;
   /** Area name */
-  readonly area: string;
+  readonly Area: string;
   /** Region name */
-  readonly region: string;
+  readonly Region: string;
   /** Settlement type code (e.g., "city", "village") */
-  readonly settlementTypeCode: string;
+  readonly SettlementTypeCode: string;
   /** Settlement reference from getSettlements */
-  readonly ref: SettlementRef;
+  readonly Ref: SettlementRef;
   /** Delivery city reference from getCities */
-  readonly deliveryCity: CityRef;
+  readonly DeliveryCity: CityRef;
 }
 
 export interface SearchSettlementsData {
   /** Total count of found objects */
-  readonly totalCount: number;
+  readonly TotalCount: number;
   /** Array of found addresses */
-  readonly addresses: SearchSettlementAddress[];
+  readonly Addresses: SearchSettlementAddress[];
 }
 
 export type SearchSettlementsResponse = NovaPoshtaResponse<SearchSettlementsData[]>;
@@ -192,35 +192,35 @@ export interface SearchSettlementStreetsRequest {
 
 export interface AddressLocation {
   /** Geographical latitude */
-  readonly lat: string;
+  readonly Lat: string;
   /** Geographical longitude */
-  readonly lon: string;
+  readonly Lon: string;
 }
 
 export interface SettlementStreetAddress {
   /** Settlement identifier */
-  readonly settlementRef: SettlementRef;
+  readonly SettlementRef: SettlementRef;
   /** Street identifier */
-  readonly settlementStreetRef: StreetRef;
+  readonly SettlementStreetRef: StreetRef;
   /** Street name */
-  readonly settlementStreetDescription: string;
+  readonly SettlementStreetDescription: string;
   /** Full street name with type */
-  readonly present: string;
+  readonly Present: string;
   /** Street type identifier */
-  readonly streetsType: StreetTypeRef;
+  readonly StreetsType: StreetTypeRef;
   /** Street type description */
-  readonly streetsTypeDescription: string;
+  readonly StreetsTypeDescription: string;
   /** Location coordinates */
-  readonly location: AddressLocation;
+  readonly Location: AddressLocation;
   /** Street name in Russian */
-  readonly settlementStreetDescriptionRu: string;
+  readonly SettlementStreetDescriptionRu: string;
 }
 
 export interface SearchSettlementStreetsData {
   /** Total count of found objects */
-  readonly totalCount: number;
+  readonly TotalCount: number;
   /** Array of found street addresses */
-  readonly addresses: SettlementStreetAddress[];
+  readonly Addresses: SettlementStreetAddress[];
 }
 
 export type SearchSettlementStreetsResponse = NovaPoshtaResponse<SearchSettlementStreetsData[]>;

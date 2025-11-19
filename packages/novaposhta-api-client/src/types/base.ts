@@ -74,9 +74,9 @@ export interface SearchParams extends PaginationParams {
 
 // Generic identifier with description
 export interface ReferenceItem {
-  readonly ref: NovaPoshtaRef;
-  readonly description: string;
-  readonly descriptionRu?: string;
+  readonly Ref: NovaPoshtaRef;
+  readonly Description: string;
+  readonly DescriptionRu?: string;
 }
 
 // Location coordinates

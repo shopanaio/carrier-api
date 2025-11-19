@@ -38,273 +38,273 @@ export interface TrackDocumentItem {
 export interface TrackingStatusData {
   // Availability flags
   /** Availability to order cargo return service */
-  readonly possibilityCreateReturn: boolean;
+  readonly PossibilityCreateReturn: boolean;
   /** Availability to order cargo refusal service */
-  readonly possibilityCreateRefusal: boolean;
+  readonly PossibilityCreateRefusal: boolean;
   /** Availability to order waybill changes service */
-  readonly possibilityChangeEW: boolean;
+  readonly PossibilityChangeEW: boolean;
   /** Availability to order redirection service */
-  readonly possibilityCreateRedirecting: boolean;
+  readonly PossibilityCreateRedirecting: boolean;
   /** Possibility to change cash to card payment */
-  readonly possibilityChangeCash2Card: boolean;
+  readonly PossibilityChangeCash2Card: boolean;
   /** Possibility to change delivery intervals */
-  readonly possibilityChangeDeliveryIntervals: boolean;
+  readonly PossibilityChangeDeliveryIntervals: boolean;
   /** Possibility to extend storage term */
-  readonly possibilityTermExtension: boolean;
+  readonly PossibilityTermExtension: boolean;
 
   // Basic document info
   /** Waybill number */
-  readonly number: String36;
+  readonly Number: String36;
   /** Document reference ID */
-  readonly refEW: NovaPoshtaRef;
+  readonly RefEW: NovaPoshtaRef;
   /** Document type */
-  readonly typeDocument: string;
+  readonly TypeDocument: string;
   /** Creation date */
-  readonly dateCreated: NovaPoshtaDateTime;
+  readonly DateCreated: NovaPoshtaDateTime;
   /** Description */
-  readonly description?: String36;
+  readonly Description?: String36;
 
   // Redelivery info
   /** Redelivery identifier */
-  readonly redelivery: String36;
+  readonly Redelivery: String36;
   /** Redelivery sum */
-  readonly redeliverySum: String36;
+  readonly RedeliverySum: String36;
   /** Redelivery number */
-  readonly redeliveryNum: String36;
+  readonly RedeliveryNum: String36;
   /** Redelivery payer */
-  readonly redeliveryPayer: String36;
+  readonly RedeliveryPayer: String36;
 
   // Document basis info
   /** Owner document type */
-  readonly ownerDocumentType: String36;
+  readonly OwnerDocumentType: String36;
   /** Owner document number */
-  readonly ownerDocumentNumber: String36;
+  readonly OwnerDocumentNumber: String36;
   /** Last created on basis document type */
-  readonly lastCreatedOnTheBasisDocumentType: String36;
+  readonly LastCreatedOnTheBasisDocumentType: String36;
   /** Last created on basis payer type */
-  readonly lastCreatedOnTheBasisPayerType: String36;
+  readonly LastCreatedOnTheBasisPayerType: String36;
   /** Last created on basis date time */
-  readonly lastCreatedOnTheBasisDateTime: String36;
+  readonly LastCreatedOnTheBasisDateTime: String36;
   /** Last created on basis number */
-  readonly lastCreatedOnTheBasisNumber: String36;
+  readonly LastCreatedOnTheBasisNumber: String36;
   /** Created on the basis */
-  readonly createdOnTheBasis: String36;
+  readonly CreatedOnTheBasis: String36;
 
   // Money transfer info
   /** Last transaction status for money transfer */
-  readonly lastTransactionStatusGM: String36;
+  readonly LastTransactionStatusGM: String36;
   /** Last transaction date time for money transfer */
-  readonly lastTransactionDateTimeGM: String36;
+  readonly LastTransactionDateTimeGM: String36;
   /** Last amount transfer for money transfer */
-  readonly lastAmountTransferGM: String36;
+  readonly LastAmountTransferGM: String36;
   /** Last amount received commission for money transfer */
-  readonly lastAmountReceivedCommissionGM: String36;
+  readonly LastAmountReceivedCommissionGM: String36;
 
   // Weight and cost info
   /** Document weight */
-  readonly documentWeight: Weight;
+  readonly DocumentWeight: Weight;
   /** Actual weight */
-  readonly factualWeight: Weight;
+  readonly FactualWeight: Weight;
   /** Volumetric weight */
-  readonly volumeWeight: Weight;
+  readonly VolumeWeight: Weight;
   /** Check weight */
-  readonly checkWeight: String36;
+  readonly CheckWeight: String36;
   /** Check weight method */
-  readonly checkWeightMethod: String36;
+  readonly CheckWeightMethod: String36;
   /** Calculated weight */
-  readonly calculatedWeight: Weight;
+  readonly CalculatedWeight: Weight;
   /** Sum before check weight */
-  readonly sumBeforeCheckWeight: String36;
+  readonly SumBeforeCheckWeight: String36;
   /** Document cost */
-  readonly documentCost: Cost;
+  readonly DocumentCost: Cost;
   /** Announced price */
-  readonly announcedPrice: Cost;
+  readonly AnnouncedPrice: Cost;
 
   // Payment info
   /** Payer type */
-  readonly payerType: PayerType;
+  readonly PayerType: PayerType;
   /** Payment method */
-  readonly paymentMethod: PaymentMethod;
+  readonly PaymentMethod: PaymentMethod;
   /** Payment status */
-  readonly paymentStatus: String36;
+  readonly PaymentStatus: String36;
   /** Payment status date */
-  readonly paymentStatusDate: String36;
+  readonly PaymentStatusDate: String36;
   /** Amount to pay */
-  readonly amountToPay: String36;
+  readonly AmountToPay: String36;
   /** Amount paid */
-  readonly amountPaid: String36;
+  readonly AmountPaid: String36;
   /** Express waybill payment status */
-  readonly expressWaybillPaymentStatus: String36;
+  readonly ExpressWaybillPaymentStatus: String36;
   /** Express waybill amount to pay */
-  readonly expressWaybillAmountToPay: String36;
+  readonly ExpressWaybillAmountToPay: String36;
   /** Card masked number */
-  readonly cardMaskedNumber: String36;
+  readonly CardMaskedNumber: String36;
 
   // Recipient info
   /** Recipient full name */
-  readonly recipientFullName: String36;
+  readonly RecipientFullName: String36;
   /** Recipient full name from waybill */
-  readonly recipientFullNameEW: String36;
+  readonly RecipientFullNameEW: String36;
   /** Recipient phone */
-  readonly phoneRecipient: PhoneNumber;
+  readonly PhoneRecipient: PhoneNumber;
   /** Recipient date time */
-  readonly recipientDateTime: NovaPoshtaDateTime;
+  readonly RecipientDateTime: NovaPoshtaDateTime;
   /** Recipient address */
-  readonly recipientAddress: String36;
+  readonly RecipientAddress: String36;
   /** Counterparty recipient description */
-  readonly counterpartyRecipientDescription: String36;
+  readonly CounterpartyRecipientDescription: String36;
 
   // Sender info
   /** Sender full name from waybill */
-  readonly senderFullNameEW: String36;
+  readonly SenderFullNameEW: String36;
   /** Sender phone */
-  readonly phoneSender: PhoneNumber;
+  readonly PhoneSender: PhoneNumber;
   /** Sender address */
-  readonly senderAddress: String36;
+  readonly SenderAddress: String36;
   /** Counterparty sender type */
-  readonly counterpartySenderType: String36;
+  readonly CounterpartySenderType: String36;
 
   // Delivery info
   /** Scheduled delivery date */
-  readonly scheduledDeliveryDate: NovaPoshtaDateTime;
+  readonly ScheduledDeliveryDate: NovaPoshtaDateTime;
   /** Actual delivery date */
-  readonly actualDeliveryDate: String36;
+  readonly ActualDeliveryDate: String36;
   /** Preferred delivery date */
-  readonly preferredDeliveryDate?: NovaPoshtaDate;
+  readonly PreferredDeliveryDate?: NovaPoshtaDate;
   /** Delivery timeframe */
-  readonly deliveryTimeframe: String36;
+  readonly DeliveryTimeframe: String36;
 
   // Cargo info
   /** Cargo description string */
-  readonly cargoDescriptionString: String36;
+  readonly CargoDescriptionString: String36;
   /** Cargo type */
-  readonly cargoType: CargoType;
+  readonly CargoType: CargoType;
   /** Service type */
-  readonly serviceType: ServiceType;
+  readonly ServiceType: ServiceType;
   /** Number of seats */
-  readonly seatsAmount: String36;
+  readonly SeatsAmount: String36;
 
   // Location info
   /** Sender city */
-  readonly citySender: String36;
+  readonly CitySender: String36;
   /** Recipient city */
-  readonly cityRecipient: String36;
+  readonly CityRecipient: String36;
   /** Ref city sender */
-  readonly refCitySender: NovaPoshtaRef;
+  readonly RefCitySender: NovaPoshtaRef;
   /** Ref city recipient */
-  readonly refCityRecipient: NovaPoshtaRef;
+  readonly RefCityRecipient: NovaPoshtaRef;
   /** Ref settlement sender */
-  readonly refSettlementSender: NovaPoshtaRef;
+  readonly RefSettlementSender: NovaPoshtaRef;
   /** Ref settlement recipient */
-  readonly refSettlementRecipient: NovaPoshtaRef;
+  readonly RefSettlementRecipient: NovaPoshtaRef;
 
   // Warehouse info
   /** Warehouse sender */
-  readonly warehouseSender: String36;
+  readonly WarehouseSender: String36;
   /** Warehouse sender address */
-  readonly warehouseSenderAddress: String36;
+  readonly WarehouseSenderAddress: String36;
   /** Warehouse sender internet address ref */
-  readonly warehouseSenderInternetAddressRef: String36;
+  readonly WarehouseSenderInternetAddressRef: String36;
   /** Warehouse recipient */
-  readonly warehouseRecipient: String36;
+  readonly WarehouseRecipient: String36;
   /** Warehouse recipient number */
-  readonly warehouseRecipientNumber: String36;
+  readonly WarehouseRecipientNumber: String36;
   /** Warehouse recipient address */
-  readonly warehouseRecipientAddress: String36;
+  readonly WarehouseRecipientAddress: String36;
   /** Warehouse recipient internet address ref */
-  readonly warehouseRecipientInternetAddressRef: NovaPoshtaRef;
+  readonly WarehouseRecipientInternetAddressRef: NovaPoshtaRef;
   /** Warehouse recipient ref */
-  readonly warehouseRecipientRef: NovaPoshtaRef;
+  readonly WarehouseRecipientRef: NovaPoshtaRef;
   /** Recipient warehouse type ref */
-  readonly recipientWarehouseTypeRef: NovaPoshtaRef;
+  readonly RecipientWarehouseTypeRef: NovaPoshtaRef;
   /** Category of warehouse */
-  readonly categoryOfWarehouse: String36;
+  readonly CategoryOfWarehouse: String36;
 
   // Status info
   /** Status */
-  readonly status: String36;
+  readonly Status: String36;
   /** Status code */
-  readonly statusCode: DeliveryStatus;
+  readonly StatusCode: DeliveryStatus;
   /** Date scan */
-  readonly dateScan: NovaPoshtaDateTime;
+  readonly DateScan: NovaPoshtaDateTime;
   /** Tracking update date */
-  readonly trackingUpdateDate: NovaPoshtaDateTime;
+  readonly TrackingUpdateDate: NovaPoshtaDateTime;
 
   // Additional services
   /** Afterpayment on goods cost */
-  readonly afterpaymentOnGoodsCost: Cost;
+  readonly AfterPaymentOnGoodsCost: Cost;
   /** Counterparty type */
-  readonly counterpartyType: String36;
+  readonly CounterpartyType: String36;
 
   // Backward delivery info
   /** Backward delivery sub types actions */
-  readonly backwardDeliverySubTypesActions: String36;
+  readonly BackwardDeliverySubTypesActions: String36;
   /** Backward delivery sub types services */
-  readonly backwardDeliverySubTypesServices: String36;
+  readonly BackwardDeliverySubTypesServices: String36;
 
   // Undelivery info
   /** Undelivery reasons */
-  readonly undeliveryReasons: String36;
+  readonly UndeliveryReasons: String36;
   /** Undelivery reasons subtype description */
-  readonly undeliveryReasonsSubtypeDescription: String36;
+  readonly UndeliveryReasonsSubtypeDescription: String36;
   /** Undelivery reasons date */
-  readonly undeliveryReasonsDate: String36;
+  readonly UndeliveryReasonsDate: String36;
 
   // Storage info
   /** Date payed keeping */
-  readonly datePayedKeeping: String36;
+  readonly DatePayedKeeping: String36;
   /** Date first day storage */
-  readonly dateFirstDayStorage: String36;
+  readonly DateFirstDayStorage: String36;
   /** Days storage cargo */
-  readonly daysStorageCargo: String36;
+  readonly DaysStorageCargo: String36;
   /** Storage amount */
-  readonly storageAmount: String36;
+  readonly StorageAmount: String36;
   /** Storage price */
-  readonly storagePrice: String36;
+  readonly StoragePrice: String36;
 
   // Return info
   /** Date return cargo */
-  readonly dateReturnCargo: String36;
+  readonly DateReturnCargo: String36;
   /** Date moving */
-  readonly dateMoving: String36;
+  readonly DateMoving: String36;
   /** Cargo return refusal */
-  readonly cargoReturnRefusal: String36;
+  readonly CargoReturnRefusal: String36;
 
   // International delivery
   /** International delivery type */
-  readonly internationalDeliveryType: String36;
+  readonly InternationalDeliveryType: String36;
 
   // Postomat info
   /** Postomat V3 cell reservation number */
-  readonly postomatV3CellReservationNumber: String36;
+  readonly PostomatV3CellReservationNumber: String36;
 
   // Marketplace info
   /** Marketplace partner token */
-  readonly marketplacePartnerToken: String36;
+  readonly MarketplacePartnerToken: String36;
   /** Client barcode */
-  readonly clientBarcode: String36;
+  readonly ClientBarcode: String36;
 
   // Additional info
   /** Additional information EW */
-  readonly additionalInformationEW: String36;
+  readonly AdditionalInformationEW: String36;
   /** Avia delivery */
-  readonly aviaDelivery: String36;
+  readonly AviaDelivery: String36;
   /** Barcode RedBox */
-  readonly barcodeRedBox: String36;
+  readonly BarcodeRedBox: String36;
 
   // Packaging info
   /** Packaging */
-  readonly packaging: unknown[] | null;
+  readonly Packaging: unknown[] | null;
   /** Partial return goods */
-  readonly partialReturnGoods: unknown[] | null;
+  readonly PartialReturnGoods: unknown[] | null;
 
   // Security and loyalty
   /** Secure payment */
-  readonly securePayment: String36;
+  readonly SecurePayment: String36;
   /** Free shipping */
-  readonly freeShipping: String36;
+  readonly FreeShipping: String36;
   /** Loyalty card recipient */
-  readonly loyaltyCardRecipient: String36;
+  readonly LoyaltyCardRecipient: String36;
 }
 
 // Tracking response type
@@ -320,23 +320,23 @@ export interface DocumentMovementRequest {
 
 export interface DocumentMovementData {
   /** Document number */
-  readonly number: String36;
+  readonly Number: String36;
   /** Document ref */
-  readonly documentRef: NovaPoshtaRef;
+  readonly DocumentRef: NovaPoshtaRef;
   /** Movement date */
-  readonly date: NovaPoshtaDateTime;
+  readonly Date: NovaPoshtaDateTime;
   /** Status */
-  readonly status: String36;
+  readonly Status: String36;
   /** Status code */
-  readonly statusCode: DeliveryStatus;
+  readonly StatusCode: DeliveryStatus;
   /** City sender */
-  readonly citySender: String36;
+  readonly CitySender: String36;
   /** City recipient */
-  readonly cityRecipient: String36;
+  readonly CityRecipient: String36;
   /** Scanning date */
-  readonly scanningDate?: NovaPoshtaDateTime;
+  readonly ScanningDate?: NovaPoshtaDateTime;
   /** Comment */
-  readonly comment?: String36;
+  readonly Comment?: String36;
 }
 
 export type DocumentMovementResponse = NovaPoshtaResponse<readonly DocumentMovementData[]>;
@@ -357,45 +357,45 @@ export interface DocumentListRequest {
 
 export interface DocumentListData {
   /** Document ref */
-  readonly ref: NovaPoshtaRef;
+  readonly Ref: NovaPoshtaRef;
   /** Document number */
-  readonly intDocNumber: String36;
+  readonly IntDocNumber: String36;
   /** Creation date */
-  readonly dateCreated: NovaPoshtaDateTime;
+  readonly DateCreated: NovaPoshtaDateTime;
   /** Status description */
-  readonly statusDescription: String36;
+  readonly StatusDescription: String36;
   /** Sender description */
-  readonly senderDescription: String36;
+  readonly SenderDescription: String36;
   /** Recipient description */
-  readonly recipientDescription: String36;
+  readonly RecipientDescription: String36;
   /** Cost on site */
-  readonly costOnSite: Cost;
+  readonly CostOnSite: Cost;
   /** Estimated delivery date */
-  readonly estimatedDeliveryDate: NovaPoshtaDate;
+  readonly EstimatedDeliveryDate: NovaPoshtaDate;
 }
 
 export type DocumentListResponse = NovaPoshtaResponse<readonly DocumentListData[]>;
 
 // Type guards
 export function isTrackingSuccessful(data: TrackingStatusData): boolean {
-  return data.statusCode !== DeliveryStatus.NotFound && 
-         data.statusCode !== DeliveryStatus.Deleted;
+  return data.StatusCode !== DeliveryStatus.NotFound &&
+         data.StatusCode !== DeliveryStatus.Deleted;
 }
 
 export function isDocumentDelivered(data: TrackingStatusData): boolean {
-  return data.statusCode === DeliveryStatus.Received ||
-         data.statusCode === DeliveryStatus.ReceivedAwaitingMoneyTransfer ||
-         data.statusCode === DeliveryStatus.ReceivedAndMoneyTransferred;
+  return data.StatusCode === DeliveryStatus.Received ||
+         data.StatusCode === DeliveryStatus.ReceivedAwaitingMoneyTransfer ||
+         data.StatusCode === DeliveryStatus.ReceivedAndMoneyTransferred;
 }
 
 export function isDocumentInTransit(data: TrackingStatusData): boolean {
-  return data.statusCode === DeliveryStatus.InTransitToRecipientCity ||
-         data.statusCode === DeliveryStatus.OnTheWayToRecipient ||
-         data.statusCode === DeliveryStatus.BeingPacked;
+  return data.StatusCode === DeliveryStatus.InTransitToRecipientCity ||
+         data.StatusCode === DeliveryStatus.OnTheWayToRecipient ||
+         data.StatusCode === DeliveryStatus.BeingPacked;
 }
 
 export function isDocumentAtWarehouse(data: TrackingStatusData): boolean {
-  return data.statusCode === DeliveryStatus.ArrivedAtWarehouse ||
-         data.statusCode === DeliveryStatus.ArrivedAtPostomat ||
-         data.statusCode === DeliveryStatus.InRecipientCityAwaitingDelivery;
+  return data.StatusCode === DeliveryStatus.ArrivedAtWarehouse ||
+         data.StatusCode === DeliveryStatus.ArrivedAtPostomat ||
+         data.StatusCode === DeliveryStatus.InRecipientCityAwaitingDelivery;
 }

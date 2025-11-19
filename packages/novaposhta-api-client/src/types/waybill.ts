@@ -229,15 +229,15 @@ export interface AdditionalServices {
 // Waybill creation response
 export interface WaybillCreationData {
   /** Document ref */
-  readonly ref: DocumentRef;
+  readonly Ref: DocumentRef;
   /** Cost on site */
-  readonly costOnSite: Cost;
+  readonly CostOnSite: Cost;
   /** Estimated delivery date */
-  readonly estimatedDeliveryDate: NovaPoshtaDate;
+  readonly EstimatedDeliveryDate: NovaPoshtaDate;
   /** Internet document number */
-  readonly intDocNumber: String36;
+  readonly IntDocNumber: String36;
   /** Document type */
-  readonly typeDocument: DocumentType;
+  readonly TypeDocument: DocumentType;
 }
 
 export type CreateWaybillResponse = NovaPoshtaResponse<readonly WaybillCreationData[]>;
@@ -245,15 +245,15 @@ export type CreateWaybillResponse = NovaPoshtaResponse<readonly WaybillCreationD
 // Waybill update response
 export interface WaybillUpdateData {
   /** Document ref */
-  readonly ref: DocumentRef;
+  readonly Ref: DocumentRef;
   /** Cost on site */
-  readonly costOnSite: Cost;
+  readonly CostOnSite: Cost;
   /** Estimated delivery date */
-  readonly estimatedDeliveryDate: NovaPoshtaDate;
+  readonly EstimatedDeliveryDate: NovaPoshtaDate;
   /** Internet document number */
-  readonly intDocNumber: String36;
+  readonly IntDocNumber: String36;
   /** Document type */
-  readonly typeDocument: DocumentType;
+  readonly TypeDocument: DocumentType;
 }
 
 export type UpdateWaybillResponse = NovaPoshtaResponse<readonly WaybillUpdateData[]>;
@@ -261,7 +261,7 @@ export type UpdateWaybillResponse = NovaPoshtaResponse<readonly WaybillUpdateDat
 // Waybill deletion response
 export interface WaybillDeletionData {
   /** Deleted document ref */
-  readonly ref: DocumentRef;
+  readonly Ref: DocumentRef;
 }
 
 export type DeleteWaybillResponse = NovaPoshtaResponse<readonly WaybillDeletionData[]>;
@@ -280,7 +280,7 @@ export interface DeliveryDateRequest {
 
 export interface DeliveryDateData {
   /** Delivery date info */
-  readonly deliveryDate: {
+  readonly DeliveryDate: {
     readonly date: string;
     readonly timezone_type: number;
     readonly timezone: string;
@@ -337,22 +337,22 @@ export interface CargoDetail {
 
 export interface TariffZoneInfo {
   /** Tariff zone name */
-  readonly tzoneName: string;
+  readonly TzoneName: string;
   /** Tariff zone ID */
-  readonly tzoneID: string;
+  readonly TzoneID: string;
 }
 
 export interface PriceCalculationData {
   /** Assessed cost */
-  readonly assessedCost: Cost;
+  readonly AssessedCost: Cost;
   /** Delivery cost */
-  readonly cost: Cost;
+  readonly Cost: Cost;
   /** Backward delivery cost */
-  readonly costRedelivery: Cost;
+  readonly CostRedelivery: Cost;
   /** Tariff zone info */
-  readonly tzoneInfo: TariffZoneInfo;
+  readonly TzoneInfo: TariffZoneInfo;
   /** Packing cost */
-  readonly costPack: Cost;
+  readonly CostPack: Cost;
 }
 
 export type PriceCalculationResponse = NovaPoshtaResponse<readonly PriceCalculationData[]>;
