@@ -1,6 +1,6 @@
 {
   "name": "@shopana/novaposhta-api-client",
-  "version": "0.0.1-alpha.1",
+  "version": "0.0.1-alpha.2",
   "description": "Fully typed Nova Poshta API client for Node.js and browsers with enterprise-grade features",
   "main": "dist/index.js",
   "module": "dist/index.esm.js",
