@@ -1,7 +1,7 @@
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 export interface ServerConfig {
-  apiKey: string;
+  apiKey?: string;
   baseUrl: string;
   logLevel: LogLevel;
   timeout: number;
@@ -10,10 +10,6 @@ export interface ServerConfig {
 export function loadConfig(overrides: Partial<ServerConfig> = {}): ServerConfig {
   const envApiKey = process.env.NOVA_POSHTA_API_KEY || process.env.NP_API_KEY;
   const apiKey = overrides.apiKey ?? envApiKey;
-
-  if (!apiKey) {
-    throw new Error('NOVA_POSHTA_API_KEY (or NP_API_KEY) environment variable is required');
-  }
 
   return {
     apiKey,

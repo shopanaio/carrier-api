@@ -39,5 +39,48 @@ Required environment variables:
 
 ## MCP integration
 
+### Quick setup for Claude Desktop
+
+1. Build the server:
+   ```bash
+   yarn workspace @shopana/novaposhta-mcp-server build
+   ```
+
+2. Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+   ```json
+   {
+     "mcpServers": {
+       "novaposhta": {
+         "command": "node",
+         "args": [
+           "/Users/phl/Projects/shopana-io/carrier-api/packages/novaposhta-mcp-server/dist/index.js"
+         ],
+         "env": {
+           "NOVA_POSHTA_API_KEY": "your_api_key_here",
+           "LOG_LEVEL": "info"
+         }
+       }
+     }
+   }
+   ```
+
+3. Restart Claude Desktop
+
+See `INSTALLATION.md` for detailed setup instructions.
+
+### Testing
+
+Run test script to verify server works:
+
+```bash
+cd packages/novaposhta-mcp-server
+cp .env.example .env
+# Edit .env and add your API key
+./test-mcp.sh
+```
+
+### Examples
+
 - `examples/claude-desktop-config.json` – ready-to-use Claude Desktop snippet
+- `examples/claude-code-config.json` – configuration for Claude Code CLI
 - `examples/usage-examples.ts` – programmatic usage example

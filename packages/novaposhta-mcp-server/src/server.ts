@@ -15,8 +15,13 @@ import {
   createClient,
 } from '@shopana/novaposhta-api-client';
 import { createFetchHttpTransport } from '@shopana/novaposhta-transport-fetch';
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
-import packageJson from '../package.json' assert { type: 'json' };
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const packageJson = JSON.parse(readFileSync(join(__dirname, '../package.json'), 'utf-8'));
 
 import type { ServerConfig } from './config.js';
 import { Logger } from './utils/logger.js';
