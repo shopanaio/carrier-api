@@ -10,12 +10,12 @@ import type { NovaPoshtaResponse, ContactRef, CounterpartyRef } from './base';
 // =============================================================================
 
 export interface SaveContactPersonRequest {
-  readonly counterpartyRef: CounterpartyRef;
-  readonly firstName: string;
-  readonly middleName?: string;
-  readonly lastName: string;
-  readonly phone: string;
-  readonly email?: string;
+  readonly CounterpartyRef: CounterpartyRef;
+  readonly FirstName: string;
+  readonly MiddleName?: string;
+  readonly LastName: string;
+  readonly Phone: string;
+  readonly Email?: string;
 }
 
 export interface ContactPersonData {
@@ -35,13 +35,13 @@ export type SaveContactPersonResponse = NovaPoshtaResponse<ContactPersonData[]>;
 // =============================================================================
 
 export interface UpdateContactPersonRequest {
-  readonly ref: ContactRef;
-  readonly counterpartyRef: CounterpartyRef;
-  readonly firstName?: string;
-  readonly middleName?: string;
-  readonly lastName?: string;
-  readonly phone?: string;
-  readonly email?: string;
+  readonly Ref: ContactRef;
+  readonly CounterpartyRef: CounterpartyRef;
+  readonly FirstName?: string;
+  readonly MiddleName?: string;
+  readonly LastName?: string;
+  readonly Phone?: string;
+  readonly Email?: string;
 }
 
 export type UpdateContactPersonResponse = NovaPoshtaResponse<ContactPersonData[]>;
@@ -51,8 +51,8 @@ export type UpdateContactPersonResponse = NovaPoshtaResponse<ContactPersonData[]
 // =============================================================================
 
 export interface DeleteContactPersonRequest {
-  readonly ref: ContactRef;
-  readonly counterpartyRef: CounterpartyRef;
+  readonly Ref: ContactRef;
+  readonly CounterpartyRef: CounterpartyRef;
 }
 
 export interface DeleteContactPersonData {

@@ -11,7 +11,7 @@ describe('ReferenceService - getCargoDescriptionList', () => {
 
   it('should search cargo descriptions', async () => {
     const response = await client.reference.getCargoDescriptionList({
-      findByString: 'одяг',
+      FindByString: 'одяг',
     });
 
     expect(response.success).toBe(true);
@@ -21,7 +21,7 @@ describe('ReferenceService - getCargoDescriptionList', () => {
 
   it('should get cargo descriptions with pagination', async () => {
     const response = await client.reference.getCargoDescriptionList({
-      page: 1,
+      Page: 1,
     });
 
     expect(response.success).toBe(true);

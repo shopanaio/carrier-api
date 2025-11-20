@@ -10,10 +10,10 @@ import type { NovaPoshtaResponse, CounterpartyRef, CityRef, AddressRef, ContactR
 // =============================================================================
 
 export interface GetCounterpartiesRequest {
-  readonly counterpartyProperty: 'Sender' | 'Recipient' | 'ThirdPerson';
-  readonly page?: number;
-  readonly findByString?: string;
-  readonly cityRef?: CityRef;
+  readonly CounterpartyProperty: 'Sender' | 'Recipient' | 'ThirdPerson';
+  readonly Page?: number;
+  readonly FindByString?: string;
+  readonly CityRef?: CityRef;
 }
 
 export interface CounterpartyData {
@@ -34,9 +34,9 @@ export type GetCounterpartiesResponse = NovaPoshtaResponse<CounterpartyData[]>;
 // =============================================================================
 
 export interface GetCounterpartyAddressesRequest {
-  readonly ref: CounterpartyRef;
-  readonly counterpartyProperty?: 'Sender' | 'Recipient';
-  readonly page?: number;
+  readonly Ref: CounterpartyRef;
+  readonly CounterpartyProperty?: 'Sender' | 'Recipient';
+  readonly Page?: number;
 }
 
 export interface CounterpartyAddressData {
@@ -53,8 +53,8 @@ export type GetCounterpartyAddressesResponse = NovaPoshtaResponse<CounterpartyAd
 // =============================================================================
 
 export interface GetCounterpartyContactPersonsRequest {
-  readonly ref: CounterpartyRef;
-  readonly page?: number;
+  readonly Ref: CounterpartyRef;
+  readonly Page?: number;
 }
 
 export interface CounterpartyContactPersonData {
@@ -77,39 +77,39 @@ export type GetCounterpartyContactPersonsResponse = NovaPoshtaResponse<Counterpa
  * Base interface for counterparty creation
  */
 interface SaveCounterpartyBase {
-  readonly counterpartyProperty: 'Sender' | 'Recipient';
-  readonly phone: string;
-  readonly email?: string;
-  readonly cityRef?: CityRef;
+  readonly CounterpartyProperty: 'Sender' | 'Recipient';
+  readonly Phone: string;
+  readonly Email?: string;
+  readonly CityRef?: CityRef;
 }
 
 /**
  * Request for creating a private person counterparty
  */
 export interface SaveCounterpartyPrivatePerson extends SaveCounterpartyBase {
-  readonly counterpartyType: 'PrivatePerson';
+  readonly CounterpartyType: 'PrivatePerson';
   /** Required for private persons */
-  readonly firstName: string;
-  readonly middleName?: string;
+  readonly FirstName: string;
+  readonly MiddleName?: string;
   /** Required for private persons */
-  readonly lastName: string;
+  readonly LastName: string;
 }
 
 /**
  * Request for creating an organization counterparty
  */
 export interface SaveCounterpartyOrganization extends SaveCounterpartyBase {
-  readonly counterpartyType: 'Organization';
+  readonly CounterpartyType: 'Organization';
   /** Contact person first name (optional for organizations) */
-  readonly firstName?: string;
+  readonly FirstName?: string;
   /** Contact person middle name (optional for organizations) */
-  readonly middleName?: string;
+  readonly MiddleName?: string;
   /** Contact person last name (optional for organizations) */
-  readonly lastName?: string;
+  readonly LastName?: string;
   /** Ownership form reference (required for organizations) */
-  readonly ownershipForm: string;
+  readonly OwnershipForm: string;
   /** EDRPOU/INN code (required for organizations) */
-  readonly edrpou: string;
+  readonly EDRPOU: string;
 }
 
 /**
@@ -135,13 +135,13 @@ export type SaveCounterpartyResponse = NovaPoshtaResponse<SaveCounterpartyData[]
 // =============================================================================
 
 export interface UpdateCounterpartyRequest {
-  readonly ref: CounterpartyRef;
-  readonly counterpartyProperty: 'Sender' | 'Recipient';
-  readonly firstName?: string;
-  readonly middleName?: string;
-  readonly lastName?: string;
-  readonly phone?: string;
-  readonly email?: string;
+  readonly Ref: CounterpartyRef;
+  readonly CounterpartyProperty: 'Sender' | 'Recipient';
+  readonly FirstName?: string;
+  readonly MiddleName?: string;
+  readonly LastName?: string;
+  readonly Phone?: string;
+  readonly Email?: string;
 }
 
 export type UpdateCounterpartyResponse = NovaPoshtaResponse<CounterpartyData[]>;
@@ -151,7 +151,7 @@ export type UpdateCounterpartyResponse = NovaPoshtaResponse<CounterpartyData[]>;
 // =============================================================================
 
 export interface DeleteCounterpartyRequest {
-  readonly ref: CounterpartyRef;
+  readonly Ref: CounterpartyRef;
 }
 
 export interface DeleteCounterpartyData {
@@ -165,7 +165,7 @@ export type DeleteCounterpartyResponse = NovaPoshtaResponse<DeleteCounterpartyDa
 // =============================================================================
 
 export interface GetCounterpartyOptionsRequest {
-  readonly ref: CounterpartyRef;
+  readonly Ref: CounterpartyRef;
 }
 
 export interface CounterpartyOptionsData {

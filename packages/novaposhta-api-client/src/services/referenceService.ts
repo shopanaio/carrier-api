@@ -206,16 +206,11 @@ export class ReferenceService {
    * @cacheable 1 hour
    */
   async getTimeIntervals(request: GetTimeIntervalsRequest): Promise<GetTimeIntervalsResponse> {
-    // Validation removed
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetTimeIntervals,
-      methodProperties: {
-        RecipientCityRef: request.recipientCityRef,
-        ...(request.dateTime ? { DateTime: request.dateTime } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetTimeIntervalsResponse['data']>(apiRequest);
@@ -227,16 +222,11 @@ export class ReferenceService {
    * @cacheable 1 hour
    */
   async getPickupTimeIntervals(request: GetPickupTimeIntervalsRequest): Promise<GetPickupTimeIntervalsResponse> {
-    // Validation removed
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Common,
       calledMethod: NovaPoshtaMethod.GetPickupTimeIntervals,
-      methodProperties: {
-        SenderCityRef: request.senderCityRef,
-        DateTime: request.dateTime,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetPickupTimeIntervalsResponse['data']>(apiRequest);

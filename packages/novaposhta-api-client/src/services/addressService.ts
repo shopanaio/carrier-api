@@ -41,14 +41,14 @@ import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
  *
  * // Search for cities
  * const cities = await addressService.getCities({
- *   findByString: 'Kyiv'
+ *   FindByString: 'Kyiv'
  * });
  *
  * // Search settlements online
  * const searchResults = await addressService.searchSettlements({
- *   cityName: 'kyiv',
- *   page: 1,
- *   limit: 50
+ *   CityName: 'kyiv',
+ *   Page: 1,
+ *   Limit: 50
  * });
  * ```
  */
@@ -102,23 +102,11 @@ export class AddressService {
    * @cacheable 12 hours
    */
   async getCities(request: GetCitiesRequest = {}): Promise<GetCitiesResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      FindByString: request.findByString,
-      Page: request.page?.toString(),
-      Limit: request.limit?.toString(),
-    };
-
-    // Remove undefined values
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetCities,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetCitiesResponse['data']>(apiRequest);
@@ -150,11 +138,7 @@ export class AddressService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlements,
-      methodProperties: {
-        CityName: request.cityName,
-        Page: request.page.toString(),
-        Limit: request.limit.toString(),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<SearchSettlementsResponse['data']>(apiRequest);
@@ -170,11 +154,7 @@ export class AddressService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.SearchSettlementStreets,
-      methodProperties: {
-        StreetName: request.streetName,
-        SettlementRef: request.settlementRef,
-        Limit: request.limit?.toString(),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<SearchSettlementStreetsResponse['data']>(apiRequest);
@@ -187,32 +167,11 @@ export class AddressService {
    * @note API returns HTTP 303 Redirect with link to cached file for some cities
    */
   async getWarehouses(request: GetWarehousesRequest = {}): Promise<GetWarehousesResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      CityName: request.cityName,
-      CityRef: request.cityRef,
-      SettlementRef: request.settlementRef,
-      WarehouseId: request.warehouseId,
-      FindByString: request.findByString,
-      TypeOfWarehouseRef: request.typeOfWarehouseRef,
-      BicycleParking: request.bicycleParking,
-      PostFinance: request.postFinance,
-      POSTerminal: request.posTerminal,
-      Page: request.page?.toString(),
-      Limit: request.limit?.toString(),
-      Language: request.language,
-    };
-
-    // Remove undefined values
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.GetWarehouses,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetWarehousesResponse['data']>(apiRequest);
@@ -223,23 +182,11 @@ export class AddressService {
    * @description Creates a new counterparty address
    */
   async save(request: SaveAddressRequest): Promise<SaveAddressResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      CounterpartyRef: request.counterpartyRef,
-      StreetRef: request.streetRef,
-      BuildingNumber: request.buildingNumber,
-      Flat: request.flat,
-      Note: request.note,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<SaveAddressResponse['data']>(apiRequest);
@@ -250,24 +197,11 @@ export class AddressService {
    * @description Updates existing counterparty address
    */
   async update(request: UpdateAddressRequest): Promise<UpdateAddressResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      CounterpartyRef: request.counterpartyRef,
-      StreetRef: request.streetRef,
-      BuildingNumber: request.buildingNumber,
-      Flat: request.flat,
-      Note: request.note,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.Update,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<UpdateAddressResponse['data']>(apiRequest);
@@ -282,9 +216,7 @@ export class AddressService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Address,
       calledMethod: NovaPoshtaMethod.Delete,
-      methodProperties: {
-        Ref: request.ref,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DeleteAddressResponse['data']>(apiRequest);

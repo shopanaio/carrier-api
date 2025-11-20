@@ -48,24 +48,11 @@ export class ContactPersonService {
    * @description Creates a new contact person for a counterparty
    */
   async save(request: SaveContactPersonRequest): Promise<SaveContactPersonResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      CounterpartyRef: request.counterpartyRef,
-      FirstName: request.firstName,
-      MiddleName: request.middleName,
-      LastName: request.lastName,
-      Phone: request.phone,
-      Email: request.email,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.ContactPerson,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<SaveContactPersonResponse['data']>(apiRequest);
@@ -76,25 +63,11 @@ export class ContactPersonService {
    * @description Updates an existing contact person record
    */
   async update(request: UpdateContactPersonRequest): Promise<UpdateContactPersonResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      CounterpartyRef: request.counterpartyRef,
-      FirstName: request.firstName,
-      MiddleName: request.middleName,
-      LastName: request.lastName,
-      Phone: request.phone,
-      Email: request.email,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.ContactPerson,
       calledMethod: NovaPoshtaMethod.Update,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<UpdateContactPersonResponse['data']>(apiRequest);
@@ -109,10 +82,7 @@ export class ContactPersonService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.ContactPerson,
       calledMethod: NovaPoshtaMethod.Delete,
-      methodProperties: {
-        Ref: request.ref,
-        CounterpartyRef: request.counterpartyRef,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DeleteContactPersonResponse['data']>(apiRequest);

@@ -5,7 +5,7 @@ describe('WaybillService - delete', () => {
     // Note: You need valid document refs to delete
     const documentRefs = ['document-ref-1', 'document-ref-2'];
 
-    const response = await client.waybill.delete({ documentRefs } as any);
+    const response = await client.waybill.delete({ DocumentRefs: documentRefs } as any);
 
     expect(response).toBeDefined();
   });

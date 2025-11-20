@@ -88,8 +88,8 @@ const tracked = await client.tracking.trackDocument('20400048799000');
 
 ```ts
 const senders = await client.counterparty.getCounterparties({
-  counterpartyProperty: 'Sender',
-  page: 1,
+  CounterpartyProperty: 'Sender',
+  Page: 1,
 });
 ```
 
@@ -97,13 +97,13 @@ const senders = await client.counterparty.getCounterparties({
 
 ```ts
 const newRecipient = await client.counterparty.save({
-  counterpartyType: 'PrivatePerson',
-  counterpartyProperty: 'Recipient',
-  firstName: 'Іван',
-  lastName: 'Петренко',
-  phone: '380501234567',
-  email: 'ivan@example.com',
-  cityRef: 'city-ref',
+  CounterpartyType: 'PrivatePerson',
+  CounterpartyProperty: 'Recipient',
+  FirstName: 'Іван',
+  LastName: 'Петренко',
+  Phone: '380501234567',
+  Email: 'ivan@example.com',
+  CityRef: 'city-ref',
 });
 ```
 
@@ -111,16 +111,16 @@ const newRecipient = await client.counterparty.save({
 
 ```ts
 const organization = await client.counterparty.save({
-  counterpartyType: 'Organization',
-  counterpartyProperty: 'Sender',
-  phone: '380671234567',
-  email: 'office@company.com',
-  ownershipForm: 'ТОВ',    // ownership form ref
-  edrpou: '12345678',      // tax code
+  CounterpartyType: 'Organization',
+  CounterpartyProperty: 'Sender',
+  Phone: '380671234567',
+  Email: 'office@company.com',
+  OwnershipForm: 'ТОВ',    // ownership form ref
+  EDRPOU: '12345678',      // tax code
   // Optional contact person
-  firstName: 'Марія',
-  lastName: 'Менеджер',
-  cityRef: 'city-ref',
+  FirstName: 'Марія',
+  LastName: 'Менеджер',
+  CityRef: 'city-ref',
 });
 ```
 
@@ -129,18 +129,18 @@ const organization = await client.counterparty.save({
 ```ts
 // Get addresses
 const addresses = await client.counterparty.getCounterpartyAddresses({
-  ref: 'counterparty-ref',
-  page: 1,
+  Ref: 'counterparty-ref',
+  Page: 1,
 });
 
 // Get contact persons
 const contacts = await client.counterparty.getCounterpartyContactPersons({
-  ref: 'counterparty-ref',
+  Ref: 'counterparty-ref',
 });
 
 // Get available options (payment permissions, delays, etc.)
 const options = await client.counterparty.getCounterpartyOptions({
-  ref: 'counterparty-ref',
+  Ref: 'counterparty-ref',
 });
 ```
 
@@ -150,10 +150,10 @@ const options = await client.counterparty.getCounterpartyOptions({
 
 ```ts
 const contact = await client.contactPerson.save({
-  counterpartyRef: 'counterparty-ref',
-  firstName: 'Марія',
-  lastName: 'Коваленко',
-  phone: '380671234567',
+  CounterpartyRef: 'counterparty-ref',
+  FirstName: 'Марія',
+  LastName: 'Коваленко',
+  Phone: '380671234567',
 });
 ```
 
@@ -164,27 +164,27 @@ const contact = await client.contactPerson.save({
 ```ts
 // Search for a settlement
 const settlements = await client.address.searchSettlements({
-  cityName: 'Київ',
-  page: 1,
-  limit: 10,
+  CityName: 'Київ',
+  Page: 1,
+  Limit: 10,
 });
 const settlementRef = settlements.data[0].Ref;
 
 // Search for a street
 const streets = await client.address.searchSettlementStreets({
-  streetName: 'Хрещатик',
-  settlementRef: settlementRef,
-  limit: 10,
+  StreetName: 'Хрещатик',
+  SettlementRef: settlementRef,
+  Limit: 10,
 });
 const streetRef = streets.data[0].Ref;
 
 // Create address
 const address = await client.address.save({
-  counterpartyRef: 'counterparty-ref',
-  streetRef: streetRef,
-  buildingNumber: '10',
-  flat: '5',
-  note: 'Door code: 1234',
+  CounterpartyRef: 'counterparty-ref',
+  StreetRef: streetRef,
+  BuildingNumber: '10',
+  Flat: '5',
+  Note: 'Door code: 1234',
 });
 ```
 
@@ -193,16 +193,16 @@ const address = await client.address.save({
 ```ts
 // Update address
 await client.address.update({
-  ref: 'address-ref',
-  counterpartyRef: 'counterparty-ref',
-  streetRef: 'new-street-ref',
-  buildingNumber: '15',
-  flat: '10',
+  Ref: 'address-ref',
+  CounterpartyRef: 'counterparty-ref',
+  StreetRef: 'new-street-ref',
+  BuildingNumber: '15',
+  Flat: '10',
 });
 
 // Delete address
 await client.address.delete({
-  ref: 'address-ref',
+  Ref: 'address-ref',
 });
 ```
 
@@ -234,12 +234,12 @@ This example shows the complete process of creating a recipient and waybill:
 ```ts
 // 1. Create recipient counterparty
 const recipient = await client.counterparty.save({
-  counterpartyType: 'PrivatePerson',
-  counterpartyProperty: 'Recipient',
-  firstName: 'Іван',
-  lastName: 'Петренко',
-  phone: '380501234567',
-  email: 'ivan@example.com',
+  CounterpartyType: 'PrivatePerson',
+  CounterpartyProperty: 'Recipient',
+  FirstName: 'Іван',
+  LastName: 'Петренко',
+  Phone: '380501234567',
+  Email: 'ivan@example.com',
 });
 
 const recipientRef = recipient.data[0].Ref;
@@ -249,40 +249,40 @@ const recipientContact = recipient.data[0].ContactPerson.data[0].Ref;
 
 // 3. Search for recipient city
 const cities = await client.address.searchSettlements({
-  cityName: 'Київ',
-  page: 1,
-  limit: 1,
+  CityName: 'Київ',
+  Page: 1,
+  Limit: 1,
 });
 const recipientCityRef = cities.data[0].DeliveryCity;
 
 // 4. Search for warehouse in recipient city
 const warehouses = await client.address.getWarehouses({
-  cityRef: recipientCityRef,
-  limit: 1,
+  CityRef: recipientCityRef,
+  Limit: 1,
 });
 const recipientWarehouseRef = warehouses.data[0].Ref;
 
 // 5. Create waybill
 const waybill = await client.waybill.create({
-  payerType: 'Sender',
-  paymentMethod: 'Cash',
-  dateTime: '25.12.2024',
-  cargoType: 'Parcel',
-  weight: 1.5,
-  serviceType: 'WarehouseWarehouse',
-  seatsAmount: 1,
-  description: 'Test package',
-  cost: 1000,
-  citySender: 'sender-city-ref',         // your sender city
-  sender: 'sender-counterparty-ref',     // your sender counterparty
-  senderAddress: 'sender-warehouse-ref', // your sender warehouse
-  contactSender: 'sender-contact-ref',   // your sender contact
-  sendersPhone: '380671234567',
-  cityRecipient: recipientCityRef,
-  recipient: recipientRef,
-  recipientAddress: recipientWarehouseRef,
-  contactRecipient: recipientContact,
-  recipientsPhone: '380501234567',
+  PayerType: 'Sender',
+  PaymentMethod: 'Cash',
+  DateTime: '25.12.2024',
+  CargoType: 'Parcel',
+  Weight: 1.5,
+  ServiceType: 'WarehouseWarehouse',
+  SeatsAmount: 1,
+  Description: 'Test package',
+  Cost: 1000,
+  CitySender: 'sender-city-ref',         // your sender city
+  Sender: 'sender-counterparty-ref',     // your sender counterparty
+  SenderAddress: 'sender-warehouse-ref', // your sender warehouse
+  ContactSender: 'sender-contact-ref',   // your sender contact
+  SendersPhone: '380671234567',
+  CityRecipient: recipientCityRef,
+  Recipient: recipientRef,
+  RecipientAddress: recipientWarehouseRef,
+  ContactRecipient: recipientContact,
+  RecipientsPhone: '380501234567',
 });
 
 console.log('Waybill created:', waybill.data[0].IntDocNumber);
@@ -369,13 +369,13 @@ All inputs and outputs are strictly typed:
 
 ```typescript
 // TypeScript knows the exact shape of the response
-const result = await client.address.searchCities({ query: 'Kyiv', limit: 10 });
+const result = await client.address.searchCities({ FindByString: 'Kyiv', Limit: 10 });
 //    ^? NovaPoshtaResponse<City[]>
 
 // Autocomplete for all parameters
 const waybill = await client.waybill.create({
-  payerType: '...',     // Autocomplete: 'Sender' | 'Recipient' | 'ThirdPerson'
-  paymentMethod: '...', // Autocomplete: 'Cash' | 'NonCash'
+  PayerType: '...',     // Autocomplete: 'Sender' | 'Recipient' | 'ThirdPerson'
+  PaymentMethod: '...', // Autocomplete: 'Cash' | 'NonCash'
   // ... all parameters with type checking
 });
 ```
@@ -396,13 +396,13 @@ The client doesn't make HTTP calls directly. Instead, it uses an injected transp
 Methods for working with addresses, cities, streets, and warehouses:
 
 ```typescript
-client.address.searchCities({ query, limit })
-client.address.searchSettlements({ cityName, limit })
-client.address.searchSettlementStreets({ settlementRef, streetName, limit })
-client.address.getWarehouses({ cityRef, limit, ... })
-client.address.save({ counterpartyRef, streetRef, buildingNumber, ... })
-client.address.update({ ref, counterpartyRef, ... })
-client.address.delete({ ref })
+client.address.searchCities({ FindByString, Limit })
+client.address.searchSettlements({ CityName, Limit })
+client.address.searchSettlementStreets({ SettlementRef, StreetName, Limit })
+client.address.getWarehouses({ CityRef, Limit, ... })
+client.address.save({ CounterpartyRef, StreetRef, BuildingNumber, ... })
+client.address.update({ Ref, CounterpartyRef, ... })
+client.address.delete({ Ref })
 ```
 
 ### ReferenceService
@@ -416,7 +416,7 @@ client.reference.getPaymentForms()
 client.reference.getTypesOfPayers()
 client.reference.getTypesOfCounterparties()
 client.reference.getOwnershipForms()
-client.reference.getTimeIntervals({ recipientCityRef })
+client.reference.getTimeIntervals({ RecipientCityRef })
 // ... and more
 ```
 
@@ -424,10 +424,10 @@ client.reference.getTimeIntervals({ recipientCityRef })
 Track packages and view delivery status:
 
 ```typescript
-client.tracking.trackDocument('20450123456789', '380501234567')
-client.tracking.trackMultipleDocuments(['20450123456789', '...'])
-client.tracking.getDocumentMovement(['20450123456789'])
-client.tracking.getDocumentList({ dateTimeFrom: '01.01.2025', dateTimeTo: '31.01.2025' })
+client.tracking.trackDocument({ Documents: ['20450123456789'], Phone: '380501234567' })
+client.tracking.trackMultipleDocuments({ Documents: ['20450123456789', '...'] })
+client.tracking.getDocumentMovement({ Documents: ['20450123456789'] })
+client.tracking.getDocumentList({ DateTimeFrom: '01.01.2025', DateTimeTo: '31.01.2025' })
 ```
 
 ### WaybillService
@@ -436,9 +436,9 @@ Create and manage waybills (Internet documents):
 ```typescript
 client.waybill.create({ ... })
 client.waybill.update({ request: { DocumentRef, ... } })
-client.waybill.delete({ documentRefs: ['...'] })
-client.waybill.calculateCost({ citySender, cityRecipient, weight, ... })
-client.waybill.getDeliveryDate({ citySender, cityRecipient, serviceType })
+client.waybill.delete({ DocumentRefs: ['...'] })
+client.waybill.calculateCost({ CitySender, CityRecipient, Weight, ... })
+client.waybill.getDeliveryDate({ CitySender, CityRecipient, ServiceType })
 client.waybill.getEstimate({ ... })
 ```
 
@@ -446,22 +446,22 @@ client.waybill.getEstimate({ ... })
 Manage senders and recipients:
 
 ```typescript
-client.counterparty.getCounterparties({ counterpartyProperty: 'Sender' })
-client.counterparty.save({ counterpartyType: 'PrivatePerson', ... })
-client.counterparty.update({ ref, ... })
-client.counterparty.delete({ ref })
-client.counterparty.getCounterpartyAddresses({ ref })
-client.counterparty.getCounterpartyContactPersons({ ref })
-client.counterparty.getCounterpartyOptions({ ref })
+client.counterparty.getCounterparties({ CounterpartyProperty: 'Sender' })
+client.counterparty.save({ CounterpartyType: 'PrivatePerson', ... })
+client.counterparty.update({ Ref, ... })
+client.counterparty.delete({ Ref })
+client.counterparty.getCounterpartyAddresses({ Ref })
+client.counterparty.getCounterpartyContactPersons({ Ref })
+client.counterparty.getCounterpartyOptions({ Ref })
 ```
 
 ### ContactPersonService
 Manage contact persons for counterparties:
 
 ```typescript
-client.contactPerson.save({ counterpartyRef, firstName, lastName, phone })
-client.contactPerson.update({ ref, counterpartyRef, ... })
-client.contactPerson.delete({ ref, counterpartyRef })
+client.contactPerson.save({ CounterpartyRef, FirstName, LastName, Phone })
+client.contactPerson.update({ Ref, CounterpartyRef, ... })
+client.contactPerson.delete({ Ref, CounterpartyRef })
 ```
 
 ---
@@ -532,40 +532,40 @@ const client = createClient({
 async function createOrderShipment(order) {
   // 1. Create recipient if needed
   const recipient = await client.counterparty.save({
-    counterpartyType: 'PrivatePerson',
-    counterpartyProperty: 'Recipient',
-    firstName: order.customer.firstName,
-    lastName: order.customer.lastName,
-    phone: order.customer.phone,
+    CounterpartyType: 'PrivatePerson',
+    CounterpartyProperty: 'Recipient',
+    FirstName: order.customer.firstName,
+    LastName: order.customer.lastName,
+    Phone: order.customer.phone,
   });
 
   // 2. Find delivery warehouse
   const warehouses = await client.address.getWarehouses({
-    cityRef: order.deliveryCityRef,
-    limit: 1,
+    CityRef: order.deliveryCityRef,
+    Limit: 1,
   });
 
   // 3. Create waybill
   const waybill = await client.waybill.create({
-    payerType: 'Sender',
-    paymentMethod: 'Cash',
-    dateTime: new Date().toLocaleDateString('uk-UA'),
-    cargoType: 'Parcel',
-    weight: order.totalWeight,
-    serviceType: 'WarehouseWarehouse',
-    seatsAmount: 1,
-    description: `Order #${order.id}`,
-    cost: order.total,
-    citySender: process.env.SENDER_CITY_REF,
-    sender: process.env.SENDER_COUNTERPARTY_REF,
-    senderAddress: process.env.SENDER_WAREHOUSE_REF,
-    contactSender: process.env.SENDER_CONTACT_REF,
-    sendersPhone: process.env.SENDER_PHONE,
-    cityRecipient: order.deliveryCityRef,
-    recipient: recipient.data[0].Ref,
-    recipientAddress: warehouses.data[0].Ref,
-    contactRecipient: recipient.data[0].ContactPerson.data[0].Ref,
-    recipientsPhone: order.customer.phone,
+    PayerType: 'Sender',
+    PaymentMethod: 'Cash',
+    DateTime: new Date().toLocaleDateString('uk-UA'),
+    CargoType: 'Parcel',
+    Weight: order.totalWeight,
+    ServiceType: 'WarehouseWarehouse',
+    SeatsAmount: 1,
+    Description: `Order #${order.id}`,
+    Cost: order.total,
+    CitySender: process.env.SENDER_CITY_REF,
+    Sender: process.env.SENDER_COUNTERPARTY_REF,
+    SenderAddress: process.env.SENDER_WAREHOUSE_REF,
+    ContactSender: process.env.SENDER_CONTACT_REF,
+    SendersPhone: process.env.SENDER_PHONE,
+    CityRecipient: order.deliveryCityRef,
+    Recipient: recipient.data[0].Ref,
+    RecipientAddress: warehouses.data[0].Ref,
+    ContactRecipient: recipient.data[0].ContactPerson.data[0].Ref,
+    RecipientsPhone: order.customer.phone,
   });
 
   return {
@@ -583,7 +583,7 @@ async function createOrderShipment(order) {
 
 ```typescript
 try {
-  const result = await client.address.searchCities({ query: 'Kyiv' });
+  const result = await client.address.searchCities({ FindByString: 'Kyiv' });
 
   if (!result.success) {
     console.error('API errors:', result.errors);
@@ -603,7 +603,7 @@ try {
 const controller = new AbortController();
 
 const promise = client.address.searchCities(
-  { query: 'Kyiv' },
+  { FindByString: 'Kyiv' },
   { signal: controller.signal }
 );
 

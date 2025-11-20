@@ -4,9 +4,9 @@ import { DeliveryStatus } from '@shopana/novaposhta-api-client';
 describe('TrackingService - filterTrackingResults', () => {
   it('should track documents for filtering by status', async () => {
     const response = await client.tracking.trackDocuments({
-      documents: [
-        { documentNumber: '20450123456789', phone: '' },
-        { documentNumber: '20450987654321', phone: '' },
+      Documents: [
+        { DocumentNumber: '20450123456789', Phone: '' },
+        { DocumentNumber: '20450987654321', Phone: '' },
       ],
     });
 
@@ -25,9 +25,9 @@ describe('TrackingService - filterTrackingResults', () => {
   // TODO: Requires valid API key with associated waybills
   it.skip('should get document list for date range filtering', async () => {
     const response = await client.tracking.getDocumentList({
-      dateTimeFrom: '01.01.2024',
-      dateTimeTo: '31.01.2024',
-      page: 1,
+      DateTimeFrom: '01.01.2024',
+      DateTimeTo: '31.01.2024',
+      Page: 1,
     });
 
     expect(response.success).toBe(true);

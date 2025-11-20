@@ -16,9 +16,9 @@ describe('TrackingService - isInTransit', () => {
 
   it('should track multiple documents and check transit status', async () => {
     const response = await client.tracking.trackDocuments({
-      documents: [
-        { documentNumber: '20450123456789', phone: '' },
-        { documentNumber: '20450987654321', phone: '' },
+      Documents: [
+        { DocumentNumber: '20450123456789', Phone: '' },
+        { DocumentNumber: '20450987654321', Phone: '' },
       ],
     });
 

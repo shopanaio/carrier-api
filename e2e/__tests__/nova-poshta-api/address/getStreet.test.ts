@@ -4,7 +4,7 @@ describe('AddressService - getStreet', () => {
   // TODO: City UUID may be outdated or API requires additional parameters
   it.skip('should get streets in a city', async () => {
     const response = await client.address.getStreet({
-      cityRef: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
+      CityRef: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
     });
 
     expect(response.success).toBe(true);
@@ -15,8 +15,8 @@ describe('AddressService - getStreet', () => {
   // TODO: City UUID may be outdated or API requires additional parameters
   it.skip('should search streets by name', async () => {
     const response = await client.address.getStreet({
-      cityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
-      findByString: 'Хрещатик',
+      CityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
+      FindByString: 'Хрещатик',
     });
 
     expect(response.success).toBe(true);
@@ -27,10 +27,10 @@ describe('AddressService - getStreet', () => {
   // TODO: API pagination doesn't work as expected
   it.skip('should search streets with pagination', async () => {
     const response = await client.address.getStreet({
-      cityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
-      findByString: 'вул',
-      page: 1,
-      limit: 20,
+      CityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
+      FindByString: 'вул',
+      Page: 1,
+      Limit: 20,
     });
 
     expect(response.success).toBe(true);

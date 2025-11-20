@@ -11,7 +11,7 @@ describe('AddressService - getCities', () => {
 
   it('should search cities by string', async () => {
     const response = await client.address.getCities({
-      findByString: 'Київ',
+      FindByString: 'Київ',
     });
 
     expect(response.success).toBe(true);
@@ -22,9 +22,9 @@ describe('AddressService - getCities', () => {
   // TODO: API pagination doesn't work as expected - returns all results regardless of limit
   it.skip('should search cities with pagination', async () => {
     const response = await client.address.getCities({
-      findByString: 'Дніпр',
-      page: 1,
-      limit: 10,
+      FindByString: 'Дніпр',
+      Page: 1,
+      Limit: 10,
     });
 
     expect(response.success).toBe(true);
@@ -37,7 +37,7 @@ describe('AddressService - getCities', () => {
 
   it('should get city by ref', async () => {
     const response = await client.address.getCities({
-      ref: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
+      Ref: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
     });
 
     expect(response.success).toBe(true);

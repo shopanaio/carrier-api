@@ -63,15 +63,15 @@ export type GetPalletsListResponse = NovaPoshtaResponse<PalletData[]>;
 
 export interface GetPackListRequest {
   /** Length in mm (optional) */
-  readonly length?: number;
+  readonly Length?: number;
   /** Width in mm (optional) */
-  readonly width?: number;
+  readonly Width?: number;
   /** Height in mm (optional) */
-  readonly height?: number;
+  readonly Height?: number;
   /** Volumetric weight (optional) */
-  readonly volumetricWeight?: number;
+  readonly VolumetricWeight?: number;
   /** Type of packing (optional) */
-  readonly typeOfPacking?: string;
+  readonly TypeOfPacking?: string;
 }
 
 export interface PackData {
@@ -124,11 +124,11 @@ export type GetTiresWheelsListResponse = NovaPoshtaResponse<TireWheelData[]>;
 
 export interface GetCargoDescriptionListRequest {
   /** Search string (optional) */
-  readonly findByString?: string;
+  readonly FindByString?: string;
   /** Page number (optional, up to 500 records per page) */
-  readonly page?: number;
+  readonly Page?: number;
   /** Limit number (optional, up to 500 records per page) */
-  readonly limit?: number;
+  readonly Limit?: number;
 }
 
 export interface CargoDescriptionData {
@@ -205,9 +205,9 @@ export type GetOwnershipFormsListResponse = NovaPoshtaResponse<OwnershipFormData
 
 export interface GetTimeIntervalsRequest {
   /** Recipient city identifier */
-  readonly recipientCityRef: ObjectRef;
+  readonly RecipientCityRef: ObjectRef;
   /** Date for time intervals (optional, defaults to current date) */
-  readonly dateTime?: string;
+  readonly DateTime?: string;
 }
 
 export interface TimeIntervalData {
@@ -227,9 +227,9 @@ export type GetTimeIntervalsResponse = NovaPoshtaResponse<TimeIntervalData[]>;
 
 export interface GetPickupTimeIntervalsRequest {
   /** Sender city identifier */
-  readonly senderCityRef: ObjectRef;
+  readonly SenderCityRef: ObjectRef;
   /** Date for available time intervals */
-  readonly dateTime: string;
+  readonly DateTime: string;
 }
 
 export interface PickupTimeIntervalData {
@@ -285,7 +285,7 @@ export type GetTypesOfPayersForRedeliveryResponse = NovaPoshtaResponse<PayerForR
 
 export interface GetTypesOfPayersRequest {
   /** Response language (ua/ru) */
-  readonly language?: string;
+  readonly Language?: string;
 }
 
 export interface PayerTypeData {
@@ -303,7 +303,7 @@ export type GetTypesOfPayersResponse = NovaPoshtaResponse<PayerTypeData[]>;
 
 export interface GetPaymentFormsRequest {
   /** Response language (ua/ru) */
-  readonly language?: string;
+  readonly Language?: string;
 }
 
 export interface PaymentFormData {
@@ -321,7 +321,7 @@ export type GetPaymentFormsResponse = NovaPoshtaResponse<PaymentFormData[]>;
 
 export interface GetTypesOfCounterpartiesRequest {
   /** Response language (ua/ru) */
-  readonly language?: string;
+  readonly Language?: string;
 }
 
 export interface CounterpartyTypeData {

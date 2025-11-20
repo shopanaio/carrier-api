@@ -5,7 +5,7 @@ describe('AddressService - getSettlementCountryRegion', () => {
   it.skip('should get settlement regions for a specific area', async () => {
     // Using a valid area ref (Kyiv region)
     const response = await client.address.getSettlementCountryRegion({
-      areaRef: '71508128-9b87-11de-822f-000c2965ae0e',
+      AreaRef: '71508128-9b87-11de-822f-000c2965ae0e',
     });
 
     expect(response.success).toBe(true);
@@ -15,7 +15,7 @@ describe('AddressService - getSettlementCountryRegion', () => {
   // TODO: Area UUID may be outdated or invalid
   it.skip('should return regions with proper structure', async () => {
     const response = await client.address.getSettlementCountryRegion({
-      areaRef: '71508128-9b87-11de-822f-000c2965ae0e',
+      AreaRef: '71508128-9b87-11de-822f-000c2965ae0e',
     });
 
     expect(response.success).toBe(true);

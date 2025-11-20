@@ -4,8 +4,8 @@ import { itWithApiKey } from '../../../setup/testHelpers';
 describe('ReferenceService - getPickupTimeIntervals', () => {
   itWithApiKey('should get available time intervals for pickup', async () => {
     const response = await client.reference.getPickupTimeIntervals({
-      senderCityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
-      dateTime: '25.12.2024',
+      SenderCityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
+      DateTime: '25.12.2024',
     });
 
     expect(response.success).toBe(true);
@@ -15,8 +15,8 @@ describe('ReferenceService - getPickupTimeIntervals', () => {
 
   itWithApiKey('should get pickup intervals for warehouse', async () => {
     const response = await client.reference.getPickupTimeIntervals({
-      senderCityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
-      dateTime: '25.12.2024',
+      SenderCityRef: '8d5a980d-391c-11dd-90d9-001a92567626',
+      DateTime: '25.12.2024',
     });
 
     expect(response.success).toBe(true);

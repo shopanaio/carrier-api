@@ -44,30 +44,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: {
-        PayerType: request.payerType,
-        PaymentMethod: request.paymentMethod,
-        DateTime: request.dateTime,
-        CargoType: request.cargoType,
-        Weight: request.weight,
-        ServiceType: request.serviceType,
-        SeatsAmount: request.seatsAmount,
-        Description: request.description,
-        Cost: request.cost,
-        CitySender: request.citySender,
-        Sender: request.sender,
-        SenderAddress: request.senderAddress,
-        ContactSender: request.contactSender,
-        SendersPhone: request.sendersPhone,
-        CityRecipient: request.cityRecipient,
-        Recipient: request.recipient,
-        RecipientAddress: request.recipientAddress,
-        ContactRecipient: request.contactRecipient,
-        RecipientsPhone: request.recipientsPhone,
-        ...(request.senderWarehouseIndex ? { SenderWarehouseIndex: request.senderWarehouseIndex } : {}),
-        ...(request.recipientWarehouseIndex ? { RecipientWarehouseIndex: request.recipientWarehouseIndex } : {}),
-        ...(request.volumeGeneral ? { VolumeGeneral: request.volumeGeneral } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -81,35 +58,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: {
-        PayerType: request.payerType,
-        PaymentMethod: request.paymentMethod,
-        DateTime: request.dateTime,
-        CargoType: request.cargoType,
-        Weight: request.weight,
-        ServiceType: request.serviceType,
-        SeatsAmount: request.seatsAmount,
-        Description: request.description,
-        Cost: request.cost,
-        CitySender: request.citySender,
-        Sender: request.sender,
-        SenderAddress: request.senderAddress,
-        ContactSender: request.contactSender,
-        SendersPhone: request.sendersPhone,
-        CityRecipient: request.cityRecipient,
-        Recipient: request.recipient,
-        RecipientAddress: request.recipientAddress,
-        ContactRecipient: request.contactRecipient,
-        RecipientsPhone: request.recipientsPhone,
-        OptionsSeat: request.optionsSeat as any,
-        ...(request.senderWarehouseIndex ? { SenderWarehouseIndex: request.senderWarehouseIndex } : {}),
-        ...(request.recipientWarehouseIndex ? { RecipientWarehouseIndex: request.recipientWarehouseIndex } : {}),
-        ...(request.volumeGeneral ? { VolumeGeneral: request.volumeGeneral } : {}),
-        ...(request.redBoxBarcode ? { RedBoxBarcode: request.redBoxBarcode } : {}),
-        ...(request.thirdPerson ? { ThirdPerson: request.thirdPerson } : {}),
-        ...(request.backwardDeliveryData ? { BackwardDeliveryData: request.backwardDeliveryData as any } : {}),
-        ...(request.additionalServices ? { AdditionalServices: request.additionalServices as any } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -123,30 +72,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: {
-        PayerType: request.payerType,
-        PaymentMethod: request.paymentMethod,
-        DateTime: request.dateTime,
-        CargoType: request.cargoType,
-        Weight: request.weight,
-        ServiceType: request.serviceType,
-        SeatsAmount: request.seatsAmount,
-        Description: request.description,
-        Cost: request.cost,
-        CitySender: request.citySender,
-        Sender: request.sender,
-        SenderAddress: request.senderAddress,
-        ContactSender: request.contactSender,
-        SendersPhone: request.sendersPhone,
-        CityRecipient: request.cityRecipient,
-        Recipient: request.recipient,
-        RecipientAddress: request.recipientAddress,
-        ContactRecipient: request.contactRecipient,
-        RecipientsPhone: request.recipientsPhone,
-        OptionsSeat: request.optionsSeat as any,
-        ...(request.senderWarehouseIndex ? { SenderWarehouseIndex: request.senderWarehouseIndex } : {}),
-        ...(request.recipientWarehouseIndex ? { RecipientWarehouseIndex: request.recipientWarehouseIndex } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
@@ -160,29 +86,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Update,
-      methodProperties: {
-        Ref: request.ref,
-        PayerType: request.payerType,
-        PaymentMethod: request.paymentMethod,
-        DateTime: request.dateTime,
-        CargoType: request.cargoType,
-        Weight: request.weight,
-        ServiceType: request.serviceType,
-        SeatsAmount: request.seatsAmount,
-        Description: request.description,
-        Cost: request.cost,
-        CitySender: request.citySender,
-        Sender: request.sender,
-        SenderAddress: request.senderAddress,
-        ContactSender: request.contactSender,
-        SendersPhone: request.sendersPhone,
-        CityRecipient: request.cityRecipient,
-        Recipient: request.recipient,
-        RecipientAddress: request.recipientAddress,
-        ContactRecipient: request.contactRecipient,
-        RecipientsPhone: request.recipientsPhone,
-        ...(request.volumeGeneral ? { VolumeGeneral: request.volumeGeneral } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<UpdateWaybillResponse['data']>(apiRequest);
@@ -196,9 +100,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.Delete,
-      methodProperties: {
-        DocumentRefs: request.documentRefs.join(','),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DeleteWaybillResponse['data']>(apiRequest);
@@ -212,12 +114,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentDeliveryDate,
-      methodProperties: {
-        CitySender: request.citySender,
-        CityRecipient: request.cityRecipient,
-        ServiceType: request.serviceType,
-        ...(request.dateTime ? { DateTime: request.dateTime } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DeliveryDateResponse['data']>(apiRequest);
@@ -231,22 +128,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentPrice,
-      methodProperties: {
-        CitySender: request.citySender,
-        CityRecipient: request.cityRecipient,
-        Weight: request.weight,
-        ServiceType: request.serviceType,
-        Cost: request.cost,
-        CargoType: request.cargoType,
-        SeatsAmount: request.seatsAmount,
-        ...(request.redeliveryCalculate ? { RedeliveryCalculate: request.redeliveryCalculate } : {}),
-        ...(request.packCount ? { PackCount: request.packCount } : {}),
-        ...(request.packRef ? { PackRef: request.packRef } : {}),
-        ...(request.amount ? { Amount: request.amount } : {}),
-        ...(request.cargoDetails ? { CargoDetails: request.cargoDetails } : {}),
-        ...(request.cargoDescription ? { CargoDescription: request.cargoDescription } : {}),
-        ...(request.optionsSeat ? { OptionsSeat: request.optionsSeat } : {}),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<PriceCalculationResponse['data']>(apiRequest);
@@ -286,7 +168,7 @@ export class WaybillService {
    * Batch delete multiple waybills
    */
   async deleteBatch(documentRefs: string[]): Promise<DeleteWaybillResponse> {
-    return this.delete({ documentRefs: documentRefs as any });
+    return this.delete({ DocumentRefs: documentRefs as any });
   }
 
   /**
@@ -299,9 +181,9 @@ export class WaybillService {
     const [price, deliveryDate] = await Promise.all([
       this.getPrice(request),
       this.getDeliveryDate({
-        serviceType: request.serviceType,
-        citySender: request.citySender,
-        cityRecipient: request.cityRecipient,
+        ServiceType: request.ServiceType,
+        CitySender: request.CitySender,
+        CityRecipient: request.CityRecipient,
       }),
     ]);
 
@@ -311,7 +193,7 @@ export class WaybillService {
   /**
    * Validate waybill data without creating
    */
-  async validateWaybill(request: CreateWaybillRequest): Promise<boolean> {
+  async validateWaybill(_request: CreateWaybillRequest): Promise<boolean> {
     try {
       // Validation removed
       return true;
@@ -325,17 +207,17 @@ export class WaybillService {
    */
   canDeliverToPostomat(request: Partial<CreateWaybillRequest>): boolean {
     // Check cargo type
-    if (!request.cargoType || !['Parcel', 'Documents'].includes(request.cargoType)) {
+    if (!request.CargoType || !['Parcel', 'Documents'].includes(request.CargoType)) {
       return false;
     }
 
     // Check service type
-    if (!request.serviceType || !['DoorsWarehouse', 'WarehouseWarehouse'].includes(request.serviceType)) {
+    if (!request.ServiceType || !['DoorsWarehouse', 'WarehouseWarehouse'].includes(request.ServiceType)) {
       return false;
     }
 
     // Check declared value
-    if (request.cost && request.cost > 10000) {
+    if (request.Cost && request.Cost > 10000) {
       return false;
     }
 

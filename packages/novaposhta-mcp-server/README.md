@@ -814,7 +814,7 @@ A: The MCP server provides error messages when rate limits are hit, but doesn't 
 
 3. **Batch operations**: Use bulk tracking methods for multiple packages
    ```typescript
-   track_multiple_documents(['123', '456', '789'])
+   track_multiple_documents({ documentNumbers: ['123', '456', '789'] })
    ```
 
 4. **Filter early**: Use specific filters to reduce result sets

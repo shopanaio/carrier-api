@@ -7,16 +7,16 @@ describe('WaybillService - update', () => {
     const documentRef = 'existing-document-ref';
 
     const response = await client.waybill.update({
-      ref: documentRef,
-      payerType: PayerType.Sender,
-      paymentMethod: PaymentMethod.Cash,
-      dateTime: '26.12.2024',
-      cargoType: CargoType.Parcel,
-      weight: 2, // Updated weight
-      serviceType: ServiceType.WarehouseWarehouse,
-      seatsAmount: 1,
-      description: 'Updated test package',
-      cost: 1500, // Updated cost
+      Ref: documentRef,
+      PayerType: PayerType.Sender,
+      PaymentMethod: PaymentMethod.Cash,
+      DateTime: '26.12.2024',
+      CargoType: CargoType.Parcel,
+      Weight: 2, // Updated weight
+      ServiceType: ServiceType.WarehouseWarehouse,
+      SeatsAmount: 1,
+      Description: 'Updated test package',
+      Cost: 1500, // Updated cost
     } as any);
 
     expect(response).toBeDefined();

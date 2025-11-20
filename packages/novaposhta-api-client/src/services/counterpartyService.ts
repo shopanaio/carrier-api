@@ -54,22 +54,11 @@ export class CounterpartyService {
    * @cacheable 1 hour
    */
   async getCounterparties(request: GetCounterpartiesRequest): Promise<GetCounterpartiesResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      CounterpartyProperty: request.counterpartyProperty,
-      Page: request.page?.toString(),
-      FindByString: request.findByString,
-      CityRef: request.cityRef,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.GetCounterparties,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetCounterpartiesResponse['data']>(apiRequest);
@@ -81,21 +70,11 @@ export class CounterpartyService {
    * @cacheable 1 hour
    */
   async getCounterpartyAddresses(request: GetCounterpartyAddressesRequest): Promise<GetCounterpartyAddressesResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      CounterpartyProperty: request.counterpartyProperty,
-      Page: request.page?.toString(),
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.GetCounterpartyAddresses,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetCounterpartyAddressesResponse['data']>(apiRequest);
@@ -109,20 +88,11 @@ export class CounterpartyService {
   async getCounterpartyContactPersons(
     request: GetCounterpartyContactPersonsRequest,
   ): Promise<GetCounterpartyContactPersonsResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      Page: request.page?.toString(),
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.GetCounterpartyContactPersons,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetCounterpartyContactPersonsResponse['data']>(apiRequest);
@@ -133,38 +103,11 @@ export class CounterpartyService {
    * @description Creates a new counterparty (sender or recipient)
    */
   async save(request: SaveCounterpartyRequest): Promise<SaveCounterpartyResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      CounterpartyType: request.counterpartyType,
-      CounterpartyProperty: request.counterpartyProperty,
-      Phone: request.phone,
-      Email: request.email,
-      CityRef: request.cityRef,
-    };
-
-    if (request.counterpartyType === 'PrivatePerson') {
-      // For private persons, firstName and lastName are required
-      methodProperties.FirstName = request.firstName;
-      methodProperties.MiddleName = request.middleName;
-      methodProperties.LastName = request.lastName;
-    } else {
-      // For organizations, ownershipForm and edrpou are required
-      methodProperties.OwnershipForm = request.ownershipForm;
-      methodProperties.EDRPOU = request.edrpou;
-      // Contact person details are optional for organizations
-      if (request.firstName) methodProperties.FirstName = request.firstName;
-      if (request.middleName) methodProperties.MiddleName = request.middleName;
-      if (request.lastName) methodProperties.LastName = request.lastName;
-    }
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<SaveCounterpartyResponse['data']>(apiRequest);
@@ -175,25 +118,11 @@ export class CounterpartyService {
    * @description Updates an existing counterparty
    */
   async update(request: UpdateCounterpartyRequest): Promise<UpdateCounterpartyResponse> {
-    const methodProperties: Record<string, string | undefined> = {
-      Ref: request.ref,
-      CounterpartyProperty: request.counterpartyProperty,
-      FirstName: request.firstName,
-      MiddleName: request.middleName,
-      LastName: request.lastName,
-      Phone: request.phone,
-      Email: request.email,
-    };
-
-    const cleanProperties = Object.fromEntries(
-      Object.entries(methodProperties).filter(([, value]) => value !== undefined && value !== ''),
-    );
-
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.Update,
-      methodProperties: cleanProperties,
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<UpdateCounterpartyResponse['data']>(apiRequest);
@@ -208,9 +137,7 @@ export class CounterpartyService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.Delete,
-      methodProperties: {
-        Ref: request.ref,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DeleteCounterpartyResponse['data']>(apiRequest);
@@ -226,9 +153,7 @@ export class CounterpartyService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.Counterparty,
       calledMethod: NovaPoshtaMethod.GetCounterpartyOptions,
-      methodProperties: {
-        Ref: request.ref,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<GetCounterpartyOptionsResponse['data']>(apiRequest);

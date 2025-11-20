@@ -5,13 +5,13 @@ describe('WaybillService - validateWaybill', () => {
   it('should validate waybill data without creating', async () => {
     // This test validates the structure by checking required fields
     const isValid = await client.waybill.validateWaybill({
-      payerType: PayerType.Sender,
-      paymentMethod: PaymentMethod.Cash,
-      dateTime: '25.12.2024',
-      cargoType: CargoType.Parcel,
-      weight: 1,
-      serviceType: ServiceType.WarehouseWarehouse,
-      seatsAmount: 1,
+      PayerType: PayerType.Sender,
+      PaymentMethod: PaymentMethod.Cash,
+      DateTime: '25.12.2024',
+      CargoType: CargoType.Parcel,
+      Weight: 1,
+      ServiceType: ServiceType.WarehouseWarehouse,
+      SeatsAmount: 1,
     } as any);
 
     expect(typeof isValid).toBe('boolean');
@@ -19,7 +19,7 @@ describe('WaybillService - validateWaybill', () => {
 
   it('should fail validation with invalid data', async () => {
     const isValid = await client.waybill.validateWaybill({
-      weight: 'invalid' as any,
+      Weight: 'invalid' as any,
     } as any);
 
     expect(typeof isValid).toBe('boolean');

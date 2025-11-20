@@ -21,10 +21,10 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.getCounterparties({
-        counterpartyProperty: 'Sender',
-        page: 2,
-        findByString: 'shop',
-        cityRef: 'city-ref',
+        CounterpartyProperty: 'Sender',
+        Page: 2,
+        FindByString: 'shop',
+        CityRef: 'city-ref',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -32,7 +32,7 @@ describe('CounterpartyService', () => {
         calledMethod: 'getCounterparties',
         methodProperties: {
           CounterpartyProperty: 'Sender',
-          Page: '2',
+          Page: 2,
           FindByString: 'shop',
           CityRef: 'city-ref',
         },
@@ -55,9 +55,9 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.getCounterpartyAddresses({
-        ref: 'counterparty-ref',
-        counterpartyProperty: 'Recipient',
-        page: 1,
+        Ref: 'counterparty-ref',
+        CounterpartyProperty: 'Recipient',
+        Page: 1,
       });
 
       expect(calls[0].body).toMatchObject({
@@ -66,7 +66,7 @@ describe('CounterpartyService', () => {
         methodProperties: {
           Ref: 'counterparty-ref',
           CounterpartyProperty: 'Recipient',
-          Page: '1',
+          Page: 1,
         },
       });
       expect(result.data).toEqual(mockData);
@@ -87,8 +87,8 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.getCounterpartyContactPersons({
-        ref: 'counterparty-ref',
-        page: 3,
+        Ref: 'counterparty-ref',
+        Page: 3,
       });
 
       expect(calls[0].body).toMatchObject({
@@ -96,7 +96,7 @@ describe('CounterpartyService', () => {
         calledMethod: 'getCounterpartyContactPersons',
         methodProperties: {
           Ref: 'counterparty-ref',
-          Page: '3',
+          Page: 3,
         },
       });
       expect(result.data).toEqual(mockData);
@@ -125,14 +125,14 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.save({
-        counterpartyType: 'PrivatePerson',
-        counterpartyProperty: 'Recipient',
-        firstName: 'Іван',
-        middleName: 'Іванович',
-        lastName: 'Петренко',
-        phone: '380501234567',
-        email: 'ivan@example.com',
-        cityRef: 'city-ref',
+        CounterpartyType: 'PrivatePerson',
+        CounterpartyProperty: 'Recipient',
+        FirstName: 'Іван',
+        MiddleName: 'Іванович',
+        LastName: 'Петренко',
+        Phone: '380501234567',
+        Email: 'ivan@example.com',
+        CityRef: 'city-ref',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -173,15 +173,15 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.save({
-        counterpartyType: 'Organization',
-        counterpartyProperty: 'Sender',
-        firstName: 'Марія',
-        lastName: 'Коваленко',
-        phone: '380671234567',
-        email: 'contact@testllc.com',
-        ownershipForm: 'ТОВ',
-        edrpou: '12345678',
-        cityRef: 'city-ref',
+        CounterpartyType: 'Organization',
+        CounterpartyProperty: 'Sender',
+        FirstName: 'Марія',
+        LastName: 'Коваленко',
+        Phone: '380671234567',
+        Email: 'contact@testllc.com',
+        OwnershipForm: 'ТОВ',
+        EDRPOU: '12345678',
+        CityRef: 'city-ref',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -218,11 +218,11 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.save({
-        counterpartyType: 'Organization',
-        counterpartyProperty: 'Sender',
-        phone: '380671234567',
-        ownershipForm: 'ТОВ',
-        edrpou: '12345678',
+        CounterpartyType: 'Organization',
+        CounterpartyProperty: 'Sender',
+        Phone: '380671234567',
+        OwnershipForm: 'ТОВ',
+        EDRPOU: '12345678',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -257,9 +257,9 @@ describe('CounterpartyService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
       const result = await client.counterparty.update({
-        ref: 'counterparty-ref',
-        counterpartyProperty: 'Sender',
-        phone: '380671112233',
+        Ref: 'counterparty-ref',
+        CounterpartyProperty: 'Sender',
+        Phone: '380671112233',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -287,7 +287,7 @@ describe('CounterpartyService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
-      const result = await client.counterparty.delete({ ref: 'counterparty-ref' });
+      const result = await client.counterparty.delete({ Ref: 'counterparty-ref' });
 
       expect(calls[0].body).toMatchObject({
         modelName: 'CounterpartyGeneral',
@@ -316,7 +316,7 @@ describe('CounterpartyService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new CounterpartyService());
 
-      const result = await client.counterparty.getCounterpartyOptions({ ref: 'counterparty-ref' });
+      const result = await client.counterparty.getCounterpartyOptions({ Ref: 'counterparty-ref' });
 
       expect(calls[0].body).toMatchObject({
         modelName: 'CounterpartyGeneral',

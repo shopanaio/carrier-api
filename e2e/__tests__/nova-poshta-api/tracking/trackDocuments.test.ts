@@ -3,9 +3,9 @@ import { client } from '../../../setup/client.setup';
 describe('TrackingService - trackDocuments', () => {
   it('should track multiple documents', async () => {
     const response = await client.tracking.trackDocuments({
-      documents: [
-        { documentNumber: '20450123456789', phone: '' },
-        { documentNumber: '20450987654321', phone: '' },
+      Documents: [
+        { DocumentNumber: '20450123456789', Phone: '' },
+        { DocumentNumber: '20450987654321', Phone: '' },
       ],
     });
 
@@ -15,7 +15,7 @@ describe('TrackingService - trackDocuments', () => {
 
   it('should track documents with phone number', async () => {
     const response = await client.tracking.trackDocuments({
-      documents: [{ documentNumber: '20450123456789', phone: '380501234567' }],
+      Documents: [{ DocumentNumber: '20450123456789', Phone: '380501234567' }],
     });
 
     expect(response.success).toBe(true);

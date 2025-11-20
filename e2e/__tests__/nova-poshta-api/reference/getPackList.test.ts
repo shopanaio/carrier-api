@@ -11,9 +11,9 @@ describe('ReferenceService - getPackList', () => {
 
   it('should get pack list with dimensions filter', async () => {
     const response = await client.reference.getPackList({
-      length: 100,
-      width: 50,
-      height: 30,
+      Length: 100,
+      Width: 50,
+      Height: 30,
     });
 
     expect(response.success).toBe(true);

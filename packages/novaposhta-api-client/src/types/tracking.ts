@@ -18,14 +18,14 @@ import { PaymentMethod, PayerType, CargoType, ServiceType, DeliveryStatus } from
 // Document tracking request
 export interface TrackDocumentsRequest {
   /** Array of documents to track */
-  readonly documents: readonly TrackDocumentItem[];
+  readonly Documents: readonly TrackDocumentItem[];
 }
 
 export interface TrackDocumentItem {
   /** Document number to track */
-  readonly documentNumber: string;
+  readonly DocumentNumber: string;
   /** Phone number of sender/recipient for extended information (optional) */
-  readonly phone?: PhoneNumber;
+  readonly Phone?: PhoneNumber;
 }
 
 // Tracking response data
@@ -307,9 +307,9 @@ export type TrackingResponse = NovaPoshtaResponse<readonly TrackingStatusData[]>
 // Document movement tracking
 export interface DocumentMovementRequest {
   /** Array of documents to track movement */
-  readonly documents: readonly TrackDocumentItem[];
+  readonly Documents: readonly TrackDocumentItem[];
   /** Show delivery details */
-  readonly showDeliveryDetails?: boolean;
+  readonly ShowDeliveryDetails?: boolean;
 }
 
 export interface DocumentMovementData {
@@ -338,15 +338,15 @@ export type DocumentMovementResponse = NovaPoshtaResponse<readonly DocumentMovem
 // Document list request
 export interface DocumentListRequest {
   /** Date from (format: dd.mm.yyyy) */
-  readonly dateTimeFrom: NovaPoshtaDate;
+  readonly DateTimeFrom: NovaPoshtaDate;
   /** Date to (format: dd.mm.yyyy) */
-  readonly dateTimeTo: NovaPoshtaDate;
+  readonly DateTimeTo: NovaPoshtaDate;
   /** Page number */
-  readonly page?: number;
+  readonly Page?: number;
   /** Get full list */
-  readonly getFullList?: '0' | '1';
+  readonly GetFullList?: '0' | '1';
   /** Date time */
-  readonly dateTime?: NovaPoshtaDate;
+  readonly DateTime?: NovaPoshtaDate;
 }
 
 export interface DocumentListData {

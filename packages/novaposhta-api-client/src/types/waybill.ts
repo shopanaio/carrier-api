@@ -37,193 +37,193 @@ import {
 // Base waybill properties
 interface BaseWaybillProperties {
   /** Payer type */
-  readonly payerType: PayerType;
+  readonly PayerType: PayerType;
   /** Payment method */
-  readonly paymentMethod: PaymentMethod;
+  readonly PaymentMethod: PaymentMethod;
   /** Shipping date (dd.mm.yyyy) */
-  readonly dateTime: NovaPoshtaDate;
+  readonly DateTime: NovaPoshtaDate;
   /** Cargo type */
-  readonly cargoType: CargoType;
+  readonly CargoType: CargoType;
   /** Actual weight in kg (min 0.1) */
-  readonly weight: Weight;
+  readonly Weight: Weight;
   /** Service type */
-  readonly serviceType: ServiceType;
+  readonly ServiceType: ServiceType;
   /** Number of seats */
-  readonly seatsAmount: number;
+  readonly SeatsAmount: number;
   /** Description */
-  readonly description: String36;
+  readonly Description: String36;
   /** Declared value */
-  readonly cost: Cost;
+  readonly Cost: Cost;
   /** Sender city ref */
-  readonly citySender: CityRef;
+  readonly CitySender: CityRef;
   /** Sender ref */
-  readonly sender: CounterpartyRef;
+  readonly Sender: CounterpartyRef;
   /** Sender address ref */
-  readonly senderAddress: AddressRef;
+  readonly SenderAddress: AddressRef;
   /** Sender contact ref */
-  readonly contactSender: ContactRef;
+  readonly ContactSender: ContactRef;
   /** Sender phone */
-  readonly sendersPhone: PhoneNumber;
+  readonly SendersPhone: PhoneNumber;
   /** Recipient city ref */
-  readonly cityRecipient: CityRef;
+  readonly CityRecipient: CityRef;
   /** Recipient ref */
-  readonly recipient: CounterpartyRef;
+  readonly Recipient: CounterpartyRef;
   /** Recipient address ref or warehouse ref */
-  readonly recipientAddress: AddressRef | WarehouseRef;
+  readonly RecipientAddress: AddressRef | WarehouseRef;
   /** Recipient contact ref */
-  readonly contactRecipient: ContactRef;
+  readonly ContactRecipient: ContactRef;
   /** Recipient phone */
-  readonly recipientsPhone: PhoneNumber;
+  readonly RecipientsPhone: PhoneNumber;
 }
 
 // Standard waybill creation request
 export interface CreateWaybillRequest extends BaseWaybillProperties {
   /** Sender warehouse index (optional) */
-  readonly senderWarehouseIndex?: String36;
+  readonly SenderWarehouseIndex?: String36;
   /** Recipient warehouse index (optional) */
-  readonly recipientWarehouseIndex?: String36;
+  readonly RecipientWarehouseIndex?: String36;
   /** Total volume in cubic meters (optional if OptionsSeat not provided) */
-  readonly volumeGeneral?: Volume;
+  readonly VolumeGeneral?: Volume;
 }
 
 // Waybill with options (advanced features)
 export interface CreateWaybillWithOptionsRequest extends BaseWaybillProperties {
   /** Sender warehouse index (optional) */
-  readonly senderWarehouseIndex?: String36;
+  readonly SenderWarehouseIndex?: String36;
   /** Recipient warehouse index (optional) */
-  readonly recipientWarehouseIndex?: String36;
+  readonly RecipientWarehouseIndex?: String36;
   /** Total volume in cubic meters (optional if OptionsSeat provided) */
-  readonly volumeGeneral?: Volume;
+  readonly VolumeGeneral?: Volume;
   /** Cargo parameters for each seat */
-  readonly optionsSeat: readonly OptionsSeatItem[];
+  readonly OptionsSeat: readonly OptionsSeatItem[];
   /** RedBox barcode (uppercase required) */
-  readonly redBoxBarcode?: String36;
+  readonly RedBoxBarcode?: String36;
   /** Third person payer ref (required if payerType is ThirdPerson) */
-  readonly thirdPerson?: CounterpartyRef;
+  readonly ThirdPerson?: CounterpartyRef;
   /** Backward delivery data */
-  readonly backwardDeliveryData?: readonly BackwardDeliveryItem[];
+  readonly BackwardDeliveryData?: readonly BackwardDeliveryItem[];
   /** Additional services */
-  readonly additionalServices?: AdditionalServices;
+  readonly AdditionalServices?: AdditionalServices;
 }
 
 // Postomat waybill creation (with restrictions)
 export interface CreatePoshtomatWaybillRequest extends BaseWaybillProperties {
   /** Sender warehouse index (optional) */
-  readonly senderWarehouseIndex?: String36;
+  readonly SenderWarehouseIndex?: String36;
   /** Recipient warehouse index (optional) */
-  readonly recipientWarehouseIndex?: String36;
+  readonly RecipientWarehouseIndex?: String36;
   /** Cargo parameters for each seat (required for postomat) */
-  readonly optionsSeat: readonly PoshtomatOptionsSeatItem[];
+  readonly OptionsSeat: readonly PoshtomatOptionsSeatItem[];
   /** Cargo type must be Parcel or Documents only */
-  readonly cargoType: CargoType.Parcel | CargoType.Documents;
+  readonly CargoType: CargoType.Parcel | CargoType.Documents;
   /** Service type must be DoorsWarehouse or WarehouseWarehouse */
-  readonly serviceType: ServiceType.DoorsWarehouse | ServiceType.WarehouseWarehouse;
+  readonly ServiceType: ServiceType.DoorsWarehouse | ServiceType.WarehouseWarehouse;
   /** Max declared value 10000 UAH */
-  readonly cost: Cost; // max 10000
+  readonly Cost: Cost; // max 10000
 }
 
 // Update waybill request
 export interface UpdateWaybillRequest extends BaseWaybillProperties {
   /** Document ref to update */
-  readonly ref: DocumentRef;
+  readonly Ref: DocumentRef;
   /** Total volume in cubic meters (optional if OptionsSeat not provided) */
-  readonly volumeGeneral?: Volume;
+  readonly VolumeGeneral?: Volume;
 }
 
 // Delete waybill request
 export interface DeleteWaybillRequest {
   /** Document refs to delete */
-  readonly documentRefs: readonly DocumentRef[];
+  readonly DocumentRefs: readonly DocumentRef[];
 }
 
 // Cargo seat options
 export interface OptionsSeatItem extends CargoDimensions {
   /** Weight in kg */
-  readonly weight: Weight;
+  readonly Weight: Weight;
   /** Width in cm */
-  readonly volumetricWidth: Dimensions;
+  readonly VolumetricWidth: Dimensions;
   /** Length in cm */
-  readonly volumetricLength: Dimensions;
+  readonly VolumetricLength: Dimensions;
   /** Height in cm */
-  readonly volumetricHeight: Dimensions;
+  readonly VolumetricHeight: Dimensions;
   /** Volume in cubic meters (optional) */
-  readonly volumetricVolume?: Volume;
+  readonly VolumetricVolume?: Volume;
   /** Package ref (optional) */
-  readonly packRef?: NovaPoshtaRef;
+  readonly PackRef?: NovaPoshtaRef;
   /** Declared value for this seat (optional) */
-  readonly cost?: Cost;
+  readonly Cost?: Cost;
   /** Description for this seat (optional) */
-  readonly description?: String36;
+  readonly Description?: String36;
   /** Special cargo flag */
-  readonly specialCargo?: '0' | '1';
+  readonly SpecialCargo?: '0' | '1';
 }
 
 // Postomat-specific seat options with restrictions
 export interface PoshtomatOptionsSeatItem extends OptionsSeatItem {
   /** Max weight 20kg */
-  readonly weight: Weight; // max 20
+  readonly Weight: Weight; // max 20
   /** Max width 40cm */
-  readonly volumetricWidth: Dimensions; // max 40
+  readonly VolumetricWidth: Dimensions; // max 40
   /** Max length 60cm */
-  readonly volumetricLength: Dimensions; // max 60
+  readonly VolumetricLength: Dimensions; // max 60
   /** Max height 30cm */
-  readonly volumetricHeight: Dimensions; // max 30
+  readonly VolumetricHeight: Dimensions; // max 30
 }
 
 // Backward delivery configuration
 export interface BackwardDeliveryItem {
   /** Backward delivery type */
-  readonly cargoType: BackwardDeliveryType;
+  readonly CargoType: BackwardDeliveryType;
   /** Amount for money transfer */
-  readonly amount?: Cost;
+  readonly Amount?: Cost;
   /** Service type */
-  readonly serviceType?: ServiceType;
+  readonly ServiceType?: ServiceType;
   /** Payer type */
-  readonly payerType?: PayerType;
+  readonly PayerType?: PayerType;
   /** Payment method */
-  readonly paymentMethod?: PaymentMethod;
+  readonly PaymentMethod?: PaymentMethod;
 }
 
 // Additional services configuration
 export interface AdditionalServices {
   /** Saturday delivery */
-  readonly saturdayDelivery?: '0' | '1';
+  readonly SaturdayDelivery?: '0' | '1';
   /** Delivery by hand personally */
-  readonly deliveryByHand?: '0' | '1';
+  readonly DeliveryByHand?: '0' | '1';
   /** List of authorized recipients */
-  readonly deliveryByHandRecipients?: readonly string[];
+  readonly DeliveryByHandRecipients?: readonly string[];
   /** Payment control amount */
-  readonly afterpaymentOnGoodsCost?: Cost;
+  readonly AfterPaymentOnGoodsCost?: Cost;
   /** Local express service */
-  readonly localExpress?: '0' | '1';
+  readonly LocalExpress?: '0' | '1';
   /** Time interval */
-  readonly timeInterval?: TimeIntervalType;
+  readonly TimeInterval?: TimeIntervalType;
   /** Preferred delivery date */
-  readonly preferredDeliveryDate?: NovaPoshtaDate;
+  readonly PreferredDeliveryDate?: NovaPoshtaDate;
   /** Packing number */
-  readonly packingNumber?: String36;
+  readonly PackingNumber?: String36;
   /** Client internal order number */
-  readonly infoRegClientBarcodes?: String36;
+  readonly InfoRegClientBarcodes?: String36;
   /** Accompanying documents */
-  readonly accompanyingDocuments?: String36;
+  readonly AccompanyingDocuments?: String36;
   /** Additional information */
-  readonly additionalInformation?: String36;
+  readonly AdditionalInformation?: String36;
   /** Floor lifting (number of floors) */
-  readonly numberOfFloorsLifting?: number;
+  readonly NumberOfFloorsLifting?: number;
   /** Floor descent (number of floors) */
-  readonly numberOfFloorsDescent?: number;
+  readonly NumberOfFloorsDescent?: number;
   /** Elevator availability */
-  readonly elevator?: '0' | '1';
+  readonly Elevator?: '0' | '1';
   /** Piece control count */
-  readonly forwardingCount?: number;
+  readonly ForwardingCount?: number;
   /** RedBox barcode */
-  readonly redBoxBarcode?: String36;
+  readonly RedBoxBarcode?: String36;
   /** Special cargo handling */
-  readonly specialCargo?: '0' | '1';
+  readonly SpecialCargo?: '0' | '1';
   /** Same day delivery */
-  readonly sameDayDelivery?: '0' | '1';
+  readonly SameDayDelivery?: '0' | '1';
   /** Express waybill payment */
-  readonly expressWaybillPayment?: '0' | '1';
+  readonly ExpressWaybillPayment?: '0' | '1';
 }
 
 // Waybill creation response
@@ -269,13 +269,13 @@ export type DeleteWaybillResponse = NovaPoshtaResponse<readonly WaybillDeletionD
 // Delivery date calculation
 export interface DeliveryDateRequest {
   /** Creation date time (optional) */
-  readonly dateTime?: NovaPoshtaDate;
+  readonly DateTime?: NovaPoshtaDate;
   /** Service type */
-  readonly serviceType: ServiceType;
+  readonly ServiceType: ServiceType;
   /** Sender city ref */
-  readonly citySender: CityRef;
+  readonly CitySender: CityRef;
   /** Recipient city ref */
-  readonly cityRecipient: CityRef;
+  readonly CityRecipient: CityRef;
 }
 
 export interface DeliveryDateData {
@@ -292,47 +292,47 @@ export type DeliveryDateResponse = NovaPoshtaResponse<readonly DeliveryDateData[
 // Price calculation
 export interface PriceCalculationRequest {
   /** Sender city ref */
-  readonly citySender: CityRef;
+  readonly CitySender: CityRef;
   /** Recipient city ref */
-  readonly cityRecipient: CityRef;
+  readonly CityRecipient: CityRef;
   /** Weight in kg */
-  readonly weight: Weight;
+  readonly Weight: Weight;
   /** Service type */
-  readonly serviceType: ServiceType;
+  readonly ServiceType: ServiceType;
   /** Declared value */
-  readonly cost: Cost;
+  readonly Cost: Cost;
   /** Cargo type */
-  readonly cargoType: CargoType;
+  readonly CargoType: CargoType;
   /** Number of seats */
-  readonly seatsAmount: number;
+  readonly SeatsAmount: number;
   /** Backward delivery calculation (optional) */
-  readonly redeliveryCalculate?: BackwardDeliveryCalculation;
+  readonly RedeliveryCalculate?: BackwardDeliveryCalculation;
   /** Package count (optional) */
-  readonly packCount?: number;
+  readonly PackCount?: number;
   /** Package ref (optional) */
-  readonly packRef?: NovaPoshtaRef;
+  readonly PackRef?: NovaPoshtaRef;
   /** Amount (optional) */
-  readonly amount?: number;
+  readonly Amount?: number;
   /** Cargo details (optional) */
-  readonly cargoDetails?: readonly CargoDetail[];
+  readonly CargoDetails?: readonly CargoDetail[];
   /** Cargo description ref (optional) */
-  readonly cargoDescription?: NovaPoshtaRef;
+  readonly CargoDescription?: NovaPoshtaRef;
   /** Options seat (optional) */
-  readonly optionsSeat?: readonly OptionsSeatItem[];
+  readonly OptionsSeat?: readonly OptionsSeatItem[];
 }
 
 export interface BackwardDeliveryCalculation {
   /** Cargo type for backward delivery */
-  readonly cargoType: CargoType;
+  readonly CargoType: CargoType;
   /** Amount for backward delivery */
-  readonly amount: Cost;
+  readonly Amount: Cost;
 }
 
 export interface CargoDetail {
   /** Cargo description ref */
-  readonly cargoDescription: NovaPoshtaRef;
+  readonly CargoDescription: NovaPoshtaRef;
   /** Amount */
-  readonly amount: number;
+  readonly Amount: number;
 }
 
 export interface TariffZoneInfo {
@@ -359,7 +359,7 @@ export type PriceCalculationResponse = NovaPoshtaResponse<readonly PriceCalculat
 
 // Validation helpers
 export function isValidPoshtomatDimensions(seat: OptionsSeatItem): seat is PoshtomatOptionsSeatItem {
-  return seat.weight <= 20 && seat.volumetricWidth <= 40 && seat.volumetricLength <= 60 && seat.volumetricHeight <= 30;
+  return seat.Weight <= 20 && seat.VolumetricWidth <= 40 && seat.VolumetricLength <= 60 && seat.VolumetricHeight <= 30;
 }
 
 export function isValidPoshtomatCargoType(cargoType: CargoType): cargoType is CargoType.Parcel | CargoType.Documents {
@@ -373,12 +373,12 @@ export function isValidPoshtomatServiceType(
 }
 
 export function calculateTotalWeight(seats: readonly OptionsSeatItem[]): Weight {
-  return seats.reduce((total, seat) => total + seat.weight, 0) as Weight;
+  return seats.reduce((total, seat) => total + seat.Weight, 0) as Weight;
 }
 
 export function calculateTotalVolume(seats: readonly OptionsSeatItem[]): Volume {
   return seats.reduce((total, seat) => {
-    const volume = (seat.volumetricWidth * seat.volumetricLength * seat.volumetricHeight) / 1000000; // cm³ to m³
+    const volume = (seat.VolumetricWidth * seat.VolumetricLength * seat.VolumetricHeight) / 1000000; // cm³ to m³
     return total + volume;
   }, 0) as Volume;
 }
@@ -386,18 +386,18 @@ export function calculateTotalVolume(seats: readonly OptionsSeatItem[]): Volume 
 // Type guards
 export function hasAdditionalServices(
   request: CreateWaybillWithOptionsRequest,
-): request is CreateWaybillWithOptionsRequest & { additionalServices: AdditionalServices } {
-  return request.additionalServices !== undefined;
+): request is CreateWaybillWithOptionsRequest & { AdditionalServices: AdditionalServices } {
+  return request.AdditionalServices !== undefined;
 }
 
 export function hasBackwardDelivery(
   request: CreateWaybillWithOptionsRequest,
-): request is CreateWaybillWithOptionsRequest & { backwardDeliveryData: readonly BackwardDeliveryItem[] } {
-  return request.backwardDeliveryData !== undefined && request.backwardDeliveryData.length > 0;
+): request is CreateWaybillWithOptionsRequest & { BackwardDeliveryData: readonly BackwardDeliveryItem[] } {
+  return request.BackwardDeliveryData !== undefined && request.BackwardDeliveryData.length > 0;
 }
 
 export function isThirdPersonPayer(
   request: BaseWaybillProperties,
-): request is BaseWaybillProperties & { thirdPerson: CounterpartyRef } {
-  return request.payerType === PayerType.ThirdPerson;
+): request is BaseWaybillProperties & { ThirdPerson: CounterpartyRef } {
+  return request.PayerType === PayerType.ThirdPerson;
 }

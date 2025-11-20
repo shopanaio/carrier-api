@@ -30,6 +30,6 @@ async function main() {
   );
 
   // Tracking API (example number)
-  const tracked = await client.tracking.trackDocument('20400048799000');
+  const tracked = await client.tracking.trackDocument({ Documents: ['20400048799000'] });
   console.log('Track first item:', tracked);
 }

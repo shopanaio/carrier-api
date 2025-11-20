@@ -23,9 +23,9 @@ describe('TrackingService - calculateStatistics', () => {
   // TODO: Requires valid API key with associated waybills
   it.skip('should track documents for comprehensive statistics', async () => {
     const response = await client.tracking.getDocumentList({
-      dateTimeFrom: '01.01.2024',
-      dateTimeTo: '31.01.2024',
-      page: 1,
+      DateTimeFrom: '01.01.2024',
+      DateTimeTo: '31.01.2024',
+      Page: 1,
     });
 
     expect(response.success).toBe(true);

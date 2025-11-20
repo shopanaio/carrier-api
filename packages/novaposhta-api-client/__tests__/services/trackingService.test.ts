@@ -68,7 +68,7 @@ describe('TrackingService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new TrackingService());
 
       const result = await client.tracking.trackDocuments({
-        documents: [{ documentNumber: '20400048799000' }, { documentNumber: '20400048799001' }],
+        Documents: [{ DocumentNumber: '20400048799000' }, { DocumentNumber: '20400048799001' }],
       });
 
       expect(calls).toHaveLength(1);
@@ -97,7 +97,7 @@ describe('TrackingService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new TrackingService());
 
       const result = await client.tracking.trackDocuments({
-        documents: [{ documentNumber: '20400048799000', phone: '380501234567' }],
+        Documents: [{ DocumentNumber: '20400048799000', Phone: '380501234567' }],
       });
 
       expect(calls).toHaveLength(1);
@@ -127,7 +127,7 @@ describe('TrackingService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new TrackingService());
 
-      const result = await client.tracking.getDocumentList({ dateTimeFrom: '01.01.2024', dateTimeTo: '31.01.2024' });
+      const result = await client.tracking.getDocumentList({ DateTimeFrom: '01.01.2024', DateTimeTo: '31.01.2024' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
@@ -211,8 +211,8 @@ describe('TrackingService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new TrackingService());
 
       const result = await client.tracking.getDocumentMovement({
-        documents: [{ documentNumber: '20400048799000' }],
-        showDeliveryDetails: true,
+        Documents: [{ DocumentNumber: '20400048799000' }],
+        ShowDeliveryDetails: true,
       });
 
       expect(calls).toHaveLength(1);

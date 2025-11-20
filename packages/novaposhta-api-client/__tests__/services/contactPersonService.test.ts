@@ -20,12 +20,12 @@ describe('ContactPersonService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new ContactPersonService());
 
       const result = await client.contactPerson.save({
-        counterpartyRef: 'counterparty-ref',
-        firstName: 'Марія',
-        middleName: 'Іванівна',
-        lastName: 'Коваленко',
-        phone: '380671234567',
-        email: 'maria@example.com',
+        CounterpartyRef: 'counterparty-ref',
+        FirstName: 'Марія',
+        MiddleName: 'Іванівна',
+        LastName: 'Коваленко',
+        Phone: '380671234567',
+        Email: 'maria@example.com',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -58,9 +58,9 @@ describe('ContactPersonService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new ContactPersonService());
 
       const result = await client.contactPerson.update({
-        ref: 'contact-ref',
-        counterpartyRef: 'counterparty-ref',
-        phone: '380501111111',
+        Ref: 'contact-ref',
+        CounterpartyRef: 'counterparty-ref',
+        Phone: '380501111111',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -89,8 +89,8 @@ describe('ContactPersonService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new ContactPersonService());
 
       const result = await client.contactPerson.delete({
-        ref: 'contact-ref',
-        counterpartyRef: 'counterparty-ref',
+        Ref: 'contact-ref',
+        CounterpartyRef: 'counterparty-ref',
       });
 
       expect(calls[0].body).toMatchObject({

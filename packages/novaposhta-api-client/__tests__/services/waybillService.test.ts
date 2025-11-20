@@ -22,25 +22,25 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const waybillData = {
-        payerType: PayerType.Sender,
-        paymentMethod: PaymentMethod.Cash,
-        dateTime: '01.01.2024',
-        cargoType: CargoType.Parcel,
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        seatsAmount: 1,
-        description: 'Test Package',
-        cost: 1000,
-        citySender: 'city-sender-ref',
-        sender: 'sender-ref',
-        senderAddress: 'sender-address-ref',
-        contactSender: 'contact-sender-ref',
-        sendersPhone: '380501234567',
-        cityRecipient: 'city-recipient-ref',
-        recipient: 'recipient-ref',
-        recipientAddress: 'recipient-address-ref',
-        contactRecipient: 'contact-recipient-ref',
-        recipientsPhone: '380507654321',
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Test Package',
+        Cost: 1000,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-address-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
       };
 
       const result = await client.waybill.create(waybillData);
@@ -91,26 +91,26 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const updateData = {
-        ref: 'waybill-ref-1',
-        payerType: PayerType.Sender,
-        paymentMethod: PaymentMethod.Cash,
-        dateTime: '01.01.2024',
-        cargoType: CargoType.Parcel,
-        weight: 2.0,
-        serviceType: ServiceType.WarehouseWarehouse,
-        seatsAmount: 1,
-        description: 'Updated Package',
-        cost: 1500,
-        citySender: 'city-sender-ref',
-        sender: 'sender-ref',
-        senderAddress: 'sender-address-ref',
-        contactSender: 'contact-sender-ref',
-        sendersPhone: '380501234567',
-        cityRecipient: 'city-recipient-ref',
-        recipient: 'recipient-ref',
-        recipientAddress: 'recipient-address-ref',
-        contactRecipient: 'contact-recipient-ref',
-        recipientsPhone: '380507654321',
+        Ref: 'waybill-ref-1',
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 2.0,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Updated Package',
+        Cost: 1500,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-address-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
       };
 
       const result = await client.waybill.update(updateData);
@@ -144,14 +144,14 @@ describe('WaybillService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
-      const result = await client.waybill.delete({ documentRefs: ['waybill-ref-1'] });
+      const result = await client.waybill.delete({ DocumentRefs: ['waybill-ref-1'] });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'delete',
         methodProperties: {
-          DocumentRefs: 'waybill-ref-1',
+          DocumentRefs: ['waybill-ref-1'],
         },
       });
       expect(result.success).toBe(true);
@@ -166,25 +166,25 @@ describe('WaybillService', () => {
       );
 
       const waybillData = {
-        payerType: PayerType.Sender,
-        paymentMethod: PaymentMethod.Cash,
-        dateTime: '01.01.2024',
-        cargoType: CargoType.Parcel,
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        seatsAmount: 1,
-        description: 'Test Package',
-        cost: 1000,
-        citySender: 'city-sender-ref',
-        sender: 'sender-ref',
-        senderAddress: 'sender-address-ref',
-        contactSender: 'contact-sender-ref',
-        sendersPhone: '380501234567',
-        cityRecipient: 'city-recipient-ref',
-        recipient: 'recipient-ref',
-        recipientAddress: 'recipient-address-ref',
-        contactRecipient: 'contact-recipient-ref',
-        recipientsPhone: '380507654321',
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Test Package',
+        Cost: 1000,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-address-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
       };
 
       const result = await client.waybill.validateWaybill(waybillData);
@@ -208,26 +208,26 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const result = await client.waybill.createWithOptions({
-        payerType: PayerType.Sender,
-        paymentMethod: PaymentMethod.Cash,
-        dateTime: '01.01.2024',
-        cargoType: CargoType.Parcel,
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        seatsAmount: 1,
-        description: 'Test Package',
-        cost: 1000,
-        citySender: 'city-sender-ref',
-        sender: 'sender-ref',
-        senderAddress: 'sender-address-ref',
-        contactSender: 'contact-sender-ref',
-        sendersPhone: '380501234567',
-        cityRecipient: 'city-recipient-ref',
-        recipient: 'recipient-ref',
-        recipientAddress: 'recipient-address-ref',
-        contactRecipient: 'contact-recipient-ref',
-        recipientsPhone: '380507654321',
-        backwardDeliveryData: [],
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Test Package',
+        Cost: 1000,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-address-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
+        BackwardDeliveryData: [],
       });
 
       expect(calls).toHaveLength(1);
@@ -251,25 +251,25 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const result = await client.waybill.createForPostomat({
-        payerType: PayerType.Sender,
-        paymentMethod: PaymentMethod.Cash,
-        dateTime: '01.01.2024',
-        cargoType: CargoType.Parcel,
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        seatsAmount: 1,
-        description: 'Test Package',
-        cost: 1000,
-        citySender: 'city-sender-ref',
-        sender: 'sender-ref',
-        senderAddress: 'sender-address-ref',
-        contactSender: 'contact-sender-ref',
-        sendersPhone: '380501234567',
-        cityRecipient: 'city-recipient-ref',
-        recipient: 'recipient-ref',
-        recipientAddress: 'recipient-address-ref',
-        contactRecipient: 'contact-recipient-ref',
-        recipientsPhone: '380507654321',
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Test Package',
+        Cost: 1000,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-address-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
       });
 
       expect(calls).toHaveLength(1);
@@ -290,9 +290,9 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const result = await client.waybill.getDeliveryDate({
-        citySender: 'city-sender-ref',
-        cityRecipient: 'city-recipient-ref',
-        serviceType: ServiceType.WarehouseWarehouse,
+        CitySender: 'city-sender-ref',
+        CityRecipient: 'city-recipient-ref',
+        ServiceType: ServiceType.WarehouseWarehouse,
       });
 
       expect(calls).toHaveLength(1);
@@ -324,13 +324,13 @@ describe('WaybillService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
       const result = await client.waybill.getPrice({
-        citySender: 'city-sender-ref',
-        cityRecipient: 'city-recipient-ref',
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        cost: 1000,
-        cargoType: CargoType.Parcel,
-        seatsAmount: 1,
+        CitySender: 'city-sender-ref',
+        CityRecipient: 'city-recipient-ref',
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        Cost: 1000,
+        CargoType: CargoType.Parcel,
+        SeatsAmount: 1,
       });
 
       expect(calls).toHaveLength(1);
@@ -367,46 +367,46 @@ describe('WaybillService', () => {
 
       const waybills = [
         {
-          payerType: PayerType.Sender,
-          paymentMethod: PaymentMethod.Cash,
-          dateTime: '01.01.2024',
-          cargoType: CargoType.Parcel,
-          weight: 1.5,
-          serviceType: ServiceType.WarehouseWarehouse,
-          seatsAmount: 1,
-          description: 'Test Package 1',
-          cost: 1000,
-          citySender: 'city-sender-ref',
-          sender: 'sender-ref',
-          senderAddress: 'sender-address-ref',
-          contactSender: 'contact-sender-ref',
-          sendersPhone: '380501234567',
-          cityRecipient: 'city-recipient-ref',
-          recipient: 'recipient-ref',
-          recipientAddress: 'recipient-address-ref',
-          contactRecipient: 'contact-recipient-ref',
-          recipientsPhone: '380507654321',
+          PayerType: PayerType.Sender,
+          PaymentMethod: PaymentMethod.Cash,
+          DateTime: '01.01.2024',
+          CargoType: CargoType.Parcel,
+          Weight: 1.5,
+          ServiceType: ServiceType.WarehouseWarehouse,
+          SeatsAmount: 1,
+          Description: 'Test Package 1',
+          Cost: 1000,
+          CitySender: 'city-sender-ref',
+          Sender: 'sender-ref',
+          SenderAddress: 'sender-address-ref',
+          ContactSender: 'contact-sender-ref',
+          SendersPhone: '380501234567',
+          CityRecipient: 'city-recipient-ref',
+          Recipient: 'recipient-ref',
+          RecipientAddress: 'recipient-address-ref',
+          ContactRecipient: 'contact-recipient-ref',
+          RecipientsPhone: '380507654321',
         },
         {
-          payerType: PayerType.Sender,
-          paymentMethod: PaymentMethod.Cash,
-          dateTime: '01.01.2024',
-          cargoType: CargoType.Parcel,
-          weight: 2.0,
-          serviceType: ServiceType.WarehouseWarehouse,
-          seatsAmount: 1,
-          description: 'Test Package 2',
-          cost: 1500,
-          citySender: 'city-sender-ref',
-          sender: 'sender-ref',
-          senderAddress: 'sender-address-ref',
-          contactSender: 'contact-sender-ref',
-          sendersPhone: '380501234567',
-          cityRecipient: 'city-recipient-ref',
-          recipient: 'recipient-ref',
-          recipientAddress: 'recipient-address-ref',
-          contactRecipient: 'contact-recipient-ref',
-          recipientsPhone: '380507654321',
+          PayerType: PayerType.Sender,
+          PaymentMethod: PaymentMethod.Cash,
+          DateTime: '01.01.2024',
+          CargoType: CargoType.Parcel,
+          Weight: 2.0,
+          ServiceType: ServiceType.WarehouseWarehouse,
+          SeatsAmount: 1,
+          Description: 'Test Package 2',
+          Cost: 1500,
+          CitySender: 'city-sender-ref',
+          Sender: 'sender-ref',
+          SenderAddress: 'sender-address-ref',
+          ContactSender: 'contact-sender-ref',
+          SendersPhone: '380501234567',
+          CityRecipient: 'city-recipient-ref',
+          Recipient: 'recipient-ref',
+          RecipientAddress: 'recipient-address-ref',
+          ContactRecipient: 'contact-recipient-ref',
+          RecipientsPhone: '380507654321',
         },
       ];
 
@@ -434,46 +434,46 @@ describe('WaybillService', () => {
 
       const waybills = [
         {
-          payerType: PayerType.Sender,
-          paymentMethod: PaymentMethod.Cash,
-          dateTime: '01.01.2024',
-          cargoType: CargoType.Parcel,
-          weight: 1.5,
-          serviceType: ServiceType.WarehouseWarehouse,
-          seatsAmount: 1,
-          description: 'Test Package 1',
-          cost: 1000,
-          citySender: 'city-sender-ref',
-          sender: 'sender-ref',
-          senderAddress: 'sender-address-ref',
-          contactSender: 'contact-sender-ref',
-          sendersPhone: '380501234567',
-          cityRecipient: 'city-recipient-ref',
-          recipient: 'recipient-ref',
-          recipientAddress: 'recipient-address-ref',
-          contactRecipient: 'contact-recipient-ref',
-          recipientsPhone: '380507654321',
+          PayerType: PayerType.Sender,
+          PaymentMethod: PaymentMethod.Cash,
+          DateTime: '01.01.2024',
+          CargoType: CargoType.Parcel,
+          Weight: 1.5,
+          ServiceType: ServiceType.WarehouseWarehouse,
+          SeatsAmount: 1,
+          Description: 'Test Package 1',
+          Cost: 1000,
+          CitySender: 'city-sender-ref',
+          Sender: 'sender-ref',
+          SenderAddress: 'sender-address-ref',
+          ContactSender: 'contact-sender-ref',
+          SendersPhone: '380501234567',
+          CityRecipient: 'city-recipient-ref',
+          Recipient: 'recipient-ref',
+          RecipientAddress: 'recipient-address-ref',
+          ContactRecipient: 'contact-recipient-ref',
+          RecipientsPhone: '380507654321',
         },
         {
-          payerType: PayerType.Sender,
-          paymentMethod: PaymentMethod.Cash,
-          dateTime: '01.01.2024',
-          cargoType: CargoType.Parcel,
-          weight: 2.0,
-          serviceType: ServiceType.WarehouseWarehouse,
-          seatsAmount: 1,
-          description: 'Test Package 2',
-          cost: 1500,
-          citySender: 'city-sender-ref',
-          sender: 'sender-ref',
-          senderAddress: 'sender-address-ref',
-          contactSender: 'contact-sender-ref',
-          sendersPhone: '380501234567',
-          cityRecipient: 'city-recipient-ref',
-          recipient: 'recipient-ref',
-          recipientAddress: 'recipient-address-ref',
-          contactRecipient: 'contact-recipient-ref',
-          recipientsPhone: '380507654321',
+          PayerType: PayerType.Sender,
+          PaymentMethod: PaymentMethod.Cash,
+          DateTime: '01.01.2024',
+          CargoType: CargoType.Parcel,
+          Weight: 2.0,
+          ServiceType: ServiceType.WarehouseWarehouse,
+          SeatsAmount: 1,
+          Description: 'Test Package 2',
+          Cost: 1500,
+          CitySender: 'city-sender-ref',
+          Sender: 'sender-ref',
+          SenderAddress: 'sender-address-ref',
+          ContactSender: 'contact-sender-ref',
+          SendersPhone: '380501234567',
+          CityRecipient: 'city-recipient-ref',
+          Recipient: 'recipient-ref',
+          RecipientAddress: 'recipient-address-ref',
+          ContactRecipient: 'contact-recipient-ref',
+          RecipientsPhone: '380507654321',
         },
       ];
 
@@ -507,7 +507,7 @@ describe('WaybillService', () => {
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'delete',
         methodProperties: {
-          DocumentRefs: 'waybill-ref-1,waybill-ref-2',
+          DocumentRefs: ['waybill-ref-1', 'waybill-ref-2'],
         },
       });
       expect(result.success).toBe(true);
@@ -542,13 +542,13 @@ describe('WaybillService', () => {
       }).use(new WaybillService());
 
       const result = await client.waybill.getEstimate({
-        citySender: 'city-sender-ref',
-        cityRecipient: 'city-recipient-ref',
-        weight: 1.5,
-        serviceType: ServiceType.WarehouseWarehouse,
-        cost: 1000,
-        cargoType: CargoType.Parcel,
-        seatsAmount: 1,
+        CitySender: 'city-sender-ref',
+        CityRecipient: 'city-recipient-ref',
+        Weight: 1.5,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        Cost: 1000,
+        CargoType: CargoType.Parcel,
+        SeatsAmount: 1,
       });
 
       expect(result.price.success).toBe(true);
@@ -563,9 +563,9 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
-        cargoType: CargoType.Parcel,
-        serviceType: ServiceType.WarehouseWarehouse,
-        cost: 5000,
+        CargoType: CargoType.Parcel,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        Cost: 5000,
       });
 
       expect(result).toBe(true);
@@ -577,9 +577,9 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
-        cargoType: CargoType.Parcel,
-        serviceType: ServiceType.WarehouseWarehouse,
-        cost: 15000,
+        CargoType: CargoType.Parcel,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        Cost: 15000,
       });
 
       expect(result).toBe(false);
@@ -591,9 +591,9 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
-        cargoType: 'Pallet' as any,
-        serviceType: ServiceType.WarehouseWarehouse,
-        cost: 5000,
+        CargoType: 'Pallet' as any,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        Cost: 5000,
       });
 
       expect(result).toBe(false);

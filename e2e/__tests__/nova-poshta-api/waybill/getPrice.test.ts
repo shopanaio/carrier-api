@@ -5,13 +5,13 @@ import { itWithApiKey } from '../../../setup/testHelpers';
 describe('WaybillService - getPrice', () => {
   itWithApiKey('should calculate delivery price', async () => {
     const response = await client.waybill.getPrice({
-      citySender: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
-      cityRecipient: 'db5c88e0-391c-11dd-90d9-001a92567626', // Dnipro
-      weight: 1,
-      serviceType: ServiceType.WarehouseWarehouse,
-      cost: 1000,
-      cargoType: CargoType.Parcel,
-      seatsAmount: 1,
+      CitySender: '8d5a980d-391c-11dd-90d9-001a92567626', // Kyiv
+      CityRecipient: 'db5c88e0-391c-11dd-90d9-001a92567626', // Dnipro
+      Weight: 1,
+      ServiceType: ServiceType.WarehouseWarehouse,
+      Cost: 1000,
+      CargoType: CargoType.Parcel,
+      SeatsAmount: 1,
     });
 
     expect(response.success).toBe(true);

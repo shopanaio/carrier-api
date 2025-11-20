@@ -56,12 +56,7 @@ export class TrackingService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetStatusDocuments,
-      methodProperties: {
-        Documents: request.documents.map(doc => ({
-          DocumentNumber: doc.documentNumber,
-          Phone: doc.phone,
-        })),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<TrackingResponse['data']>(apiRequest);
@@ -72,7 +67,7 @@ export class TrackingService {
    */
   async trackDocument(documentNumber: string, phone?: string): Promise<TrackingStatusData | null> {
     const response = await this.trackDocuments({
-      documents: [{ documentNumber, phone: phone as any }],
+      Documents: [{ DocumentNumber: documentNumber, Phone: phone as any }],
     });
 
     if (response.success && response.data.length > 0) {
@@ -90,12 +85,7 @@ export class TrackingService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetStatusDocuments,
-      methodProperties: {
-        Documents: request.documents.map(doc => ({
-          DocumentNumber: doc.documentNumber,
-          Phone: doc.phone,
-        })),
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DocumentMovementResponse['data']>(apiRequest);
@@ -109,13 +99,7 @@ export class TrackingService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentList,
-      methodProperties: {
-        DateTimeFrom: request.dateTimeFrom,
-        DateTimeTo: request.dateTimeTo,
-        Page: request.page?.toString() || '1',
-        GetFullList: request.getFullList || '0',
-        DateTime: request.dateTime,
-      },
+      methodProperties: request as unknown as Record<string, unknown>,
     };
 
     return await this.transport.request<DocumentListResponse['data']>(apiRequest);
@@ -129,8 +113,8 @@ export class TrackingService {
     failed: string[];
     statistics: TrackingStatistics;
   }> {
-    const documents = documentNumbers.map(num => ({ documentNumber: num }));
-    const response = await this.trackDocuments({ documents });
+    const documents = documentNumbers.map(num => ({ DocumentNumber: num }));
+    const response = await this.trackDocuments({ Documents: documents });
 
     const successful: TrackingStatusData[] = [];
     const failed: string[] = [];
@@ -356,9 +340,9 @@ export class TrackingService {
     }>;
   }): Promise<TrackingResponse> {
     return this.trackDocuments({
-      documents: request.documents.map(doc => ({
-        documentNumber: doc.documentNumber,
-        phone: doc.phone as any,
+      Documents: request.documents.map(doc => ({
+        DocumentNumber: doc.documentNumber,
+        Phone: doc.phone as any,
       })),
     });
   }

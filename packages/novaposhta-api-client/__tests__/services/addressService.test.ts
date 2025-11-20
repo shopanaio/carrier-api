@@ -20,7 +20,7 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.getCities({ findByString: 'Kyiv' });
+      const result = await client.address.getCities({ FindByString: 'Kyiv' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].url).toBe(baseUrl);
@@ -46,13 +46,13 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.getCities({ findByString: 'Kyiv', page: 1, limit: 10 });
+      const result = await client.address.getCities({ FindByString: 'Kyiv', Page: 1, Limit: 10 });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',
         calledMethod: 'getCities',
-        methodProperties: { FindByString: 'Kyiv', Page: '1', Limit: '10' },
+        methodProperties: { FindByString: 'Kyiv', Page: 1, Limit: 10 },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -72,13 +72,13 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.getSettlements({ ref: 'area-ref-1' });
+      const result = await client.address.getSettlements({ Ref: 'area-ref-1' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',
         calledMethod: 'getSettlementAreas',
-        methodProperties: { ref: 'area-ref-1' },
+        methodProperties: { Ref: 'area-ref-1' },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -103,13 +103,13 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.searchSettlements({ cityName: 'Kyiv', page: 1, limit: 10 });
+      const result = await client.address.searchSettlements({ CityName: 'Kyiv', Page: 1, Limit: 10 });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',
         calledMethod: 'searchSettlements',
-        methodProperties: { CityName: 'Kyiv', Page: '1', Limit: '10' },
+        methodProperties: { CityName: 'Kyiv', Page: 1, Limit: 10 },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -132,9 +132,9 @@ describe('AddressService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
       const result = await client.address.searchSettlementStreets({
-        streetName: 'Khreshchatyk',
-        settlementRef: 'settlement-ref-1',
-        limit: 10,
+        StreetName: 'Khreshchatyk',
+        SettlementRef: 'settlement-ref-1',
+        Limit: 10,
       });
 
       expect(calls).toHaveLength(1);
@@ -144,7 +144,7 @@ describe('AddressService', () => {
         methodProperties: {
           StreetName: 'Khreshchatyk',
           SettlementRef: 'settlement-ref-1',
-          Limit: '10',
+          Limit: 10,
         },
       });
       expect(result.success).toBe(true);
@@ -166,15 +166,15 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.getStreet({ cityRef: 'city-ref-1', findByString: 'Khreshchatyk' });
+      const result = await client.address.getStreet({ CityRef: 'city-ref-1', FindByString: 'Khreshchatyk' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',
         calledMethod: 'getStreet',
         methodProperties: {
-          cityRef: 'city-ref-1',
-          findByString: 'Khreshchatyk',
+          CityRef: 'city-ref-1',
+          FindByString: 'Khreshchatyk',
         },
       });
       expect(result.success).toBe(true);
@@ -195,13 +195,13 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.getSettlementCountryRegion({ areaRef: 'area-ref-1' });
+      const result = await client.address.getSettlementCountryRegion({ AreaRef: 'area-ref-1' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',
         calledMethod: 'getSettlementCountryRegion',
-        methodProperties: { areaRef: 'area-ref-1' },
+        methodProperties: { AreaRef: 'area-ref-1' },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -222,11 +222,11 @@ describe('AddressService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
       const result = await client.address.save({
-        counterpartyRef: 'counterparty-ref',
-        streetRef: 'street-ref',
-        buildingNumber: '1',
-        flat: '5',
-        note: 'Door code 123',
+        CounterpartyRef: 'counterparty-ref',
+        StreetRef: 'street-ref',
+        BuildingNumber: '1',
+        Flat: '5',
+        Note: 'Door code 123',
       });
 
       expect(calls).toHaveLength(1);
@@ -259,11 +259,11 @@ describe('AddressService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
       const result = await client.address.update({
-        ref: 'address-ref',
-        counterpartyRef: 'counterparty-ref',
-        streetRef: 'street-ref',
-        buildingNumber: '10',
-        note: 'updated note',
+        Ref: 'address-ref',
+        CounterpartyRef: 'counterparty-ref',
+        StreetRef: 'street-ref',
+        BuildingNumber: '10',
+        Note: 'updated note',
       });
 
       expect(calls[0].body).toMatchObject({
@@ -293,7 +293,7 @@ describe('AddressService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new AddressService());
 
-      const result = await client.address.delete({ ref: 'address-ref' });
+      const result = await client.address.delete({ Ref: 'address-ref' });
 
       expect(calls[0].body).toMatchObject({
         modelName: 'AddressGeneral',

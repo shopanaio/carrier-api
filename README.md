@@ -123,9 +123,9 @@ const client = createClient({
   .use(new TrackingService());
 
 // Use the namespaced API
-const cities = await client.address.searchCities({ query: 'Київ', limit: 10 });
+const cities = await client.address.searchCities({ FindByString: 'Київ', Limit: 10 });
 const cargoTypes = await client.reference.getCargoTypes();
-const tracking = await client.tracking.trackDocument('20450123456789');
+const tracking = await client.tracking.trackDocument({ Documents: ['20450123456789'] });
 
 console.log('Found cities:', cities.data.length);
 console.log('Package status:', tracking.data[0].Status);

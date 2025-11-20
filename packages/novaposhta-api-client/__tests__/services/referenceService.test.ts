@@ -95,13 +95,13 @@ describe('ReferenceService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
-      const result = await client.reference.getPackList({ length: 10, width: 10, height: 10 });
+      const result = await client.reference.getPackList({ Length: 10, Width: 10, Height: 10 });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'CommonGeneral',
         calledMethod: 'getPackList',
-        methodProperties: { length: 10, width: 10, height: 10 },
+        methodProperties: { Length: 10, Width: 10, Height: 10 },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -146,13 +146,13 @@ describe('ReferenceService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
-      const result = await client.reference.getCargoDescriptionList({ findByString: 'Electronics' });
+      const result = await client.reference.getCargoDescriptionList({ FindByString: 'Electronics' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'CommonGeneral',
         calledMethod: 'getCargoDescriptionList',
-        methodProperties: { findByString: 'Electronics' },
+        methodProperties: { FindByString: 'Electronics' },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -249,8 +249,8 @@ describe('ReferenceService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
       const result = await client.reference.getTimeIntervals({
-        recipientCityRef: 'city-ref-1',
-        dateTime: '01.01.2024',
+        RecipientCityRef: 'city-ref-1',
+        DateTime: '01.01.2024',
       });
 
       expect(calls).toHaveLength(1);
@@ -274,7 +274,7 @@ describe('ReferenceService', () => {
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
       await client.reference.getTimeIntervals({
-        recipientCityRef: 'test-city-ref',
+        RecipientCityRef: 'test-city-ref',
       });
 
       expect(calls[0].body.methodProperties).toHaveProperty('RecipientCityRef', 'test-city-ref');
@@ -322,7 +322,7 @@ describe('ReferenceService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
-      const result = await client.reference.getPickupTimeIntervals({ senderCityRef: 'city-ref-1', dateTime: '01.01.2024' });
+      const result = await client.reference.getPickupTimeIntervals({ SenderCityRef: 'city-ref-1', DateTime: '01.01.2024' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
@@ -351,13 +351,13 @@ describe('ReferenceService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new ReferenceService());
 
-      const result = await client.reference.getTypesOfPayers({ language: 'ua' });
+      const result = await client.reference.getTypesOfPayers({ Language: 'ua' });
 
       expect(calls).toHaveLength(1);
       expect(calls[0].body).toMatchObject({
         modelName: 'CommonGeneral',
         calledMethod: 'getTypesOfPayers',
-        methodProperties: { language: 'ua' },
+        methodProperties: { Language: 'ua' },
       });
       expect(result.data).toEqual(mockData);
     });

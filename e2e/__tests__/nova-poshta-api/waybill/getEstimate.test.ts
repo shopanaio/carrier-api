@@ -5,13 +5,13 @@ import { itWithApiKey } from '../../../setup/testHelpers';
 describe('WaybillService - getEstimate', () => {
   itWithApiKey('should get both price and delivery date estimation', async () => {
     const response = await client.waybill.getEstimate({
-      citySender: '8d5a980d-391c-11dd-90d9-001a92567626',
-      cityRecipient: 'db5c88e0-391c-11dd-90d9-001a92567626',
-      weight: 1,
-      serviceType: ServiceType.WarehouseWarehouse,
-      cost: 1000,
-      cargoType: CargoType.Parcel,
-      seatsAmount: 1,
+      CitySender: '8d5a980d-391c-11dd-90d9-001a92567626',
+      CityRecipient: 'db5c88e0-391c-11dd-90d9-001a92567626',
+      Weight: 1,
+      ServiceType: ServiceType.WarehouseWarehouse,
+      Cost: 1000,
+      CargoType: CargoType.Parcel,
+      SeatsAmount: 1,
     });
 
     expect(response).toBeDefined();
