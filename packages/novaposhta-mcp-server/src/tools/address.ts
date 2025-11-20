@@ -119,7 +119,7 @@ async function handleSearchCities(args: ToolArguments, context: ToolContext): Pr
     };
   });
 
-  return createTextResult(formatAsJson({ total: response.data?.length ?? 0, preview }), { response });
+  return createTextResult(formatAsJson({ total: response.data?.length ?? 0, preview }));
 }
 
 async function handleSearchSettlements(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
@@ -143,7 +143,7 @@ async function handleSearchSettlements(args: ToolArguments, context: ToolContext
     deliveryCity: address.DeliveryCity,
   }));
 
-  return createTextResult(formatAsJson({ total: addresses.length, preview }), { response });
+  return createTextResult(formatAsJson({ total: addresses.length, preview }));
 }
 
 async function handleSearchStreets(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
@@ -164,7 +164,7 @@ async function handleSearchStreets(args: ToolArguments, context: ToolContext): P
     location: street.Location,
   }));
 
-  return createTextResult(formatAsJson({ total: addresses.length, preview }), { response });
+  return createTextResult(formatAsJson({ total: addresses.length, preview }));
 }
 
 async function handleGetWarehouses(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
@@ -217,5 +217,5 @@ async function handleGetWarehouses(args: ToolArguments, context: ToolContext): P
     schedule: warehouse.Schedule,
   }));
 
-  return createTextResult(formatAsJson({ total: data.length, preview }), { response });
+  return createTextResult(formatAsJson({ total: data.length, preview }));
 }
