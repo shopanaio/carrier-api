@@ -9,8 +9,8 @@
     "novaposhta-mcp": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "dev": "tsx src/index.ts",
+    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@modelcontextprotocol/* --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
+    "dev": "npm run build && node dist/index.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest run",
     "test:watch": "vitest"
@@ -31,6 +31,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
+    "esbuild": "^0.19.0",
     "tsx": "^4.1.0",
     "typescript": "^5.3.3",
     "vitest": "^1.0.0"
