@@ -1,6 +1,6 @@
-# Nova Poshta MCP Server
-
 <div align="center">
+
+# Nova Poshta MCP Server
 
 [![npm version](https://img.shields.io/npm/v/@shopana/novaposhta-mcp-server.svg?style=flat-square)](https://www.npmjs.com/package/@shopana/novaposhta-mcp-server)
 [![MCP Registry](https://img.shields.io/badge/MCP_Registry-Published-green.svg?style=flat-square)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.shopanaio/novaposhta)
