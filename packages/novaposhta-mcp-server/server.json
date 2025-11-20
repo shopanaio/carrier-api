@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-10-17/server.schema.json",
+  "name": "io.github.shopanaio/novaposhta",
+  "description": "MCP Server for Nova Poshta API integration with AI assistants",
+  "repository": {
+    "url": "https://github.com/shopanaio/carrier-api",
+    "source": "github",
+    "subfolder": "packages/novaposhta-mcp-server"
+  },
+  "version": "0.0.1-alpha.5",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@shopana/novaposhta-mcp-server",
+      "version": "0.0.1-alpha.5",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "description": "Your Nova Poshta API key",
+          "isRequired": true,
+          "format": "string",
+          "isSecret": true,
+          "name": "NOVA_POSHTA_API_KEY"
+        },
+        {
+          "description": "System identifier (e.g., 'DevCentre' for development/testing)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "NOVA_POSHTA_SYSTEM"
+        },
+        {
+          "description": "Logging level (debug, info, warn, error)",
+          "isRequired": false,
+          "format": "string",
+          "isSecret": false,
+          "name": "LOG_LEVEL"
+        }
+      ]
+    }
+  ]
+}

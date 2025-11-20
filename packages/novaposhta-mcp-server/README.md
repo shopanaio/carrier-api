@@ -3,11 +3,14 @@
 <div align="center">
 
 [![npm version](https://img.shields.io/npm/v/@shopana/novaposhta-mcp-server.svg?style=flat-square)](https://www.npmjs.com/package/@shopana/novaposhta-mcp-server)
+[![MCP Registry](https://img.shields.io/badge/MCP_Registry-Published-green.svg?style=flat-square)](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.shopanaio/novaposhta)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg?style=flat-square)](https://www.apache.org/licenses/LICENSE-2.0)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue.svg?style=flat-square)](https://www.typescriptlang.org/)
 [![MCP](https://img.shields.io/badge/MCP-1.22+-green.svg?style=flat-square)](https://modelcontextprotocol.io)
 
 **Model Context Protocol (MCP) server for Nova Poshta API integration with AI assistants**
+
+**✨ Now available in the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.shopanaio/novaposhta)!**
 
 [Features](#features) • [Installation](#installation) • [Quick Start](#quick-start) • [Documentation](#available-tools) • [Examples](#usage-examples)
 
@@ -31,6 +34,12 @@
 - **Zero Configuration**: Works out of the box with sensible defaults
 
 ## Installation
+
+### From MCP Registry (Easiest)
+
+This server is published in the [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.shopanaio/novaposhta) as `io.github.shopanaio/novaposhta`.
+
+MCP-compatible clients can discover and install it automatically. For manual installation, see options below.
 
 ### For Claude Desktop / Claude Code (Recommended)
 
@@ -964,6 +973,7 @@ Apache License 2.0 - see [LICENSE](./LICENSE) for details.
 
 ## Links
 
+- [MCP Registry](https://registry.modelcontextprotocol.io/v0.1/servers?search=io.github.shopanaio/novaposhta) - Find this server in the official registry
 - [Nova Poshta API Documentation](https://developers.novaposhta.ua/)
 - [Model Context Protocol](https://modelcontextprotocol.io)
 - [MCP SDK](https://github.com/modelcontextprotocol/sdk)
