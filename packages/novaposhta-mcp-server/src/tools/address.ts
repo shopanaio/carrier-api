@@ -8,39 +8,39 @@ import { createTextResult, formatAsJson } from '../utils/tool-response.js';
 const addressTools: Tool[] = [
   {
     name: 'address_search_cities',
-    description: 'Find Nova Poshta cities by name or postal index.',
+    description: 'Find Nova Poshta cities by name or postal index. IMPORTANT: Always use limit parameter (recommended: 10) to avoid large responses.',
     inputSchema: {
       type: 'object',
       properties: {
         query: { type: 'string', description: 'Partial city name or postal code.' },
         page: { type: 'number', description: 'Page number (default 1).' },
-        limit: { type: 'number', description: 'Items per page (max 50).' },
+        limit: { type: 'number', description: 'Items per page (max 50). Recommended: 10 to avoid large responses.' },
       },
       required: ['query'],
     },
   },
   {
     name: 'address_search_settlements',
-    description: 'Search for settlements (city, town, village) with pagination.',
+    description: 'Search for settlements (city, town, village) with pagination. IMPORTANT: Always use limit parameter (recommended: 10) to avoid large responses.',
     inputSchema: {
       type: 'object',
       properties: {
         cityName: { type: 'string', description: 'Settlement name or postal code.' },
         page: { type: 'number', description: 'Page number (default 1).' },
-        limit: { type: 'number', description: 'Items per page (1-500).' },
+        limit: { type: 'number', description: 'Items per page (1-500). Recommended: 10 to avoid large responses.' },
       },
       required: ['cityName'],
     },
   },
   {
     name: 'address_search_streets',
-    description: 'Search for streets inside a settlement.',
+    description: 'Search for streets inside a settlement. IMPORTANT: Always use limit parameter (recommended: 10) to avoid large responses.',
     inputSchema: {
       type: 'object',
       properties: {
         settlementRef: { type: 'string', description: 'Settlement reference ID.' },
         streetName: { type: 'string', description: 'Street name or fragment.' },
-        limit: { type: 'number', description: 'Max items to return (optional).' },
+        limit: { type: 'number', description: 'Max items to return. Recommended: 10 to avoid large responses.' },
       },
       required: ['settlementRef', 'streetName'],
     },
@@ -48,7 +48,7 @@ const addressTools: Tool[] = [
   {
     name: 'address_get_warehouses',
     description:
-      'List Nova Poshta warehouses (branches, postomats, pickup points) filtered by city, settlement, type, number, or search string.',
+      'List Nova Poshta warehouses (branches, postomats, pickup points) filtered by city, settlement, type, number, or search string. IMPORTANT: Always use limit parameter (recommended: 10-20) to avoid large responses.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -63,7 +63,7 @@ const addressTools: Tool[] = [
         postFinance: { type: 'string', description: 'Filter by NovaPay cash desk availability (1/0).' },
         posTerminal: { type: 'string', description: 'Filter by POS terminal availability (1/0).' },
         page: { type: 'number', description: 'Page number (default 1).' },
-        limit: { type: 'number', description: 'Items per page (default 50).' },
+        limit: { type: 'number', description: 'Items per page (default 50). Recommended: 10-20 to avoid large responses.' },
         language: { type: 'string', description: 'Language code (UA, RU, EN).' },
       },
       required: [],
@@ -101,7 +101,7 @@ export async function handleAddressTool(
 async function handleSearchCities(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
   const query = assertString(args?.query, 'query');
   const page = assertOptionalNumber(args?.page, 'page') ?? 1;
-  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 20;
+  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 10;
 
   const response = await context.client.address.getCities({
     findByString: query,
@@ -125,7 +125,7 @@ async function handleSearchCities(args: ToolArguments, context: ToolContext): Pr
 async function handleSearchSettlements(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
   const cityName = assertString(args?.cityName, 'cityName');
   const page = assertOptionalNumber(args?.page, 'page') ?? 1;
-  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 50;
+  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 10;
 
   const response = await context.client.address.searchSettlements({
     cityName,
@@ -149,12 +149,12 @@ async function handleSearchSettlements(args: ToolArguments, context: ToolContext
 async function handleSearchStreets(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
   const settlementRef = assertString(args?.settlementRef, 'settlementRef');
   const streetName = assertString(args?.streetName, 'streetName');
-  const limit = assertOptionalNumber(args?.limit, 'limit');
+  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 10;
 
   const response = await context.client.address.searchSettlementStreets({
     settlementRef,
     streetName,
-    limit: limit ?? undefined,
+    limit,
   });
 
   const addresses = response.data?.[0]?.Addresses ?? [];
@@ -179,8 +179,8 @@ async function handleGetWarehouses(args: ToolArguments, context: ToolContext): P
   const postFinance = assertOptionalString(args?.postFinance, 'postFinance');
   const posTerminal = assertOptionalString(args?.posTerminal, 'posTerminal');
   const language = assertOptionalString(args?.language, 'language');
-  const page = assertOptionalNumber(args?.page, 'page');
-  const limit = assertOptionalNumber(args?.limit, 'limit');
+  const page = assertOptionalNumber(args?.page, 'page') ?? 1;
+  const limit = assertOptionalNumber(args?.limit, 'limit') ?? 10;
 
   // Allow search by ref without cityRef/settlementRef
   if (!ref && !cityRef && !settlementRef) {

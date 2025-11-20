@@ -31,7 +31,7 @@
     "cli"
   ],
   "author": "Shopana IO",
-  "license": "MIT",
+  "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
     "@shopana/novaposhta-api-client": "npm:@shopana/novaposhta-api-client@^0.0.1-alpha.2",
