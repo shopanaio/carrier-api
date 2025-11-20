@@ -1,0 +1,47 @@
+{
+  "name": "@shopana/novaposhta-mcp-server",
+  "version": "0.0.1-alpha.3",
+  "description": "MCP Server for Nova Poshta API integration with AI assistants",
+  "type": "module",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "bin": {
+    "novaposhta-mcp": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "node build.js",
+    "dev:http": "npm run build && node dist/cli.js --http",
+    "dev:stdio": "npm run build && node dist/cli.js",
+    "start:http": "node dist/cli.js --http",
+    "start:stdio": "node dist/cli.js",
+    "lint": "eslint 'src/**/*.{ts,tsx}'",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "keywords": [
+    "mcp",
+    "nova-poshta",
+    "ai",
+    "assistant",
+    "cli"
+  ],
+  "author": "Shopana IO",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.22.0",
+    "@shopana/novaposhta-api-client": "^0.0.1-alpha.5",
+    "@shopana/novaposhta-transport-fetch": "npm:@shopana/novaposhta-transport-fetch@^0.0.1-alpha.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "esbuild": "^0.19.0",
+    "tsx": "^4.1.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

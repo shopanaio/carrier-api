@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "novaposhta": {
+      "command": "npx",
+      "args": ["@shopana/novaposhta-mcp-server"],
+      "env": {
+        "NOVA_POSHTA_API_KEY": "your_api_key_here",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

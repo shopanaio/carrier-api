@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "novaposhta-http": {
+      "type": "http",
+      "url": "http://localhost:3000/mcp",
+      "env": {
+        "NOVA_POSHTA_API_KEY": "your_api_key_here",
+        "LOG_LEVEL": "info"
+      }
+    },
+    "novaposhta-stdio": {
+      "type": "stdio",
+      "command": "/Users/phl/Projects/shopana-io/carrier-api/packages/novaposhta-mcp-server/dist/cli.js",
+      "env": {
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

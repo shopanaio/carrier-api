@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "novaposhta": {
+      "command": "node",
+      "args": [
+        "/Users/phl/Projects/shopana-io/carrier-api/packages/novaposhta-mcp-server/dist/index.js"
+      ],
+      "env": {
+        "NOVA_POSHTA_API_KEY": "your_api_key_here",
+        "LOG_LEVEL": "info"
+      }
+    }
+  }
+}

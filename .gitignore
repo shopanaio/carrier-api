@@ -3,6 +3,7 @@
 .vscode/!settings.json
 .env
 */.env
+.claude/mcp_settings.json
 postgres-data
 node_modules/
 uploads/

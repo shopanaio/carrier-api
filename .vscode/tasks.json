@@ -1,0 +1,166 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "MCP: Build",
+      "type": "shell",
+      "command": "yarn workspace @shopana/novaposhta-mcp-server build",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: Run HTTP Server",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/packages/novaposhta-mcp-server/dist/http.js"
+      ],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Nova Poshta MCP server is listening on http://localhost"
+        }
+      }
+    },
+    {
+      "label": "MCP: Run stdio Server",
+      "type": "shell",
+      "command": "node",
+      "args": [
+        "${workspaceFolder}/packages/novaposhta-mcp-server/dist/stdio.js"
+      ],
+      "group": "none",
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false,
+        "clear": true
+      },
+      "isBackground": true,
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Nova Poshta MCP server is listening on stdio"
+        }
+      }
+    },
+    {
+      "label": "MCP: Build and Run HTTP",
+      "dependsOn": [
+        "MCP: Build",
+        "MCP: Run HTTP Server"
+      ],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: Build and Run stdio",
+      "dependsOn": [
+        "MCP: Build",
+        "MCP: Run stdio Server"
+      ],
+      "dependsOrder": "sequence",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "MCP: Dev HTTP",
+      "type": "shell",
+      "command": "yarn workspace @shopana/novaposhta-mcp-server dev:http",
+      "group": "none",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Nova Poshta MCP server is listening on http://localhost"
+        }
+      }
+    },
+    {
+      "label": "MCP: Dev stdio",
+      "type": "shell",
+      "command": "yarn workspace @shopana/novaposhta-mcp-server dev:stdio",
+      "group": "none",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated",
+        "showReuseMessage": false
+      },
+      "problemMatcher": {
+        "pattern": {
+          "regexp": "^$",
+          "file": 1,
+          "location": 2,
+          "message": 3
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": ".*",
+          "endsPattern": "Nova Poshta MCP server is listening on stdio"
+        }
+      }
+    },
+    {
+      "label": "MCP: Test",
+      "type": "shell",
+      "command": "yarn workspace @shopana/novaposhta-mcp-server test",
+      "group": "test",
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    }
+  ]
+}
