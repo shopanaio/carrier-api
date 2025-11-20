@@ -51,25 +51,25 @@ describe('WaybillService', () => {
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'save',
         methodProperties: {
-          payerType: 'Sender',
-          paymentMethod: 'Cash',
-          dateTime: '01.01.2024',
-          cargoType: 'Parcel',
-          weight: 1.5,
-          serviceType: 'WarehouseWarehouse',
-          seatsAmount: 1,
-          description: 'Test Package',
-          cost: 1000,
-          citySender: 'city-sender-ref',
-          sender: 'sender-ref',
-          senderAddress: 'sender-address-ref',
-          contactSender: 'contact-sender-ref',
-          sendersPhone: '380501234567',
-          cityRecipient: 'city-recipient-ref',
-          recipient: 'recipient-ref',
-          recipientAddress: 'recipient-address-ref',
-          contactRecipient: 'contact-recipient-ref',
-          recipientsPhone: '380507654321',
+          PayerType: 'Sender',
+          PaymentMethod: 'Cash',
+          DateTime: '01.01.2024',
+          CargoType: 'Parcel',
+          Weight: 1.5,
+          ServiceType: 'WarehouseWarehouse',
+          SeatsAmount: 1,
+          Description: 'Test Package',
+          Cost: 1000,
+          CitySender: 'city-sender-ref',
+          Sender: 'sender-ref',
+          SenderAddress: 'sender-address-ref',
+          ContactSender: 'contact-sender-ref',
+          SendersPhone: '380501234567',
+          CityRecipient: 'city-recipient-ref',
+          Recipient: 'recipient-ref',
+          RecipientAddress: 'recipient-address-ref',
+          ContactRecipient: 'contact-recipient-ref',
+          RecipientsPhone: '380507654321',
         },
       });
       expect(result.success).toBe(true);
@@ -120,11 +120,11 @@ describe('WaybillService', () => {
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'update',
         methodProperties: {
-          ref: 'waybill-ref-1',
-          payerType: 'Sender',
-          weight: 2.0,
-          description: 'Updated Package',
-          cost: 1500,
+          Ref: 'waybill-ref-1',
+          PayerType: 'Sender',
+          Weight: 2.0,
+          Description: 'Updated Package',
+          Cost: 1500,
         },
       });
       expect(result.success).toBe(true);
@@ -299,6 +299,11 @@ describe('WaybillService', () => {
       expect(calls[0].body).toMatchObject({
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'getDocumentDeliveryDate',
+        methodProperties: {
+          CitySender: 'city-sender-ref',
+          CityRecipient: 'city-recipient-ref',
+          ServiceType: 'WarehouseWarehouse',
+        },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
@@ -332,6 +337,15 @@ describe('WaybillService', () => {
       expect(calls[0].body).toMatchObject({
         modelName: 'InternetDocumentGeneral',
         calledMethod: 'getDocumentPrice',
+        methodProperties: {
+          CitySender: 'city-sender-ref',
+          CityRecipient: 'city-recipient-ref',
+          Weight: 1.5,
+          ServiceType: 'WarehouseWarehouse',
+          Cost: 1000,
+          CargoType: 'Parcel',
+          SeatsAmount: 1,
+        },
       });
       expect(result.success).toBe(true);
       expect(result.data).toEqual(mockData);
