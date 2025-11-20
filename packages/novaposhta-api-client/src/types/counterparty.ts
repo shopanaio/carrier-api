@@ -80,7 +80,6 @@ interface SaveCounterpartyBase {
   readonly counterpartyProperty: 'Sender' | 'Recipient';
   readonly phone: string;
   readonly email?: string;
-  readonly cityRef?: CityRef;
 }
 
 /**
@@ -142,7 +141,6 @@ export interface UpdateCounterpartyRequest {
   readonly lastName?: string;
   readonly phone?: string;
   readonly email?: string;
-  readonly cityRef?: CityRef;
 }
 
 export type UpdateCounterpartyResponse = NovaPoshtaResponse<CounterpartyData[]>;

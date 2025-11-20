@@ -138,7 +138,6 @@ export class CounterpartyService {
       CounterpartyProperty: request.counterpartyProperty,
       Phone: request.phone,
       Email: request.email,
-      CityRef: request.cityRef,
     };
 
     if (request.counterpartyType === 'PrivatePerson') {
@@ -183,7 +182,6 @@ export class CounterpartyService {
       LastName: request.lastName,
       Phone: request.phone,
       Email: request.email,
-      CityRef: request.cityRef,
     };
 
     const cleanProperties = Object.fromEntries(
