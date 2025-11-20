@@ -17,12 +17,23 @@
   },
   "keywords": [
     "nova-poshta",
+    "novaposhta",
     "transport",
+    "http-transport",
+    "http-client",
     "fetch",
-    "typescript"
+    "cross-fetch",
+    "api-client",
+    "rest",
+    "shipping",
+    "carrier",
+    "typescript",
+    "nodejs",
+    "browser",
+    "esm"
   ],
-  "author": "Nova Poshta Client Team",
-  "license": "MIT",
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
   "repository": {
     "type": "git",
     "url": "https://github.com/shopanaio/carrier-api.git",
