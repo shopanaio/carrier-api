@@ -6,11 +6,7 @@ import { promisify } from 'util';
 
 const execAsync = promisify(exec);
 
-const external = [
-  '@modelcontextprotocol/sdk',
-  'cross-fetch',
-  'node-fetch',
-];
+const external = ['@modelcontextprotocol/sdk', 'cross-fetch'];
 
 // Build library entry point (no shebang, for imports)
 await esbuild.build({
