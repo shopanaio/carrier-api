@@ -19,7 +19,10 @@ yarn install
 yarn workspace @shopana/novaposhta-mcp-server build
 
 # Run in dev mode (stdio transport)
-NOVA_POSHTA_API_KEY=your_key yarn workspace @shopana/novaposhta-mcp-server dev
+NOVA_POSHTA_API_KEY=your_key yarn workspace @shopana/novaposhta-mcp-server dev:stdio
+
+# Run in dev mode (http transport)
+NOVA_POSHTA_API_KEY=your_key yarn workspace @shopana/novaposhta-mcp-server dev:http
 ```
 
 Required environment variables:
@@ -37,6 +40,13 @@ Required environment variables:
 - Waybill: `waybill_calculate_cost`, `waybill_create`, `waybill_update`, `waybill_delete`, `waybill_get_delivery_date`
 - Reference: `reference_get_cargo_types`, `reference_get_service_types`, `reference_get_payment_methods`, `reference_get_pallet_types`, `reference_get_time_intervals`, `reference_get_ownership_forms`, `reference_decode_message`
 
+## Transport modes
+
+- **`novaposhta-mcp`** — by default runs as stdio server for Claude Desktop/Claude Code
+- **`novaposhta-mcp --http`** — runs as HTTP server on port 3000 (or `MCP_PORT`)
+
+The stdio transport is the default and is what most AI assistants expect (Claude Desktop, Claude Code, etc.).
+
 ## MCP integration
 
 ### Quick setup for Claude Desktop
@@ -51,10 +61,7 @@ Required environment variables:
    {
      "mcpServers": {
        "novaposhta": {
-         "command": "node",
-         "args": [
-           "/Users/phl/Projects/shopana-io/carrier-api/packages/novaposhta-mcp-server/dist/index.js"
-         ],
+         "command": "novaposhta-mcp",
          "env": {
            "NOVA_POSHTA_API_KEY": "your_api_key_here",
            "LOG_LEVEL": "info"
@@ -65,6 +72,10 @@ Required environment variables:
    ```
 
 3. Restart Claude Desktop
+
+The same config works for the global package if `novaposhta-mcp` is on your `PATH` (or you can still point `command` to `node dist/cli.js` when running locally).
+
+For HTTP-based assistants or proxy deployments, use `novaposhta-mcp --http` (or `node dist/cli.js --http`) and expose the `/mcp` endpoint via `MCP_PORT` (default `3000`).
 
 See `INSTALLATION.md` for detailed setup instructions.
 

@@ -3,14 +3,22 @@
   "version": "0.0.1-alpha.0",
   "description": "MCP Server for Nova Poshta API integration with AI assistants",
   "type": "module",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "bin": {
-    "novaposhta-mcp": "./dist/index.js"
+    "novaposhta-mcp": "./dist/cli.js"
   },
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --format=esm --outfile=dist/index.js --external:@modelcontextprotocol/* --banner:js=\"import { createRequire } from 'module'; const require = createRequire(import.meta.url);\"",
-    "dev": "npm run build && node dist/index.js",
+    "build": "node build.js",
+    "dev:http": "npm run build && node dist/cli.js --http",
+    "dev:stdio": "npm run build && node dist/cli.js",
+    "start:http": "node dist/cli.js --http",
+    "start:stdio": "node dist/cli.js",
     "lint": "eslint 'src/**/*.{ts,tsx}'",
     "test": "vitest run",
     "test:watch": "vitest"
