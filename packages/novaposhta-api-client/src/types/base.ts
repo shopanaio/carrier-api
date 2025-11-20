@@ -47,9 +47,13 @@ export interface NovaPoshtaResponse<T = unknown> {
   readonly infoCodes: readonly string[];
 }
 
+// System type
+export type System = 'DevCentre';
+
 // API request base structure
 export interface NovaPoshtaRequest {
   readonly apiKey?: string;
+  readonly system?: System;
   readonly modelName: string;
   readonly calledMethod: string;
   readonly methodProperties: Record<string, unknown>;

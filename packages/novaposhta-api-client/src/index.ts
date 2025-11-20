@@ -96,6 +96,7 @@ export type {
   Volume,
   Dimensions,
   Cost,
+  System,
   NovaPoshtaResponse,
   NovaPoshtaRequest,
   PaginationParams,

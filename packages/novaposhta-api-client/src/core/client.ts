@@ -14,16 +14,18 @@ export interface ClientContext {
   transport: HttpPostJsonTransport;
   baseUrl: string;
   apiKey?: string;
+  system?: 'DevCentre';
 }
 
 // Adapter from function-style transport to interface-style transport for services
 export function toHttpTransport(ctx: ClientContext): HttpTransport {
   return {
     async request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
-      const { apiKey, ...rest } = request as NovaPoshtaRequest & { apiKey?: string };
+      const { apiKey, system, ...rest } = request as NovaPoshtaRequest & { apiKey?: string; system?: 'DevCentre' };
       const finalRequest: NovaPoshtaRequest = {
         ...(rest as NovaPoshtaRequest),
         ...(apiKey ? { apiKey } : {}),
+        ...(system || ctx.system ? { system: (system || ctx.system) as 'DevCentre' } : {}),
       };
 
       const response = await ctx.transport<NovaPoshtaRequest, NovaPoshtaResponse<T>>({
