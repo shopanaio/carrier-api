@@ -34,7 +34,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
-    "@shopana/novaposhta-api-client": "file:../novaposhta-api-client",
+    "@shopana/novaposhta-api-client": "0.0.1-alpha.4",
     "@shopana/novaposhta-transport-fetch": "npm:@shopana/novaposhta-transport-fetch@^0.0.1-alpha.0"
   },
   "devDependencies": {
