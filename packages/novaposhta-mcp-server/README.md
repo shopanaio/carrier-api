@@ -47,6 +47,7 @@ Add to your MCP configuration file:
       "args": ["-y", "@shopana/novaposhta-mcp-server"],
       "env": {
         "NOVA_POSHTA_API_KEY": "your_api_key_here",
+        "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "info"
       }
     }
@@ -116,6 +117,7 @@ Create or update your `.mcp.json`:
       "args": ["-y", "@shopana/novaposhta-mcp-server"],
       "env": {
         "NOVA_POSHTA_API_KEY": "your_actual_api_key_here",
+        "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "info"
       }
     }
@@ -144,6 +146,7 @@ Ask Claude:
 |----------|----------|---------|-------------|
 | `NOVA_POSHTA_API_KEY` | Yes | - | Your Nova Poshta API key |
 | `NOVA_POSHTA_BASE_URL` | No | `https://api.novaposhta.ua/v2.0/json/` | API base URL |
+| `NOVA_POSHTA_SYSTEM` | No | - | System identifier (e.g., `DevCentre` for development/testing) |
 | `LOG_LEVEL` | No | `info` | Logging level: `debug`, `info`, `warn`, `error` |
 | `MCP_PORT` | No | `3000` | HTTP server port (HTTP mode only) |
 
@@ -516,6 +519,7 @@ Claude uses `track_multiple_documents` and provides aggregated statistics: deliv
       "args": ["-y", "@shopana/novaposhta-mcp-server"],
       "env": {
         "NOVA_POSHTA_API_KEY": "your_api_key",
+        "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "info"
       }
     }
@@ -535,6 +539,7 @@ Create `.mcp.json` in your project root or home directory:
       "command": "/path/to/dist/cli.js",
       "env": {
         "NOVA_POSHTA_API_KEY": "your_api_key",
+        "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "debug"
       }
     }
@@ -552,6 +557,7 @@ Create `.mcp.json` in your project root or home directory:
       "url": "https://your-domain.com/mcp",
       "env": {
         "NOVA_POSHTA_API_KEY": "your_api_key",
+        "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "info"
       }
     }
@@ -567,6 +573,7 @@ WORKDIR /app
 COPY . .
 RUN yarn install && yarn build
 ENV NOVA_POSHTA_API_KEY=your_key
+ENV NOVA_POSHTA_SYSTEM=DevCentre
 ENV MCP_PORT=3000
 EXPOSE 3000
 CMD ["node", "dist/cli.js", "--http"]

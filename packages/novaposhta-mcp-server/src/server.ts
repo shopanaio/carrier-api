@@ -60,6 +60,7 @@ export class NovaPoshtaMCPServer {
       transport,
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
+      system: config.system,
     })
       .use(new AddressService())
       .use(new ReferenceService())
