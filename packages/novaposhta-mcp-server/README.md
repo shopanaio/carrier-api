@@ -57,10 +57,7 @@ Create or update your `.mcp.json`:
       "command": "npx",
       "args": ["-y", "-p", "@shopana/novaposhta-mcp-server", "novaposhta-mcp"],
       "env": {
-        // Optional. Only required for waybill operations.
-        // Tracking, addresses, and reference data work without API key.
         "NOVA_POSHTA_API_KEY": "your_actual_api_key_here",
-        // Optional. Parameter sent by Nova Poshta API Sandbox UI
         "NOVA_POSHTA_SYSTEM": "DevCentre",
         "LOG_LEVEL": "info"
       }
