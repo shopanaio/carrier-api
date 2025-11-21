@@ -68,13 +68,7 @@ Create or update your `.mcp.json`:
 
 ### 3. Restart Your MCP Client
 
-After updating your MCP configuration, you need to restart or reload your client:
-
-- **Windsurf, Cursor, *Claude, Gemini, VSCode extensions**:
-  - Reload IDE window (`Cmd/Ctrl + Shift + P` → "Reload Window")
-  - Or restart the extension from Extensions panel
-  - Or restart the CLI
-  - Or reload MCP servers from IDE settings/command palette
+After updating your MCP configuration, you need to restart or reload your client
 
 ### 4. Start Using
 
@@ -91,24 +85,23 @@ Ask Claude:
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
 | `NOVA_POSHTA_API_KEY` | Partial* | - | Your Nova Poshta API key (*only required for waybill operations) |
-| `NOVA_POSHTA_BASE_URL` | No | `https://api.novaposhta.ua/v2.0/json/` | API base URL |
 | `NOVA_POSHTA_SYSTEM` | No | - | System identifier parameter. `DevCentre` is the value used by Nova Poshta API Sandbox UI (optional, does not affect functionality) |
 | `LOG_LEVEL` | No | `info` | Logging level: `debug`, `info`, `warn`, `error` |
-| `MCP_PORT` | No | `3000` | HTTP server port (HTTP mode only) |
 
 **Operations that work without API key:**
-- Tracking (track_document, track_multiple_documents, get_document_movement)
-- Address search (address_search_cities, address_search_settlements, address_search_streets, address_get_warehouses)
+- Tracking (track_document, track_multiple_documents, track_multiple, get_document_movement, get_document_list)
+- Address search (address_get_settlements, address_get_settlement_country_region, address_search_cities, address_search_settlements, address_search_streets, address_get_warehouses)
 - Reference data (all reference_* tools)
 
 **Operations that require API key:**
-- Waybill management (waybill_create, waybill_update, waybill_delete)
-- Counterparty operations
-- Contact person management
+- Waybill management (waybill_calculate_cost, waybill_get_estimate, waybill_create, waybill_create_with_options, waybill_create_for_postomat, waybill_create_batch, waybill_update, waybill_delete, waybill_delete_batch, waybill_get_delivery_date)
+- Address management (address_save, address_update, address_delete)
+- Counterparty operations (counterparty_get_counterparties, counterparty_get_addresses, counterparty_get_contact_persons, counterparty_save, counterparty_update, counterparty_delete, counterparty_get_options)
+- Contact person management (contact_person_save, contact_person_update, contact_person_delete)
 
 ### Transport Modes
 
-#### stdio (Default)
+#### stdio
 Best for local AI assistants like Claude Desktop and Claude Code:
 
 ```bash
@@ -117,295 +110,179 @@ novaposhta-mcp
 node dist/cli.js
 ```
 
-#### HTTP
-Best for cloud deployments and proxy scenarios:
-
-```bash
-novaposhta-mcp --http
-# or
-node dist/cli.js --http
-```
-
-The HTTP server exposes:
-- `POST /mcp` - MCP streamable HTTP endpoint
-- `GET /health` - Health check endpoint
-
 ## Available Tools
 
 ### Tracking Tools
 
 #### `track_document`
-Track a single shipment with detailed status information.
-
-
-**Parameters:**
-- `DocumentNumber` (string, required): 14-digit tracking number
-- `phone` (string, optional): Recipient phone in format `380XXXXXXXXX`
-
-**Example:**
-```typescript
-{
-  "DocumentNumber": "20450123456789",
-  "phone": "380501234567"
-}
-```
+Track a single Nova Poshta document by number and optional phone to receive live status, location, and ETA.
 
 #### `track_multiple_documents`
-Track multiple shipments at once with aggregated statistics.
+Track multiple Nova Poshta documents at once and receive aggregated statistics.
 
-**Parameters:**
-- `DocumentNumbers` (array, required): List of tracking numbers
-
-**Example:**
-```typescript
-{
-  "DocumentNumbers": ["20450123456789", "20450987654321"]
-}
-```
+#### `track_multiple`
+Track multiple Nova Poshta documents with organized results and statistics. Returns successful/failed tracking attempts with delivery statistics (delivered, in-transit, at-warehouse counts). More convenient than `track_multiple_documents` for batch operations.
 
 #### `get_document_movement`
-Get complete movement history for shipments.
-
-**Parameters:**
-- `DocumentNumbers` (array, required): List of tracking numbers (max 10)
-- `ShowDeliveryDetails` (boolean, optional): Include extended delivery checkpoints
-
-**Example:**
-```typescript
-{
-  "DocumentNumbers": ["20450123456789"],
-  "ShowDeliveryDetails": true
-}
-```
+Get movement history for up to 10 documents including statuses and timestamps.
 
 #### `get_document_list`
-List documents created within a date range.
-
-**Parameters:**
-- `DateTimeFrom` (string, required): Start date in format `dd.mm.yyyy`
-- `DateTimeTo` (string, required): End date in format `dd.mm.yyyy`
-- `Page` (number, optional): Page number (default: 1)
-- `GetFullList` (string, optional): Use `"1"` to request all results ignoring pagination
-
-**Example:**
-```typescript
-{
-  "DateTimeFrom": "01.01.2025",
-  "DateTimeTo": "31.01.2025",
-  "Page": 1
-}
-```
+List documents created in the given date range with pagination support.
 
 ---
 
 ### Address Tools
 
+#### `address_get_settlements`
+Get settlement areas (областей) in Ukraine. Returns list of administrative regions/areas. Cache this public directory for 12 hours.
+
+#### `address_get_settlement_country_region`
+Get settlement country regions (регіонів) for a specific area. Returns list of regions within an administrative area. Cache for 12 hours.
+
 #### `address_search_cities`
-Search for cities by name or postal code.
-
-**Parameters:**
-- `FindByString` (string, required): Partial city name or postal code
-- `Page` (number, optional): Page number (default: 1)
-- `Limit` (number, optional): Items per page (max: 50, **recommended: 10**, default: 10)
-
-**Example:**
-```typescript
-{
-  "FindByString": "Київ",
-  "Limit": 10
-}
-```
-
-**Note:** Always specify `Limit` to avoid large responses that may consume excessive tokens.
+Find Nova Poshta cities by name or postal index. Always use `limit` parameter (recommended: 10) to avoid large responses.
 
 #### `address_search_settlements`
-Search for settlements (cities, towns, villages).
-
-**Parameters:**
-- `CityName` (string, required): Settlement name or postal code
-- `Page` (number, optional): Page number (default: 1)
-- `Limit` (number, optional): Items per page (1-500, **recommended: 10**, default: 10)
-
-**Example:**
-```typescript
-{
-  "CityName": "Львів",
-  "Limit": 10
-}
-```
-
-**Note:** Always specify `Limit` to avoid large responses that may consume excessive tokens.
+Search for settlements (city, town, village) with pagination. Always use `limit` parameter (recommended: 10) to avoid large responses.
 
 #### `address_search_streets`
-Search for streets within a settlement.
-
-**Parameters:**
-- `SettlementRef` (string, required): Settlement reference ID
-- `StreetName` (string, required): Street name or fragment
-- `Limit` (number, optional): Maximum items to return (**recommended: 10**, default: 10)
-
-**Example:**
-```typescript
-{
-  "SettlementRef": "8d5a980d-391c-11dd-90d9-001a92567626",
-  "StreetName": "Хрещатик",
-  "Limit": 10
-}
-```
-
-**Note:** Always specify `Limit` to avoid large responses that may consume excessive tokens.
+Search for streets inside a settlement. Used for door pickup/delivery flows. Always use `limit` parameter (recommended: 10) to avoid large responses.
 
 #### `address_get_warehouses`
-Find warehouses (branches, postomats, pickup points) with advanced filtering.
+List Nova Poshta warehouses (branches, postomats, pickup points) with advanced filtering. Always use `limit` parameter (recommended: 10-20) to avoid large responses.
 
-**Parameters:**
-- `Ref` (string, optional): Specific warehouse reference
-- `CityName` (string, optional): City name filter
-- `CityRef` (string, optional): City reference ID
-- `SettlementRef` (string, optional): Settlement reference ID
-- `WarehouseId` (string, optional): Warehouse number (e.g., "1" for Branch #1)
-- `FindByString` (string, optional): Search by name, address, or street
-- `TypeOfWarehouseRef` (string, optional): Warehouse type filter
-- `BicycleParking` (string, optional): Filter by bicycle parking (`1`/`0`)
-- `PostFinance` (string, optional): Filter by NovaPay cash desk (`1`/`0`)
-- `POSTerminal` (string, optional): Filter by POS terminal (`1`/`0`)
-- `Page` (number, optional): Page number (default: 1)
-- `Limit` (number, optional): Items per page (max: 50, **recommended: 10-20**, default: 10)
-- `Language` (string, optional): Language code (`UA`, `RU`, `EN`)
+#### `address_save`
+Create new address for a counterparty. Requires API key. Response returns the Ref and Description needed for door-to-door delivery.
 
-**Example:**
-```typescript
-{
-  "CityName": "Київ",
-  "TypeOfWarehouseRef": "9a68df70-0267-42a8-bb5c-37f427e36ee4", // Branch
-  "POSTerminal": "1",
-  "Limit": 10
-}
-```
+#### `address_update`
+Update existing counterparty address. Can only edit an address before a waybill is created with it.
 
-**Note:** Always specify `Limit` to avoid large responses that may consume excessive tokens.
+#### `address_delete`
+Delete counterparty address by reference. Allowed only before the address participates in an Internet document.
 
 ---
 
 ### Waybill Tools
 
 #### `waybill_calculate_cost`
-Calculate delivery cost and estimated delivery date.
+Calculate delivery cost and optional delivery date estimation for a shipment. Can use typed fields or raw API payload.
 
-**Parameters:**
-- `CitySender` (string): Sender city reference
-- `CityRecipient` (string): Recipient city reference
-- `ServiceType` (string): Service type (e.g., `WarehouseWarehouse`)
-- `Weight` (number): Weight in kg
-- `Cost` (number): Declared value in UAH
-- `CargoType` (string): Cargo type (e.g., `Parcel`)
-- `SeatsAmount` (number): Number of seats
-
-Or use `request` object for raw API payload.
-
-**Example:**
-```typescript
-{
-  "CitySender": "8d5a980d-391c-11dd-90d9-001a92567626",
-  "CityRecipient": "db5c88f0-391c-11dd-90d9-001a92567626",
-  "ServiceType": "WarehouseWarehouse",
-  "Weight": 5,
-  "Cost": 1000,
-  "CargoType": "Parcel",
-  "SeatsAmount": 1
-}
-```
+#### `waybill_get_estimate`
+Get complete shipment estimate (price + delivery date) in one call. Combines cost calculation and delivery date estimation for convenience.
 
 #### `waybill_create`
-Create a new waybill (Internet document).
+Create a standard Nova Poshta waybill (Internet document). This is the basic waybill creation method.
 
-**Parameters:**
-- `request` (object, required): Complete waybill creation payload
+#### `waybill_create_with_options`
+Create a Nova Poshta waybill with additional options and services. Supports backward delivery, additional services, third-party payer, and RedBox barcodes. Use this when you need COD, insurance, or return shipments.
 
-Refer to [Nova Poshta API Documentation](https://developers.novaposhta.ua/) for the full request schema.
+#### `waybill_create_for_postomat`
+Create a waybill for postomat delivery. Postomats have size/weight restrictions (max 30kg, max dimensions). Requires proper warehouse selection (postomat type) and seat options configuration.
+
+#### `waybill_create_batch`
+Batch create multiple waybills sequentially. Processes each waybill one by one to avoid rate limiting. Returns array of results including any errors.
 
 #### `waybill_update`
-Update an existing waybill.
-
-**Parameters:**
-- `request` (object, required): Update payload including `DocumentRef`
+Update an existing waybill. Pass the raw payload (must include DocumentRef).
 
 #### `waybill_delete`
-Delete one or multiple waybills.
+Delete one or multiple waybills by their DocumentRef. Waybills can only be deleted before they enter processing.
 
-**Parameters:**
-- `DocumentRefs` (array, required): Array of document references to delete
-
-**Example:**
-```typescript
-{
-  "documentRefs": ["20450123456789-1234"]
-}
-```
+#### `waybill_delete_batch`
+Batch delete multiple waybills by their DocumentRef in a single API call. Waybills can only be deleted before they enter processing.
 
 #### `waybill_get_delivery_date`
-Get estimated delivery date for a route.
-
-**Parameters:**
-- `CitySender` (string): Sender city reference
-- `CityRecipient` (string): Recipient city reference
-- `ServiceType` (string): Service type
-- `DateTime` (string, optional): Shipment date in format `dd.mm.yyyy`
-
-Or use `request` object for raw API payload.
+Get estimated delivery date for a city pair and service type.
 
 ---
 
 ### Reference Tools
 
 #### `reference_get_cargo_types`
-List all available cargo types.
+List available cargo types supported by Nova Poshta. Cache this directory monthly. Values: `Parcel`, `Cargo`, `Documents`, `TiresWheels`, `Pallet`.
 
-**Example response:** `Parcel`, `Documents`, `TiresWheels`, `Pallet`, etc.
+#### `reference_get_pack_list`
+List available packaging types with standard package dimensions and descriptions. Useful for calculating delivery costs. Cache monthly.
+
+#### `reference_get_tires_wheels_list`
+List available tires and wheels types. Returns types and descriptions for shipping tires and wheels as cargo. Cache monthly.
+
+#### `reference_get_cargo_description_list`
+List cargo descriptions with optional search. Returns predefined descriptions for common cargo types. Cache monthly.
+
+#### `reference_get_pickup_time_intervals`
+Get available pickup time intervals. Returns time windows when Nova Poshta can pick up packages from sender. Cache hourly.
+
+#### `reference_get_backward_cargo_types`
+List backward delivery cargo types. Returns types of cargo that can be sent back (documents, money, etc.). Used for return shipments and COD. Cache monthly.
+
+#### `reference_get_redelivery_payers`
+List payer types for redelivery. Returns who can pay for backward delivery (Sender/Recipient). Used with return shipments. Cache monthly.
 
 #### `reference_get_service_types`
-List all delivery service types.
-
-**Example response:** `WarehouseWarehouse`, `WarehouseDoors`, `DoorsWarehouse`, `DoorsDoors`
+List delivery service types. Four core technologies: `WarehouseWarehouse`, `WarehouseDoors`, `DoorsWarehouse`, `DoorsDoors`. Cache monthly.
 
 #### `reference_get_payment_methods`
-List available payment methods.
-
-**Example response:** `Cash`, `NonCash`, etc.
+List supported payment methods for shipments. Returns `Cash`/`NonCash`. Non-cash payments are only available to customers with a Nova Poshta contract.
 
 #### `reference_get_pallet_types`
-Get pallet types with dimensions and weight specifications.
+List pallet types with dimensions and weight specifications. Cache monthly, especially when offering reverse delivery of pallets.
 
 #### `reference_get_time_intervals`
-Get available delivery time intervals for a recipient city.
-
-**Parameters:**
-- `RecipientCityRef` (string, required): Recipient city reference
-- `DateTime` (string, optional): Specific date in format `dd.mm.yyyy`
-
-**Example:**
-```typescript
-{
-  "RecipientCityRef": "8d5a980d-391c-11dd-90d9-001a92567626",
-  "DateTime": "20.01.2025"
-}
-```
+Get available delivery time intervals for recipient city. Returns Number/Start/End entries. Cache monthly.
 
 #### `reference_get_ownership_forms`
-List corporate ownership forms (required for counterparty creation).
+List corporate ownership forms required for counterparty creation. Returns refs such as ТОВ, ПрАТ, ФГ with both short and full names. Cache monthly.
 
 #### `reference_decode_message`
-Decode Nova Poshta API message codes into human-readable text.
+Decode Nova Poshta API message code into human readable text. Maps numeric codes to Ukrainian/Russian descriptions.
 
-**Parameters:**
-- `code` (string, required): Message code (e.g., `20000200039`)
+#### `reference_get_types_of_payers`
+Get list of payer types for waybill creation. Returns `Sender`/`Recipient`/`ThirdPerson`. ThirdPerson payer is accessible only after signing a service contract. Cache monthly.
 
-**Example:**
-```typescript
-{
-  "code": "20000200039"
-}
-```
+#### `reference_get_payment_forms`
+Get list of payment forms for waybill creation. Returns `Cash`/`NonCash`. Non-cash payments are available only to contracted clients. Cache monthly.
+
+#### `reference_get_types_of_counterparties`
+Get list of counterparty types. Returns `PrivatePerson`/`Organization`. Refresh monthly to stay aligned with sender/recipient onboarding rules.
+
+---
+
+### Counterparty Tools
+
+#### `counterparty_get_counterparties`
+Get counterparties list filtered by property (Sender/Recipient/ThirdPerson). Requires API key. Cache daily. Each page tops out at 500 rows.
+
+#### `counterparty_get_addresses`
+Get addresses for a specific counterparty. Requires API key. Cache daily. Each page is capped at 500 entries.
+
+#### `counterparty_get_contact_persons`
+Get contact persons for a counterparty. API key is mandatory. Cache daily. Use paging to stay under the 500-record response cap.
+
+#### `counterparty_save`
+Create new counterparty (private person or organization). Private persons require first/last name. Organizations must also send OwnershipForm and EDRPOU. Requires API key.
+
+#### `counterparty_update`
+Update existing counterparty details. Can only edit a counterparty before creating a waybill with it.
+
+#### `counterparty_delete`
+Delete counterparty by reference. **IMPORTANT:** Only Recipient counterparties can be deleted through the API; Sender cleanup must go through your account manager.
+
+#### `counterparty_get_options`
+Get counterparty options and permissions. Returns booleans such as CanPayTheThirdPerson, CanSameDayDelivery, HideDeliveryCost, etc.
+
+---
+
+### Contact Person Tools
+
+#### `contact_person_save`
+Create new contact person for a counterparty. Requires API key. All fields must be entered in Ukrainian.
+
+#### `contact_person_update`
+Update existing contact person details. Only legal entities may edit full profiles. Private persons can change phone only. Edits are allowed solely before a waybill is issued for that counterparty.
+
+#### `contact_person_delete`
+Delete contact person by reference. Allowed via API only for legal entities and only until the contact was used on an Internet document.
 
 ## Usage Examples
 
@@ -416,7 +293,6 @@ Decode Nova Poshta API message codes into human-readable text.
 Track Nova Poshta package 20450123456789
 ```
 
-**What happens:**
 Claude will use `track_document` tool and return detailed status including current location, estimated delivery, and recipient information.
 
 ---
@@ -428,14 +304,7 @@ Claude will use `track_document` tool and return detailed status including curre
 Find all Nova Poshta branches in Lviv that have POS terminals
 ```
 
-**What happens:**
-Claude will:
-1. Use `address_search_cities` to find Lviv city reference (with `Limit: 10`)
-2. Use `address_get_warehouses` with filters:
-   - `CityName`: "Львів"
-   - `TypeOfWarehouseRef`: Branch type
-   - `POSTerminal`: "1"
-   - `Limit`: 10 (to avoid large responses)
+Claude will search for Lviv city and then list warehouses with POS terminals using appropriate filters.
 
 ---
 
@@ -446,11 +315,7 @@ Claude will:
 Calculate shipping cost for 10kg parcel from Kyiv to Odesa, warehouse to warehouse, declared value 2000 UAH
 ```
 
-**What happens:**
-Claude will:
-1. Find city references for Kyiv and Odesa
-2. Use `waybill_calculate_cost` with parameters
-3. Return cost breakdown and estimated delivery date
+Claude will find city references and calculate the delivery cost with estimated delivery date.
 
 ---
 
@@ -461,129 +326,8 @@ Claude will:
 Track these packages: 20450123456789, 20450987654321, 20451234567890 and give me a summary
 ```
 
-**What happens:**
-Claude uses `track_multiple_documents` and provides aggregated statistics: delivered, in transit, pending pickup, etc.
+Claude will use batch tracking tools and provide aggregated statistics: delivered, in transit, pending pickup, etc.
 
-## Integration Examples
-
-### Claude Desktop
-
-```json
-{
-  "mcpServers": {
-    "novaposhta": {
-      "command": "npx",
-      "args": ["-y", "-p", "@shopana/novaposhta-mcp-server", "novaposhta-mcp"],
-      "env": {
-        // Optional - only required for waybill operations
-        "NOVA_POSHTA_API_KEY": "your_api_key",
-        // Optional - parameter sent by Nova Poshta API Sandbox UI
-        "NOVA_POSHTA_SYSTEM": "DevCentre",
-        "LOG_LEVEL": "info"
-      }
-    }
-  }
-}
-```
-
-### Claude Code
-
-Create `.mcp.json` in your project root or home directory:
-
-```json
-{
-  "mcpServers": {
-    "novaposhta-stdio": {
-      "type": "stdio",
-      "command": "/path/to/dist/cli.js",
-      "env": {
-        // Optional - only required for waybill operations
-        "NOVA_POSHTA_API_KEY": "your_api_key",
-        // Optional - parameter sent by Nova Poshta API Sandbox UI
-        "NOVA_POSHTA_SYSTEM": "DevCentre",
-        "LOG_LEVEL": "debug"
-      }
-    }
-  }
-}
-```
-
-### HTTP Mode (Cloud Deployment)
-
-```json
-{
-  "mcpServers": {
-    "novaposhta-http": {
-      "type": "http",
-      "url": "https://your-domain.com/mcp",
-      "env": {
-        // Optional - only required for waybill operations
-        "NOVA_POSHTA_API_KEY": "your_api_key",
-        // Optional - parameter sent by Nova Poshta API Sandbox UI
-        "NOVA_POSHTA_SYSTEM": "DevCentre",
-        "LOG_LEVEL": "info"
-      }
-    }
-  }
-}
-```
-
-Deploy with Docker:
-
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY . .
-RUN yarn install && yarn build
-# Optional - only required for waybill operations
-ENV NOVA_POSHTA_API_KEY=your_key
-# Optional - parameter sent by Nova Poshta API Sandbox UI
-ENV NOVA_POSHTA_SYSTEM=DevCentre
-ENV MCP_PORT=3000
-EXPOSE 3000
-CMD ["node", "dist/cli.js", "--http"]
-```
-
-## Development
-
-### Setup
-
-```bash
-# Install dependencies
-yarn install
-
-# Build all packages
-yarn build
-
-# Build MCP server only
-yarn build:mcp
-```
-
-### Running in Development
-
-```bash
-# stdio mode (default)
-NOVA_POSHTA_API_KEY=your_key yarn dev:mcp:stdio
-
-# HTTP mode
-NOVA_POSHTA_API_KEY=your_key yarn dev:mcp:http
-```
-
-### Testing
-
-```bash
-# Run tests
-yarn test:mcp
-
-# Run tests in watch mode
-yarn test:mcp --watch
-
-# Test with real API (requires .env file)
-cd packages/novaposhta-mcp-server
-cp .env.example .env
-# Edit .env and add your API key
-./test-mcp.sh
-```
 
 ### Project Structure
 
@@ -766,148 +510,6 @@ A: The MCP server provides error messages when rate limits are hit, but doesn't 
 
 ---
 
-## Performance Tips
-
-### Optimize API Calls
-
-1. **Use pagination and limits**: Always specify `Limit` parameter to avoid large responses
-   ```typescript
-   { query: 'Kyiv', Limit: 10 }
-   ```
-
-2. **Cache reference data**: Cargo types, service types, etc. rarely change
-
-3. **Batch operations**: Use bulk tracking methods for multiple packages
-   ```typescript
-   track_multiple_documents({ DocumentNumbers: ['123', '456', '789'] })
-   ```
-
-4. **Filter early**: Use specific filters to reduce result sets
-   ```typescript
-   {
-     CityName: 'Київ',
-     typeOfWarehouseRef: 'branch-type-ref',
-     posTerminal: '1',
-     Limit: 5
-   }
-   ```
-
-### Memory Management
-
-- The MCP server is stateless and doesn't cache responses
-- Each request is independent
-- For high-volume applications, consider implementing your own caching layer
-
----
-
-## Security Best Practices
-
-### API Key Management
-
-1. **Never commit API keys**: Use environment variables
-2. **Rotate keys regularly**: Generate new keys periodically
-3. **Use different keys per environment**: Separate keys for dev/staging/prod
-4. **Monitor API usage**: Check Nova Poshta dashboard for unusual activity
-
-### Production Deployment
-
-1. **Use HTTPS**: Always use HTTPS in production (HTTP mode)
-2. **Implement rate limiting**: Protect your server from abuse
-3. **Add authentication**: Don't expose MCP server publicly without auth
-4. **Monitor logs**: Set up log aggregation and alerting
-5. **Use secrets management**: Store API keys in a secure vault (AWS Secrets Manager, etc.)
-
-Example with secrets:
-```dockerfile
-FROM node:20-alpine
-WORKDIR /app
-COPY . .
-RUN yarn install && yarn build
-
-# Never hardcode keys - use runtime secrets
-CMD ["sh", "-c", "NOVA_POSHTA_API_KEY=$(cat /run/secrets/np_api_key) node dist/cli.js --http"]
-```
-
----
-
-## Contributing
-
-We welcome contributions from the community! Whether it's bug fixes, new features, documentation improvements, or examples - all contributions are appreciated.
-
-### Development Workflow
-
-1. **Fork the repository**
-2. **Clone your fork**:
-   ```bash
-   git clone https://github.com/your-username/carrier-api.git
-   cd carrier-api
-   ```
-3. **Install dependencies**:
-   ```bash
-   yarn install
-   ```
-4. **Create a feature branch**:
-   ```bash
-   git checkout -b feature/my-amazing-feature
-   ```
-5. **Make your changes**
-6. **Add tests** for new functionality
-7. **Run tests**:
-   ```bash
-   yarn test:mcp
-   ```
-8. **Build the package**:
-   ```bash
-   yarn build:mcp
-   ```
-9. **Commit with conventional commits**:
-   ```bash
-   git commit -m "feat: add new tracking tool"
-   ```
-10. **Push and create a Pull Request**
-
-### Coding Standards
-
-- Write clean, readable TypeScript code
-- Follow the existing code style
-- Add JSDoc comments for public APIs
-- Include unit tests for new features
-- Update documentation as needed
-- Use conventional commits (feat, fix, docs, chore, etc.)
-
-### Adding New Tools
-
-To add a new MCP tool:
-
-1. Create a new file in `src/tools/`
-2. Define the tool schema and handler
-3. Register the tool in `src/server.ts`
-4. Add tests in `tests/`
-5. Update documentation
-
-Example:
-```typescript
-// src/tools/my-new-tool.ts
-export const myNewTool = {
-  name: 'my_new_tool',
-  description: 'Does something awesome',
-  inputSchema: {
-    type: 'object',
-    properties: {
-      param: { type: 'string', description: 'A parameter' }
-    },
-    required: ['param']
-  }
-};
-
-export async function handleMyNewTool(client, params) {
-  // Implementation
-  return result;
-}
-```
-
----
-
 ## Changelog
 
 See [CHANGELOG.md](../../CHANGELOG.md) for a detailed history of changes.
@@ -917,14 +519,6 @@ See [CHANGELOG.md](../../CHANGELOG.md) for a detailed history of changes.
 ## License
 
 Apache License 2.0 - see [LICENSE](./LICENSE) for details.
-
-**What this means:**
-- ✅ Commercial use allowed
-- ✅ Modification allowed
-- ✅ Distribution allowed
-- ✅ Patent use allowed
-- ✅ Private use allowed
-- ⚠️ Liability and warranty limitations apply
 
 ## Links
 
