@@ -1,6 +1,6 @@
 {
   "name": "@shopana/novaposhta-transport-fetch",
-  "version": "0.0.1-alpha.0",
+  "version": "0.0.1-alpha.1",
   "description": "Fetch-based HTTP JSON transport for Nova Poshta API",
   "type": "module",
   "main": "dist/index.js",

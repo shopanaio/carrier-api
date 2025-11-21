@@ -1,6 +1,6 @@
 {
   "name": "@shopana/novaposhta-mcp-server",
-  "version": "0.0.1-alpha.7",
+  "version": "0.0.1-alpha.8",
   "description": "MCP Server for Nova Poshta API integration with AI assistants",
   "mcpName": "io.github.shopanaio/novaposhta",
   "type": "module",
@@ -54,7 +54,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.22.0",
-    "@shopana/novaposhta-api-client": "^0.0.1-alpha.9"
+    "@shopana/novaposhta-api-client": "^0.0.1-alpha.10"
   },
   "peerDependencies": {
     "cross-fetch": "^4.0.0"
