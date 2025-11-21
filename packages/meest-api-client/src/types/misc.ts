@@ -1,0 +1,15 @@
+export type {
+  BannersResult,
+  BannersResponse,
+  CheckPhoneOnParcelPathParams,
+  CheckPhoneOnParcelResponse,
+  ContractClientInfoPathParams,
+  ContractClientInfoResponse,
+  ContractValidationCheckRequestBody,
+  ContractValidationCheckResult,
+  ContractValidationCheckResponse,
+  ParcelReturnNewRequestBody,
+  ParcelReturnNewResponse,
+  ParcelReturnReasonsResult,
+  ParcelReturnReasonsResponse,
+} from './generated';

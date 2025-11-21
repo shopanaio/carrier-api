@@ -1,0 +1,78 @@
+{
+  "name": "@shopana/meest-api-client",
+  "version": "0.0.1-alpha.0",
+  "description": "Fully typed Meest API client for Node.js and browsers with plugin-based architecture",
+  "main": "dist/index.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc -p tsconfig.json",
+    "clean": "rm -rf dist",
+    "dev": "tsc -w -p tsconfig.json",
+    "type-check": "tsc --noEmit",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "generate:types": "node scripts/generate-types.js"
+  },
+  "keywords": [
+    "meest",
+    "shipping",
+    "logistics",
+    "delivery",
+    "tracking",
+    "api-client",
+    "sdk",
+    "rest-api",
+    "carrier",
+    "courier",
+    "parcel",
+    "registers",
+    "print",
+    "typescript",
+    "nodejs",
+    "browser",
+    "plugin-architecture"
+  ],
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/meest-api-client"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/meest-api-client#readme",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/jest": "^29.5.8",
+    "@types/node": "^20.9.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.2.2"
+  },
+  "peerDependencies": {
+    "@shopana/carrier-transport": "^0.1.0",
+    "typescript": ">=4.9.0"
+  },
+  "peerDependenciesMeta": {
+    "@shopana/carrier-transport": {
+      "optional": false
+    }
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false
+}

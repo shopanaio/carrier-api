@@ -63,6 +63,10 @@ export type { ClientContext, Client, ServiceAPI } from './core/client';
 
 export type { HttpTransport } from './http/transport';
 
+// Transport adapters for universal transport integration
+export { fromUniversalTransport, toUniversalTransport } from './adapters';
+export type { UniversalHttpTransport } from './adapters';
+
 export { WaybillService } from './services/waybillService';
 
 export { TrackingService } from './services/trackingService';
