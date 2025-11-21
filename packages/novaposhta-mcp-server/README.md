@@ -364,87 +364,17 @@ Enable debug logging:
 
 Check logs:
 - **stdio mode**: Logs are written to stderr
-- **HTTP mode**: Logs are written to console and available in server logs
-
-Common issues:
-1. **API Key errors**: Verify your API key is correct and not expired
-2. **Connection issues**: Check your internet connection and firewall settings
-3. **Tool not found**: Ensure you're using the latest version of the server
-
-## API Rate Limits
-
-Nova Poshta API has the following limits:
-- **Free accounts**: 500 requests per day
-- **Paid accounts**: Higher limits based on plan
-
-The MCP server automatically handles rate limiting and provides meaningful error messages.
-
-## Troubleshooting
-
-### Common Issues
-
-#### Server Not Starting
-
-**Problem**: Server doesn't start or crashes immediately
-
-**Solutions**:
-1. Verify API key is set correctly:
-   ```bash
-   echo $NOVA_POSHTA_API_KEY
-   ```
-2. Check if port is available (HTTP mode):
-   ```bash
-   lsof -i :3000
-   ```
-3. Enable debug logging:
-   ```json
-   {
-     "env": {
-       "LOG_LEVEL": "debug"
-     }
-   }
-   ```
-
-#### Tools Not Available in Claude
-
-**Problem**: Claude says it doesn't have access to Nova Poshta tools
-
-**Solutions**:
-1. Restart Claude Desktop/Code
-2. Verify `.mcp.json` syntax (use a JSON validator)
-3. Check server logs for errors
-4. Try running the server manually:
-   ```bash
-   NOVA_POSHTA_API_KEY=your_key node dist/cli.js
-   ```
-
-#### Rate Limiting Errors
-
-**Problem**: Getting "rate limit exceeded" errors
-
-**Solutions**:
-1. Check your Nova Poshta account limits
-2. Implement request throttling in your application
-3. Consider upgrading to a paid Nova Poshta plan
-4. Use caching for reference data (it changes infrequently)
-
-#### Large Response Warnings
-
-**Problem**: Token consumption warnings or truncated responses
-
-**Solutions**:
-1. Always use `Limit` parameter for search operations:
-   ```typescript
-   client.address.searchCities({ query: 'Kyiv', Limit: 10 })
-   ```
-2. Use pagination for large datasets
-3. Filter results with specific criteria
-
----
 
 ## FAQ
 
 ### General Questions
+
+**Q: Why should I use this MCP server instead of calling Nova Poshta API directly?**
+A: This MCP server provides several key advantages:
+- **Comprehensive Documentation**: All tools are well-documented with clear descriptions, making it easy for AI assistants to understand and use them correctly
+- **Real Data Operations**: Execute real API calls with actual Nova Poshta data - tracking shipments, calculating costs, creating waybills, and more
+- **AI-Native Integration**: Designed specifically for AI assistants like Claude, enabling natural language interactions with Nova Poshta services
+- **Zero Configuration**: Works immediately after setup with sensible defaults and clear error messages
 
 **Q: Do I need a Nova Poshta account to use this?**
 A: Yes, you need to register at [my.novaposhta.ua](https://my.novaposhta.ua/) and generate an API key.
@@ -452,61 +382,11 @@ A: Yes, you need to register at [my.novaposhta.ua](https://my.novaposhta.ua/) an
 **Q: Is this an official Nova Poshta package?**
 A: No, this is a community-maintained package. For official API docs, visit [developers.novaposhta.ua](https://developers.novaposhta.ua/).
 
-**Q: What's the difference between stdio and HTTP modes?**
-A: Stdio is for local AI assistants (Claude Desktop/Code), while HTTP is for cloud deployments and proxy scenarios.
-
 **Q: Can I use this in production?**
-A: Yes! The package is production-ready with enterprise-grade error handling. Many companies use it in production.
+A: Yes! The package is production-ready with enterprise-grade error handling.
 
 **Q: Does this support all Nova Poshta API features?**
 A: The package covers the most commonly used features. If you need additional functionality, please [open an issue](https://github.com/shopanaio/carrier-api/issues).
-
-### Technical Questions
-
-**Q: How do I cache reference data?**
-A: Reference data (cargo types, service types, etc.) changes infrequently. Implement your own caching layer:
-```typescript
-const cache = new Map();
-
-async function getCachedCargoTypes() {
-  if (cache.has('cargoTypes')) {
-    return cache.get('cargoTypes');
-  }
-
-  const result = await client.reference.getCargoTypes();
-  cache.set('cargoTypes', result);
-
-  // Cache for 24 hours
-  setTimeout(() => cache.delete('cargoTypes'), 24 * 60 * 60 * 1000);
-
-  return result;
-}
-```
-
-**Q: Can I run multiple MCP servers?**
-A: Yes! Just use different server names in your `.mcp.json`:
-```json
-{
-  "mcpServers": {
-    "novaposhta-prod": { ... },
-    "novaposhta-test": { ... }
-  }
-}
-```
-
-**Q: How do I handle errors in my application?**
-A: The API returns a structured response with `success`, `data`, `errors`, `warnings`, and `info` fields:
-```typescript
-const result = await tool.execute();
-
-if (!result.success) {
-  console.error('API Errors:', result.errors);
-  console.warn('Warnings:', result.warnings);
-}
-```
-
-**Q: Is rate limiting handled automatically?**
-A: The MCP server provides error messages when rate limits are hit, but doesn't implement automatic retry logic. Implement this in your application if needed.
 
 ---
 
@@ -533,7 +413,7 @@ Apache License 2.0 - see [LICENSE](./LICENSE) for details.
 
 - **Issues**: [GitHub Issues](https://github.com/shopanaio/carrier-api/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/shopanaio/carrier-api/discussions)
-- **Email**: support@shopana.io
+- **Email**: hello@shopana.io
 
 ---
 
