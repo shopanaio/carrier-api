@@ -450,13 +450,13 @@ A: The package covers the most commonly used features. If you need additional fu
 
 ## Changelog
 
-See [CHANGELOG.md](../../CHANGELOG.md) for a detailed history of changes.
+See [CHANGELOG.md](https://github.com/shopanaio/carrier-api/blob/main/CHANGELOG.md) for a detailed history of changes.
 
 ---
 
 ## License
 
-Apache License 2.0 - see [LICENSE](./LICENSE) for details.
+Apache License 2.0 - see [LICENSE](https://github.com/shopanaio/carrier-api/blob/main/LICENSE) for details.
 
 ## Links
 

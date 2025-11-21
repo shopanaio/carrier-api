@@ -629,7 +629,7 @@ Contributions are welcome! Please see the [main repository](https://github.com/s
 
 ## 📄 License
 
-Apache License 2.0 - see [LICENSE](../../LICENSE) for details.
+Apache License 2.0 - see [LICENSE](https://github.com/shopanaio/carrier-api/blob/main/LICENSE) for details.
 
 ---
 
