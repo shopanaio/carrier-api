@@ -62,6 +62,7 @@ npm i @shopana/novaposhta-api-client @shopana/novaposhta-transport-fetch
 
 [![npm version](https://img.shields.io/npm/v/@shopana/novaposhta-mcp-server.svg?style=flat-square)](https://www.npmjs.com/package/@shopana/novaposhta-mcp-server)
 [![MCP](https://img.shields.io/badge/MCP-1.22+-green.svg?style=flat-square)](https://modelcontextprotocol.io)
+[![MCP Badge](https://lobehub.com/badge/mcp/shopanaio-carrier-api)](https://lobehub.com/mcp/shopanaio-carrier-api)
 
 **Model Context Protocol (MCP) server** for integrating Nova Poshta with AI assistants like Claude.
 
