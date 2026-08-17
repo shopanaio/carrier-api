@@ -42,18 +42,15 @@ jobs:
           changed_files="$(git diff --name-only "origin/${{ github.base_ref }}...HEAD")"
           printf '%s\n' "$changed_files"
 
-          has_package_source=false
-          has_package_manifest=false
           has_changeset=false
+          changed_package_dirs=()
           changeset_files=()
 
-          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/((src|scripts)/|build\.js$|rollup\.config\.js$|tsup\.config\.ts$|tsconfig\.json$)'; then
-            has_package_source=true
-          fi
-
-          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/package\.json$'; then
-            has_package_manifest=true
-          fi
+          mapfile -t changed_package_dirs < <(
+            printf '%s\n' "$changed_files" |
+              sed -nE 's#^packages/([^/]+)/((src|scripts)/.*|package\.json|build\.js|rollup\.config\.js|tsup\.config\.ts|tsconfig\.json)$#packages/\1#p' |
+              sort -u
+          )
 
           if printf '%s\n' "$changed_files" | grep -Eq '^\.changeset/[^/]+\.md$'; then
             has_changeset=true
@@ -61,15 +58,19 @@ jobs:
           fi
 
           if [[ "$has_changeset" == "true" ]]; then
-            node tools/validate-changesets.mjs "${changeset_files[@]}"
+            validator_args=()
+            for package_dir in "${changed_package_dirs[@]}"; do
+              validator_args+=(--changed-package-dir "$package_dir")
+            done
+            node tools/validate-changesets.mjs "${validator_args[@]}" -- "${changeset_files[@]}"
           fi
 
-          if [[ "$has_package_source" == "false" && "$has_package_manifest" == "false" && "$has_changeset" == "true" ]]; then
+          if [[ "${#changed_package_dirs[@]}" -eq 0 && "$has_changeset" == "true" ]]; then
             echo "::error::Changeset-only pull requests are not allowed. Include the package source change in the same pull request."
             exit 1
           fi
 
-          if [[ "$has_package_source" == "false" && "$has_package_manifest" == "false" ]]; then
+          if [[ "${#changed_package_dirs[@]}" -eq 0 ]]; then
             echo "No releasable package changes detected."
             exit 0
           fi

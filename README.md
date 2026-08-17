@@ -330,25 +330,13 @@ test-only, and repository maintenance changes do not need a Changeset.
 The `Changeset Required` workflow checks pull requests before release automation
 can run.
 
-Stable releases use the `main` branch:
+Releases use the `main` branch:
 
 1. Merge a source change and its `.changeset/*.md` file into `main`.
 2. The `Release` workflow opens a `chore: version packages` pull request.
 3. Review and merge that version pull request.
-4. The same workflow builds and publishes changed packages to npm with the
-   `latest` tag and creates GitHub releases.
-
-Beta prereleases use the `beta` branch:
-
-1. Create or update `beta` from `main`.
-2. Merge beta-bound source changes and their Changesets into `beta`.
-3. The `Release` workflow opens a `chore: version packages (beta)` pull request.
-4. Review and merge that version pull request.
-5. The same workflow builds and publishes changed packages to npm with the
-   `beta` tag.
-
-The beta workflow enters Changesets prerelease mode automatically. Keep
-`.changeset/pre.json` out of `main`.
+4. The same workflow builds and publishes stable package versions to npm with
+   the `latest` tag and creates GitHub releases.
 
 Manual release packaging checks are:
 

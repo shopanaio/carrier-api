@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - beta
     paths:
       - '.changeset/**'
       - 'packages/**/package.json'
@@ -28,7 +27,6 @@ concurrency:
 jobs:
   release:
     name: Version or publish packages
-    if: ${{ github.ref_name == 'main' || github.ref_name == 'beta' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -65,12 +63,6 @@ jobs:
         run: |
           before="${{ github.event.before }}"
           after="${{ github.sha }}"
-
-          if [[ "$before" =~ ^0+$ ]]; then
-            echo "Skipping changeset validation for initial branch push."
-            echo "SKIP_RELEASE=true" >> "$GITHUB_ENV"
-            exit 0
-          fi
 
           changed_files="$(git diff --name-only "$before" "$after")"
           printf '%s\n' "$changed_files"
@@ -110,14 +102,13 @@ jobs:
           exit 1
 
       - name: Create release PR or publish
-        if: ${{ env.SKIP_RELEASE != 'true' }}
         id: changesets
         uses: changesets/action@v1
         with:
-          version: "${{ github.ref_name == 'beta' && 'yarn version:packages:beta' || 'yarn version:packages' }}"
-          publish: "${{ github.ref_name == 'beta' && 'yarn release:beta' || 'yarn release:stable' }}"
-          title: "${{ github.ref_name == 'beta' && 'chore: version packages (beta)' || 'chore: version packages' }}"
-          commit: "${{ github.ref_name == 'beta' && 'chore: version packages (beta)' || 'chore: version packages' }}"
-          createGithubReleases: "${{ github.ref_name == 'main' }}"
+          version: yarn version:packages
+          publish: yarn release:stable
+          title: "chore: version packages"
+          commit: "chore: version packages"
+          createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESETS_TOKEN || secrets.GITHUB_TOKEN }}
