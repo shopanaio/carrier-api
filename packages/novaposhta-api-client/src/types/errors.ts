@@ -246,6 +246,9 @@ export enum NovaPoshtaErrorCode {
   InternetDocumentNotFound = '20000200205',
   InternetDocumentNotFoundByOwner = '20000200206',
 
+  // Postomat direction restrictions
+  SendingFromPostomatUnavailable = '20000204037',
+
   // Attorney and items errors
   IsTakeAttorneyUnavailable = '20000200207',
   ItemsEmpty = '20000200208',
@@ -382,6 +385,14 @@ export const ERROR_MESSAGES: Partial<
     ua: 'Вартість занадто висока',
     ru: 'Стоимость слишком высокая',
     category: ErrorCategory.Validation,
+    severity: ErrorSeverity.Medium,
+    retryable: false,
+  },
+  [NovaPoshtaErrorCode.SendingFromPostomatUnavailable]: {
+    en: 'Sending from a postomat is available only in the Nova Poshta mobile application',
+    ua: 'Відправка з поштомату доступна лише з мобільного додатку Nova Poshta',
+    ru: 'Отправка из почтомата доступна только в мобильном приложении Nova Poshta',
+    category: ErrorCategory.BusinessLogic,
     severity: ErrorSeverity.Medium,
     retryable: false,
   },

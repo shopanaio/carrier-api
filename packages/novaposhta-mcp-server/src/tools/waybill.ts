@@ -2,7 +2,7 @@ import type { CallToolResult, Tool } from '@modelcontextprotocol/sdk/types.js';
 import type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
-  CreatePoshtomatWaybillRequest,
+  CreateWaybillToPostomatRequest,
   DeleteWaybillRequest,
   DeliveryDateRequest,
   PriceCalculationRequest,
@@ -92,13 +92,14 @@ const waybillTools: Tool[] = [
   {
     name: 'waybill_create_for_postomat',
     description:
-      'Create a waybill for postomat delivery via InternetDocument/save (doc 1.2). Postomats have size/weight restrictions (max 30kg, max dimensions). Requires proper warehouse selection (postomat type) and seat options configuration.',
+      'Create a waybill for delivery TO a recipient postomat via InternetDocument/save (doc 1.2). Sending FROM a postomat is not supported by Nova Poshta API v2 and is available only in the Nova Poshta mobile app. Recipient postomats have a 20 kg limit and require OptionsSeat dimensions.',
     inputSchema: {
       type: 'object',
       properties: {
         request: {
           type: 'object',
-          description: 'Raw Nova Poshta create postomat waybill payload with optionsSeat array.',
+          description:
+            'Raw Nova Poshta payload for delivery to a recipient postomat with an OptionsSeat array. SenderAddress must not reference a postomat.',
         },
       },
       required: ['request'],
@@ -386,16 +387,20 @@ async function handleCreateWaybillWithOptions(args: ToolArguments, context: Tool
 }
 
 async function handleCreateForPostomat(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
-  const request = ensureObject<CreatePoshtomatWaybillRequest>(args?.request, 'request');
-  const response = await context.client.waybill.createForPostomat(request);
-  return createTextResult(
+  const request = ensureObject<CreateWaybillToPostomatRequest>(args?.request, 'request');
+  const response = await context.client.waybill.createToPostomat(request);
+  const result = createTextResult(
     formatAsJson({
       success: response.success,
       refs: response.data?.map(item => item.Ref),
+      errors: response.errors,
+      errorCodes: response.errorCodes,
       warnings: response.warnings,
     }),
     { response },
   );
+
+  return response.success ? result : { ...result, isError: true };
 }
 
 async function handleCreateBatch(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {

@@ -177,6 +177,7 @@ export type {
 export type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
+  CreateWaybillToPostomatRequest,
   CreatePoshtomatWaybillRequest,
   UpdateWaybillRequest,
   DeleteWaybillRequest,

@@ -288,6 +288,51 @@ const waybill = await client.waybill.create({
 console.log('Waybill created:', waybill.data[0].IntDocNumber);
 ```
 
+### Delivery to a postomat
+
+Nova Poshta API v2 supports delivery **to** a recipient postomat. Use `createToPostomat()` and pass the postomat reference as `RecipientAddress`:
+
+```ts
+const waybill = await client.waybill.createToPostomat({
+  PayerType: 'Sender',
+  PaymentMethod: 'Cash',
+  DateTime: '25.12.2024',
+  CargoType: 'Parcel',
+  Weight: 1,
+  ServiceType: 'WarehouseWarehouse',
+  SeatsAmount: 1,
+  Description: 'Test package',
+  Cost: 500,
+  CitySender: 'sender-city-ref',
+  Sender: 'sender-counterparty-ref',
+  SenderAddress: 'sender-branch-ref',
+  ContactSender: 'sender-contact-ref',
+  SendersPhone: '380671234567',
+  CityRecipient: 'recipient-city-ref',
+  Recipient: 'recipient-counterparty-ref',
+  RecipientAddress: 'recipient-postomat-ref',
+  RecipientWarehouseIndex: '11/1001',
+  ContactRecipient: 'recipient-contact-ref',
+  RecipientsPhone: '380501234567',
+  OptionsSeat: [
+    {
+      Weight: 1,
+      VolumetricWidth: 10,
+      VolumetricLength: 20,
+      VolumetricHeight: 15,
+    },
+  ],
+});
+```
+
+Nova Poshta API v2 does **not** support sending from a postomat. A response with error code `20000204037` means that this operation is available only in the Nova Poshta mobile application. The SDK exposes this capability explicitly:
+
+```ts
+client.waybill.canSendFromPostomat(); // false
+```
+
+`createForPostomat()` remains available as a deprecated compatibility alias for `createToPostomat()`.
+
 ---
 
 ## 🛠️ Custom Transport

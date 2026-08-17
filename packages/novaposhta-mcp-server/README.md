@@ -201,7 +201,9 @@ Create a Nova Poshta waybill with additional options and services. Supports back
 
 #### `waybill_create_for_postomat`
 
-Create a waybill for postomat delivery. Postomats have size/weight restrictions (max 30kg, max dimensions). Requires proper warehouse selection (postomat type) and seat options configuration.
+Create a waybill for delivery **to a recipient postomat**. Recipient postomats have a 20 kg limit and require an `OptionsSeat` array with parcel dimensions.
+
+> **Important:** Nova Poshta API v2 does not support sending **from** a postomat. Error `20000204037` means that this direction is available only in the Nova Poshta mobile application. `SenderAddress` must therefore reference a branch or another sender location supported by the API.
 
 #### `waybill_create_batch`
 

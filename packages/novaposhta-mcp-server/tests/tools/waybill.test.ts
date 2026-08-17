@@ -11,7 +11,7 @@ const createMockContext = (): ToolContext => ({
       getEstimate: vi.fn(),
       create: vi.fn(),
       createWithOptions: vi.fn(),
-      createForPostomat: vi.fn(),
+      createToPostomat: vi.fn(),
       createBatch: vi.fn(),
       update: vi.fn(),
       delete: vi.fn(),
@@ -248,8 +248,8 @@ describe('waybill tools', () => {
   });
 
   describe('waybill_create_for_postomat', () => {
-    it('successfully creates waybill for postomat', async () => {
-      vi.mocked(context.client.waybill.createForPostomat).mockResolvedValue({
+    it('successfully creates a waybill for delivery to a recipient postomat', async () => {
+      vi.mocked(context.client.waybill.createToPostomat).mockResolvedValue({
         success: true,
         data: [{ Ref: 'doc-ref-456', IntDocNumber: '20400048799001' }] as any,
         errors: [],
@@ -265,33 +265,85 @@ describe('waybill tools', () => {
         'waybill_create_for_postomat',
         {
           request: {
-            payerType: 'Sender',
-            paymentMethod: 'Cash',
-            dateTime: '01.01.2024',
+            PayerType: 'Sender',
+            PaymentMethod: 'Cash',
+            DateTime: '01.01.2024',
             CargoType: 'Parcel',
             Weight: 1,
             ServiceType: 'WarehouseWarehouse',
             SeatsAmount: 1,
-            description: 'Test',
+            Description: 'Test',
             Cost: 100,
             CitySender: 'city1',
-            sender: 'sender-ref',
-            senderAddress: 'address1',
-            contactSender: 'contact1',
-            sendersPhone: '380501234567',
+            Sender: 'sender-ref',
+            SenderAddress: 'sender-branch-ref',
+            ContactSender: 'contact1',
+            SendersPhone: '380501234567',
             CityRecipient: 'city2',
-            recipient: 'recipient-ref',
-            recipientAddress: 'address2',
-            contactRecipient: 'contact2',
-            recipientsPhone: '380501234568',
-            optionsSeat: [],
+            Recipient: 'recipient-ref',
+            RecipientAddress: 'recipient-postomat-ref',
+            RecipientWarehouseIndex: '11/1001',
+            ContactRecipient: 'contact2',
+            RecipientsPhone: '380501234568',
+            OptionsSeat: [
+              {
+                Weight: 1,
+                VolumetricWidth: 10,
+                VolumetricLength: 20,
+                VolumetricHeight: 15,
+              },
+            ],
           },
         },
         context,
       );
 
       expect(result.isError).toBeUndefined();
-      expect(context.client.waybill.createForPostomat).toHaveBeenCalled();
+      expect(context.client.waybill.createToPostomat).toHaveBeenCalledWith(
+        expect.objectContaining({
+          SenderAddress: 'sender-branch-ref',
+          RecipientAddress: 'recipient-postomat-ref',
+          RecipientWarehouseIndex: '11/1001',
+        }),
+      );
+    });
+
+    it('exposes the API restriction when SenderAddress is a postomat', async () => {
+      vi.mocked(context.client.waybill.createToPostomat).mockResolvedValue({
+        success: false,
+        data: [],
+        errors: ['Sending from Postomat is Unavailable'],
+        warnings: [],
+        info: [],
+        messageCodes: [],
+        errorCodes: ['20000204037'],
+        warningCodes: [],
+        infoCodes: [],
+      });
+
+      const result = await handleWaybillTool(
+        'waybill_create_for_postomat',
+        {
+          request: {
+            SenderAddress: 'sender-postomat-ref',
+          },
+        },
+        context,
+      );
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0]).toMatchObject({
+        type: 'text',
+        text: expect.stringContaining('20000204037'),
+      });
+      expect(result.structuredContent).toEqual(
+        expect.objectContaining({
+          response: expect.objectContaining({
+            success: false,
+            errorCodes: ['20000204037'],
+          }),
+        }),
+      );
     });
   });
 

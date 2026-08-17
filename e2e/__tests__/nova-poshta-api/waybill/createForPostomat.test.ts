@@ -2,9 +2,9 @@ import { client } from '../../../setup/client.setup';
 import { PayerType, PaymentMethod, CargoType, ServiceType } from '@shopana/novaposhta-api-client';
 import { itWithApiKey } from '../../../setup/testHelpers';
 
-describe('WaybillService - createForPostomat', () => {
-  itWithApiKey('should create a postomat waybill with restrictions', async () => {
-    const response = await client.waybill.createForPostomat({
+describe('WaybillService - createToPostomat', () => {
+  itWithApiKey('should create a waybill for delivery to a recipient postomat', async () => {
+    const response = await client.waybill.createToPostomat({
       PayerType: PayerType.Sender,
       PaymentMethod: PaymentMethod.Cash,
       DateTime: '25.12.2024',
@@ -16,7 +16,7 @@ describe('WaybillService - createForPostomat', () => {
       Cost: 500, // Max 10000 for postomat
       CitySender: '8d5a980d-391c-11dd-90d9-001a92567626',
       Sender: '8d5a980d-391c-11dd-90d9-001a92567626',
-      SenderAddress: '8d5a980d-391c-11dd-90d9-001a92567626',
+      SenderAddress: '8d5a980d-391c-11dd-90d9-001a92567626', // Sender must not be a postomat
       ContactSender: '8d5a980d-391c-11dd-90d9-001a92567626',
       SendersPhone: '380501234567',
       CityRecipient: '8d5a980d-391c-11dd-90d9-001a92567626',

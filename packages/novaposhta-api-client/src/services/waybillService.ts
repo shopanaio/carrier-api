@@ -9,6 +9,7 @@ import { toHttpTransport } from '../core/client';
 import type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
+  CreateWaybillToPostomatRequest,
   CreatePoshtomatWaybillRequest,
   UpdateWaybillRequest,
   DeleteWaybillRequest,
@@ -65,9 +66,12 @@ export class WaybillService {
   }
 
   /**
-   * Create a postomat waybill (with restrictions)
+   * Create a waybill for delivery to a postomat (with restrictions).
+   *
+   * Nova Poshta API v2 does not support sending from a postomat. Such
+   * shipments can only be created in the Nova Poshta mobile application.
    */
-  async createForPostomat(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
+  async createToPostomat(request: CreateWaybillToPostomatRequest): Promise<CreateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
@@ -76,6 +80,14 @@ export class WaybillService {
     };
 
     return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
+  }
+
+  /**
+   * Create a waybill for delivery to a postomat (with restrictions).
+   * @deprecated Use createToPostomat() to make the supported direction explicit.
+   */
+  async createForPostomat(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
+    return this.createToPostomat(request);
   }
 
   /**
@@ -203,7 +215,7 @@ export class WaybillService {
   }
 
   /**
-   * Check if postomat delivery is available for the request
+   * Check if delivery to a postomat is available for the request
    */
   canDeliverToPostomat(request: Partial<CreateWaybillRequest>): boolean {
     // Check cargo type
@@ -222,6 +234,14 @@ export class WaybillService {
     }
 
     return true;
+  }
+
+  /**
+   * Check whether Nova Poshta API v2 supports sending from a postomat.
+   * Sending from a postomat is available only in the Nova Poshta mobile app.
+   */
+  canSendFromPostomat(): false {
+    return false;
   }
 
   // =============================================================================
@@ -246,10 +266,10 @@ export class WaybillService {
 
   /**
    * Create postomat express waybill (legacy method for compatibility)
-   * @deprecated Use createForPostomat() method instead
+   * @deprecated Use createToPostomat() method instead
    */
   async createPoshtomatExpressWaybill(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
-    return this.createForPostomat(request);
+    return this.createToPostomat(request);
   }
 
   /**

@@ -103,13 +103,13 @@ export interface CreateWaybillWithOptionsRequest extends BaseWaybillProperties {
   readonly AdditionalServices?: AdditionalServices;
 }
 
-// Postomat waybill creation (with restrictions)
-export interface CreatePoshtomatWaybillRequest extends BaseWaybillProperties {
-  /** Sender warehouse index (optional) */
+// Waybill creation for delivery to a postomat (with restrictions)
+export interface CreateWaybillToPostomatRequest extends BaseWaybillProperties {
+  /** Sender warehouse index (optional, but the sender itself cannot be a postomat) */
   readonly SenderWarehouseIndex?: String36;
-  /** Recipient warehouse index (optional) */
+  /** Recipient postomat index (optional) */
   readonly RecipientWarehouseIndex?: String36;
-  /** Cargo parameters for each seat (required for postomat) */
+  /** Cargo parameters for each seat (required for delivery to a postomat) */
   readonly OptionsSeat: readonly PoshtomatOptionsSeatItem[];
   /** Cargo type must be Parcel or Documents only */
   readonly CargoType: CargoType.Parcel | CargoType.Documents;
@@ -118,6 +118,13 @@ export interface CreatePoshtomatWaybillRequest extends BaseWaybillProperties {
   /** Max declared value 10000 UAH */
   readonly Cost: Cost; // max 10000
 }
+
+/**
+ * @deprecated Use CreateWaybillToPostomatRequest. Nova Poshta API v2 supports
+ * delivery to a postomat, but sending from a postomat is available only in the
+ * Nova Poshta mobile application.
+ */
+export type CreatePoshtomatWaybillRequest = CreateWaybillToPostomatRequest;
 
 // Update waybill request
 export interface UpdateWaybillRequest extends BaseWaybillProperties {

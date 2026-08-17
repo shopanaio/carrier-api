@@ -237,8 +237,8 @@ describe('WaybillService', () => {
     });
   });
 
-  describe('createForPostomat', () => {
-    it('should call transport with correct parameters', async () => {
+  describe('createToPostomat', () => {
+    it('should create a waybill for delivery to a recipient postomat', async () => {
       const mockData = [
         {
           Ref: 'waybill-ref-1',
@@ -250,7 +250,7 @@ describe('WaybillService', () => {
 
       const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
 
-      const result = await client.waybill.createForPostomat({
+      const result = await client.waybill.createToPostomat({
         PayerType: PayerType.Sender,
         PaymentMethod: PaymentMethod.Cash,
         DateTime: '01.01.2024',
@@ -270,10 +270,84 @@ describe('WaybillService', () => {
         RecipientAddress: 'recipient-address-ref',
         ContactRecipient: 'contact-recipient-ref',
         RecipientsPhone: '380507654321',
+        RecipientWarehouseIndex: '11/1001',
+        OptionsSeat: [
+          {
+            Weight: 1.5,
+            VolumetricWidth: 10,
+            VolumetricLength: 20,
+            VolumetricHeight: 15,
+          },
+        ],
       });
 
       expect(calls).toHaveLength(1);
+      expect(calls[0].body).toMatchObject({
+        modelName: 'InternetDocumentGeneral',
+        calledMethod: 'save',
+        methodProperties: {
+          SenderAddress: 'sender-address-ref',
+          RecipientAddress: 'recipient-address-ref',
+          RecipientWarehouseIndex: '11/1001',
+          OptionsSeat: [
+            {
+              Weight: 1.5,
+              VolumetricWidth: 10,
+              VolumetricLength: 20,
+              VolumetricHeight: 15,
+            },
+          ],
+        },
+      });
       expect(result.success).toBe(true);
+    });
+
+    it('keeps createForPostomat as a compatibility alias', async () => {
+      const service = new WaybillService();
+      const createToPostomat = jest.spyOn(service, 'createToPostomat').mockResolvedValue({
+        success: true,
+        data: [],
+        errors: [],
+        warnings: [],
+        info: [],
+        messageCodes: [],
+        errorCodes: [],
+        warningCodes: [],
+        infoCodes: [],
+      });
+      const request = {
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Test Package',
+        Cost: 500,
+        CitySender: 'city-sender-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-address-ref',
+        ContactSender: 'contact-sender-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'city-recipient-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-postomat-ref',
+        ContactRecipient: 'contact-recipient-ref',
+        RecipientsPhone: '380507654321',
+        OptionsSeat: [
+          {
+            Weight: 1,
+            VolumetricWidth: 10,
+            VolumetricLength: 10,
+            VolumetricHeight: 10,
+          },
+        ],
+      } as const;
+
+      await service.createForPostomat(request);
+
+      expect(createToPostomat).toHaveBeenCalledWith(request);
     });
   });
 
@@ -597,6 +671,16 @@ describe('WaybillService', () => {
       });
 
       expect(result).toBe(false);
+    });
+  });
+
+  describe('canSendFromPostomat', () => {
+    it('should report that Nova Poshta API v2 does not support this direction', () => {
+      const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
+        new WaybillService(),
+      );
+
+      expect(client.waybill.canSendFromPostomat()).toBe(false);
     });
   });
 });
