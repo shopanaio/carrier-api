@@ -98,7 +98,7 @@ Ask Claude:
 
 **Operations that require API key:**
 
-- Waybill management (waybill_calculate_cost, waybill_get_estimate, waybill_create, waybill_create_with_options, waybill_create_for_postomat, waybill_create_batch, waybill_update, waybill_delete, waybill_delete_batch, waybill_get_delivery_date)
+- Waybill management (waybill_calculate_cost, waybill_get_estimate, waybill_create, waybill_create_with_options, waybill_create_to_postomat, waybill_create_batch, waybill_update, waybill_delete, waybill_delete_batch, waybill_get_delivery_date)
 - Address management (address_save, address_update, address_delete)
 - Counterparty operations (counterparty_get_counterparties, counterparty_get_addresses, counterparty_get_contact_persons, counterparty_save, counterparty_update, counterparty_delete, counterparty_get_options)
 - Contact person management (contact_person_save, contact_person_update, contact_person_delete)
@@ -199,13 +199,50 @@ Create a standard Nova Poshta waybill (Internet document). This is the basic way
 
 Create a Nova Poshta waybill with additional options and services. Supports backward delivery, additional services, third-party payer, and RedBox barcodes. Use this when you need COD, insurance, or return shipments.
 
-#### `waybill_create_for_postomat`
+#### `waybill_create_to_postomat`
 
 Create a waybill for delivery **to a recipient postomat**. Recipient postomats have a 20 kg limit and require an `OptionsSeat` array with parcel dimensions.
 
-Use `DoorsPostomat` or `WarehousePostomat` as `ServiceType`.
+The request uses the same PascalCase fields as `CreateWaybillToPostomatRequest` in the API client. Use `DoorsPostomat` or `WarehousePostomat` as `ServiceType`; `CargoType` must be `Parcel` or `Documents`, declared `Cost` must not exceed 10,000 UAH, and `SeatsAmount` must match the number of `OptionsSeat` items. Each seat is limited to 20 kg, 40 cm wide, 60 cm long, and 30 cm high.
+
+```json
+{
+  "request": {
+    "PayerType": "Sender",
+    "PaymentMethod": "Cash",
+    "DateTime": "25.12.2024",
+    "CargoType": "Parcel",
+    "Weight": 1,
+    "ServiceType": "WarehousePostomat",
+    "SeatsAmount": 1,
+    "Description": "Test package",
+    "Cost": 500,
+    "CitySender": "sender-city-ref",
+    "Sender": "sender-counterparty-ref",
+    "SenderAddress": "sender-branch-ref",
+    "ContactSender": "sender-contact-ref",
+    "SendersPhone": "380671234567",
+    "CityRecipient": "recipient-city-ref",
+    "Recipient": "recipient-counterparty-ref",
+    "RecipientAddress": "recipient-postomat-ref",
+    "RecipientWarehouseIndex": "11/1001",
+    "ContactRecipient": "recipient-contact-ref",
+    "RecipientsPhone": "380501234567",
+    "OptionsSeat": [
+      {
+        "Weight": 1,
+        "VolumetricWidth": 10,
+        "VolumetricLength": 20,
+        "VolumetricHeight": 15
+      }
+    ]
+  }
+}
+```
 
 > **Important:** An ЕН for physical sending **from** a postomat can be created through the API, but a postomat must not be passed as `SenderAddress`. Create the ЕН with a supported sender address, then select it in the Nova Poshta mobile application to open and load the sender postomat. Passing a postomat as `SenderAddress` produces error `20000204037`.
+
+`waybill_create_for_postomat` remains available as a deprecated compatibility alias and accepts the same request.
 
 #### `waybill_create_batch`
 
@@ -261,7 +298,7 @@ List payer types for redelivery. Returns who can pay for backward delivery (Send
 
 #### `reference_get_service_types`
 
-List delivery service types. Four core technologies: `WarehouseWarehouse`, `WarehouseDoors`, `DoorsWarehouse`, `DoorsDoors`. Cache monthly.
+List delivery service types: `WarehouseWarehouse`, `WarehouseDoors`, `DoorsWarehouse`, `DoorsDoors`, `DoorsPostomat`, and `WarehousePostomat`. Cache monthly.
 
 #### `reference_get_payment_methods`
 

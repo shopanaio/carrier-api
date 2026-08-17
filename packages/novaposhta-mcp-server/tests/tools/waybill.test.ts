@@ -31,6 +31,37 @@ const createMockContext = (): ToolContext => ({
   },
 });
 
+const validPostomatRequest = {
+  PayerType: 'Sender',
+  PaymentMethod: 'Cash',
+  DateTime: '01.01.2024',
+  CargoType: 'Parcel',
+  Weight: 1,
+  ServiceType: 'WarehousePostomat',
+  SeatsAmount: 1,
+  Description: 'Test',
+  Cost: 100,
+  CitySender: 'city1',
+  Sender: 'sender-ref',
+  SenderAddress: 'sender-branch-ref',
+  ContactSender: 'contact1',
+  SendersPhone: '380501234567',
+  CityRecipient: 'city2',
+  Recipient: 'recipient-ref',
+  RecipientAddress: 'recipient-postomat-ref',
+  RecipientWarehouseIndex: '11/1001',
+  ContactRecipient: 'contact2',
+  RecipientsPhone: '380501234568',
+  OptionsSeat: [
+    {
+      Weight: 1,
+      VolumetricWidth: 10,
+      VolumetricLength: 20,
+      VolumetricHeight: 15,
+    },
+  ],
+};
+
 describe('waybill tools', () => {
   let context: ToolContext;
 
@@ -38,8 +69,25 @@ describe('waybill tools', () => {
     context = createMockContext();
   });
 
-  it('exposes ten waybill tools', () => {
-    expect(getWaybillTools()).toHaveLength(10);
+  it('exposes the canonical postomat tool and its compatibility alias', () => {
+    const tools = getWaybillTools();
+
+    expect(tools).toHaveLength(11);
+    expect(tools.map(tool => tool.name)).toEqual(
+      expect.arrayContaining(['waybill_create_to_postomat', 'waybill_create_for_postomat']),
+    );
+
+    const canonicalTool = tools.find(tool => tool.name === 'waybill_create_to_postomat');
+    const requestSchema = canonicalTool?.inputSchema.properties?.request as {
+      properties?: Record<string, { enum?: string[]; maximum?: number }>;
+      required?: string[];
+    };
+    expect(requestSchema.properties?.ServiceType.enum).toEqual(['DoorsPostomat', 'WarehousePostomat']);
+    expect(requestSchema.properties?.CargoType.enum).toEqual(['Parcel', 'Documents']);
+    expect(requestSchema.properties?.Cost.maximum).toBe(10000);
+    expect(requestSchema.required).toEqual(
+      expect.arrayContaining(['SenderAddress', 'RecipientAddress', 'OptionsSeat']),
+    );
   });
 
   it('requires document refs for delete tool', async () => {
@@ -247,7 +295,7 @@ describe('waybill tools', () => {
     });
   });
 
-  describe('waybill_create_for_postomat', () => {
+  describe('waybill_create_to_postomat', () => {
     it('successfully creates a waybill for delivery to a recipient postomat', async () => {
       vi.mocked(context.client.waybill.createToPostomat).mockResolvedValue({
         success: true,
@@ -262,38 +310,9 @@ describe('waybill tools', () => {
       });
 
       const result = await handleWaybillTool(
-        'waybill_create_for_postomat',
+        'waybill_create_to_postomat',
         {
-          request: {
-            PayerType: 'Sender',
-            PaymentMethod: 'Cash',
-            DateTime: '01.01.2024',
-            CargoType: 'Parcel',
-            Weight: 1,
-            ServiceType: 'WarehousePostomat',
-            SeatsAmount: 1,
-            Description: 'Test',
-            Cost: 100,
-            CitySender: 'city1',
-            Sender: 'sender-ref',
-            SenderAddress: 'sender-branch-ref',
-            ContactSender: 'contact1',
-            SendersPhone: '380501234567',
-            CityRecipient: 'city2',
-            Recipient: 'recipient-ref',
-            RecipientAddress: 'recipient-postomat-ref',
-            RecipientWarehouseIndex: '11/1001',
-            ContactRecipient: 'contact2',
-            RecipientsPhone: '380501234568',
-            OptionsSeat: [
-              {
-                Weight: 1,
-                VolumetricWidth: 10,
-                VolumetricLength: 20,
-                VolumetricHeight: 15,
-              },
-            ],
-          },
+          request: validPostomatRequest,
         },
         context,
       );
@@ -306,6 +325,58 @@ describe('waybill tools', () => {
           RecipientWarehouseIndex: '11/1001',
         }),
       );
+    });
+
+    it('keeps waybill_create_for_postomat as a compatibility alias', async () => {
+      vi.mocked(context.client.waybill.createToPostomat).mockResolvedValue({
+        success: true,
+        data: [{ Ref: 'doc-ref-compatibility' }] as any,
+        errors: [],
+        warnings: [],
+        info: [],
+        messageCodes: [],
+        errorCodes: [],
+        warningCodes: [],
+        infoCodes: [],
+      });
+
+      const result = await handleWaybillTool('waybill_create_for_postomat', { request: validPostomatRequest }, context);
+
+      expect(result.isError).toBeUndefined();
+      expect(context.client.waybill.createToPostomat).toHaveBeenCalledWith(validPostomatRequest);
+    });
+
+    it.each([
+      ['ServiceType', 'WarehouseWarehouse', 'DoorsPostomat or WarehousePostomat'],
+      ['CargoType', 'Cargo', 'Parcel or Documents'],
+      ['Cost', 10001, 'between 0 and 10000'],
+    ])('rejects invalid postomat %s before calling the API client', async (field, value, message) => {
+      const result = await handleWaybillTool(
+        'waybill_create_to_postomat',
+        { request: { ...validPostomatRequest, [field]: value } },
+        context,
+      );
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining(message) });
+      expect(context.client.waybill.createToPostomat).not.toHaveBeenCalled();
+    });
+
+    it('rejects postomat seat dimensions above the API client limits', async () => {
+      const result = await handleWaybillTool(
+        'waybill_create_to_postomat',
+        {
+          request: {
+            ...validPostomatRequest,
+            OptionsSeat: [{ ...validPostomatRequest.OptionsSeat[0], VolumetricWidth: 41 }],
+          },
+        },
+        context,
+      );
+
+      expect(result.isError).toBe(true);
+      expect(result.content[0]).toMatchObject({ type: 'text', text: expect.stringContaining('width 40 cm') });
+      expect(context.client.waybill.createToPostomat).not.toHaveBeenCalled();
     });
 
     it('exposes the API restriction when SenderAddress is a postomat', async () => {
@@ -322,11 +393,9 @@ describe('waybill tools', () => {
       });
 
       const result = await handleWaybillTool(
-        'waybill_create_for_postomat',
+        'waybill_create_to_postomat',
         {
-          request: {
-            SenderAddress: 'sender-postomat-ref',
-          },
+          request: { ...validPostomatRequest, SenderAddress: 'sender-postomat-ref' },
         },
         context,
       );

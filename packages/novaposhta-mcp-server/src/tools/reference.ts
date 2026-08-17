@@ -91,7 +91,7 @@ const referenceTools: Tool[] = [
   {
     name: 'reference_get_service_types',
     description:
-      'List delivery service types (warehouse-door etc.) through Common/getServiceType (doc 1.9). Docs say to refresh monthly and point out the four core technologies: WarehouseWarehouse, WarehouseDoors, DoorsWarehouse, DoorsDoors.',
+      'List delivery service types through Common/getServiceType (doc 1.9). Includes WarehouseWarehouse, WarehouseDoors, DoorsWarehouse, DoorsDoors, DoorsPostomat, and WarehousePostomat. Docs recommend refreshing this directory monthly.',
     inputSchema: {
       type: 'object',
       properties: {},
@@ -160,8 +160,8 @@ const referenceTools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {},
-      required: []
-    }
+      required: [],
+    },
   },
   {
     name: 'reference_get_payment_forms',
@@ -170,8 +170,8 @@ const referenceTools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {},
-      required: []
-    }
+      required: [],
+    },
   },
   {
     name: 'reference_get_types_of_counterparties',
@@ -180,8 +180,8 @@ const referenceTools: Tool[] = [
     inputSchema: {
       type: 'object',
       properties: {},
-      required: []
-    }
+      required: [],
+    },
   },
 ];
 
@@ -207,9 +207,15 @@ export async function handleReferenceTool(
       case 'reference_get_pickup_time_intervals':
         return await handleGetPickupTimeIntervals(args, context);
       case 'reference_get_backward_cargo_types':
-        return await wrapList(() => context.client.reference.getBackwardDeliveryCargoTypes(), 'backwardDeliveryCargoTypes');
+        return await wrapList(
+          () => context.client.reference.getBackwardDeliveryCargoTypes(),
+          'backwardDeliveryCargoTypes',
+        );
       case 'reference_get_redelivery_payers':
-        return await wrapList(() => context.client.reference.getTypesOfPayersForRedelivery(), 'payerTypesForRedelivery');
+        return await wrapList(
+          () => context.client.reference.getTypesOfPayersForRedelivery(),
+          'payerTypesForRedelivery',
+        );
       case 'reference_get_service_types':
         return await wrapList(() => context.client.reference.getServiceTypes(), 'serviceTypes');
       case 'reference_get_payment_methods':
@@ -319,7 +325,9 @@ async function handleGetCargoDescriptionList(args: ToolArguments, context: ToolC
     ...(page !== undefined ? { Page: page } : {}),
   });
 
-  return createTextResult(formatAsJson({ cargoDescriptions: response.data, total: response.data?.length ?? 0 }), { response });
+  return createTextResult(formatAsJson({ cargoDescriptions: response.data, total: response.data?.length ?? 0 }), {
+    response,
+  });
 }
 
 async function handleGetPickupTimeIntervals(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {

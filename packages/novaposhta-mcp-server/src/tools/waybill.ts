@@ -8,11 +8,103 @@ import type {
   PriceCalculationRequest,
   UpdateWaybillRequest,
 } from '@shopana/novaposhta-api-client';
+import {
+  isValidPoshtomatCargoType,
+  isValidPoshtomatDimensions,
+  isValidPoshtomatServiceType,
+} from '@shopana/novaposhta-api-client';
 
 import type { ToolArguments, ToolContext } from '../types/mcp.js';
 import { toErrorResult } from '../utils/error-handler.js';
-import { assertNumber, assertOptionalString, assertString } from '../utils/validation.js';
+import { assertNumber, assertOptionalString, assertString, isDateFormat, isPhoneNumber } from '../utils/validation.js';
 import { createTextResult, formatAsJson } from '../utils/tool-response.js';
+
+const postomatRequestSchema: Tool['inputSchema'] = {
+  type: 'object',
+  properties: {
+    request: {
+      type: 'object',
+      description:
+        'Nova Poshta payload for delivery to a recipient postomat. SenderAddress must reference a supported sender address, never a postomat.',
+      properties: {
+        PayerType: { type: 'string', enum: ['Sender', 'Recipient', 'ThirdPerson'] },
+        PaymentMethod: { type: 'string', enum: ['Cash', 'NonCash'] },
+        DateTime: { type: 'string', pattern: '^\\d{2}\\.\\d{2}\\.\\d{4}$', description: 'Shipping date (dd.mm.yyyy).' },
+        CargoType: { type: 'string', enum: ['Parcel', 'Documents'] },
+        Weight: {
+          type: 'number',
+          minimum: 0.1,
+          maximum: 20,
+          description: 'Total shipment weight in kg (maximum 20 kg).',
+        },
+        ServiceType: { type: 'string', enum: ['DoorsPostomat', 'WarehousePostomat'] },
+        SeatsAmount: { type: 'integer', minimum: 1 },
+        Description: { type: 'string', minLength: 1, maxLength: 36 },
+        Cost: { type: 'number', minimum: 0, maximum: 10000, description: 'Declared value in UAH (maximum 10,000).' },
+        CitySender: { type: 'string', minLength: 1, description: 'Sender city reference.' },
+        Sender: { type: 'string', minLength: 1, description: 'Sender counterparty reference.' },
+        SenderAddress: {
+          type: 'string',
+          minLength: 1,
+          description:
+            'Supported sender address reference. A postomat reference is not accepted by InternetDocument/save.',
+        },
+        SenderWarehouseIndex: { type: 'string', minLength: 1 },
+        ContactSender: { type: 'string', minLength: 1, description: 'Sender contact reference.' },
+        SendersPhone: { type: 'string', pattern: '^380\\d{9}$' },
+        CityRecipient: { type: 'string', minLength: 1, description: 'Recipient city reference.' },
+        Recipient: { type: 'string', minLength: 1, description: 'Recipient counterparty reference.' },
+        RecipientAddress: { type: 'string', minLength: 1, description: 'Recipient postomat reference.' },
+        RecipientWarehouseIndex: { type: 'string', minLength: 1, description: 'Recipient postomat index.' },
+        ContactRecipient: { type: 'string', minLength: 1, description: 'Recipient contact reference.' },
+        RecipientsPhone: { type: 'string', pattern: '^380\\d{9}$' },
+        OptionsSeat: {
+          type: 'array',
+          minItems: 1,
+          description: 'Cargo dimensions for every seat; required for postomat delivery.',
+          items: {
+            type: 'object',
+            properties: {
+              Weight: { type: 'number', exclusiveMinimum: 0, maximum: 20 },
+              VolumetricWidth: { type: 'number', exclusiveMinimum: 0, maximum: 40 },
+              VolumetricLength: { type: 'number', exclusiveMinimum: 0, maximum: 60 },
+              VolumetricHeight: { type: 'number', exclusiveMinimum: 0, maximum: 30 },
+              VolumetricVolume: { type: 'number', exclusiveMinimum: 0 },
+              PackRef: { type: 'string', minLength: 1 },
+              Cost: { type: 'number', minimum: 0, maximum: 10000 },
+              Description: { type: 'string', minLength: 1, maxLength: 36 },
+              SpecialCargo: { type: 'string', enum: ['0', '1'] },
+            },
+            required: ['Weight', 'VolumetricWidth', 'VolumetricLength', 'VolumetricHeight'],
+          },
+        },
+      },
+      required: [
+        'PayerType',
+        'PaymentMethod',
+        'DateTime',
+        'CargoType',
+        'Weight',
+        'ServiceType',
+        'SeatsAmount',
+        'Description',
+        'Cost',
+        'CitySender',
+        'Sender',
+        'SenderAddress',
+        'ContactSender',
+        'SendersPhone',
+        'CityRecipient',
+        'Recipient',
+        'RecipientAddress',
+        'ContactRecipient',
+        'RecipientsPhone',
+        'OptionsSeat',
+      ],
+    },
+  },
+  required: ['request'],
+};
 
 const waybillTools: Tool[] = [
   {
@@ -24,7 +116,8 @@ const waybillTools: Tool[] = [
       properties: {
         request: {
           type: 'object',
-          description: 'Raw Nova Poshta price calculation payload (CitySender, CityRecipient, ServiceType, CargoType, Cost, Weight, SeatsAmount).',
+          description:
+            'Raw Nova Poshta price calculation payload (CitySender, CityRecipient, ServiceType, CargoType, Cost, Weight, SeatsAmount).',
         },
         CitySender: { type: 'string', description: 'Sender city reference.' },
         CityRecipient: { type: 'string', description: 'Recipient city reference.' },
@@ -62,7 +155,7 @@ const waybillTools: Tool[] = [
   {
     name: 'waybill_create',
     description:
-      'Create a standard Nova Poshta waybill (Internet document) via InternetDocument/save (doc 1.2). This is the basic waybill creation method. For additional services use waybill_create_with_options. For postomat delivery use waybill_create_for_postomat.',
+      'Create a standard Nova Poshta waybill (Internet document) via InternetDocument/save (doc 1.2). This is the basic waybill creation method. For additional services use waybill_create_with_options. For postomat delivery use waybill_create_to_postomat.',
     inputSchema: {
       type: 'object',
       properties: {
@@ -83,27 +176,24 @@ const waybillTools: Tool[] = [
       properties: {
         request: {
           type: 'object',
-          description: 'Raw Nova Poshta create waybill payload with additional options (backwardDeliveryData, additionalServices, thirdPerson, redBoxBarcode).',
+          description:
+            'Raw Nova Poshta create waybill payload with additional options (backwardDeliveryData, additionalServices, thirdPerson, redBoxBarcode).',
         },
       },
       required: ['request'],
     },
   },
   {
+    name: 'waybill_create_to_postomat',
+    description:
+      'Create a waybill for delivery TO a recipient postomat via InternetDocument/save (doc 1.2), using ServiceType DoorsPostomat or WarehousePostomat. For physical sending FROM a postomat, create the waybill with a supported SenderAddress and use the Nova Poshta mobile app to open and load the locker; do not pass a postomat as SenderAddress. Recipient postomats accept only Parcel or Documents cargo, have a 20 kg and 10,000 UAH limit, and require OptionsSeat dimensions.',
+    inputSchema: postomatRequestSchema,
+  },
+  {
     name: 'waybill_create_for_postomat',
     description:
-      'Create a waybill for delivery TO a recipient postomat via InternetDocument/save (doc 1.2), using ServiceType DoorsPostomat or WarehousePostomat. For physical sending FROM a postomat, create the waybill with a supported SenderAddress and use the Nova Poshta mobile app to open and load the locker; do not pass a postomat as SenderAddress. Recipient postomats have a 20 kg limit and require OptionsSeat dimensions.',
-    inputSchema: {
-      type: 'object',
-      properties: {
-        request: {
-          type: 'object',
-          description:
-            'Raw Nova Poshta payload for delivery to a recipient postomat with an OptionsSeat array. SenderAddress must not reference a postomat.',
-        },
-      },
-      required: ['request'],
-    },
+      'Deprecated compatibility alias for waybill_create_to_postomat. Creates a waybill for delivery TO a recipient postomat; it does not allow a postomat as SenderAddress.',
+    inputSchema: postomatRequestSchema,
   },
   {
     name: 'waybill_create_batch',
@@ -208,8 +298,9 @@ export async function handleWaybillTool(
         return await handleCreateWaybill(args, context);
       case 'waybill_create_with_options':
         return await handleCreateWaybillWithOptions(args, context);
+      case 'waybill_create_to_postomat':
       case 'waybill_create_for_postomat':
-        return await handleCreateForPostomat(args, context);
+        return await handleCreateToPostomat(args, context);
       case 'waybill_create_batch':
         return await handleCreateBatch(args, context);
       case 'waybill_update':
@@ -386,8 +477,8 @@ async function handleCreateWaybillWithOptions(args: ToolArguments, context: Tool
   );
 }
 
-async function handleCreateForPostomat(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
-  const request = ensureObject<CreateWaybillToPostomatRequest>(args?.request, 'request');
+async function handleCreateToPostomat(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
+  const request = validateCreateToPostomatRequest(args?.request);
   const response = await context.client.waybill.createToPostomat(request);
   const result = createTextResult(
     formatAsJson({
@@ -401,6 +492,102 @@ async function handleCreateForPostomat(args: ToolArguments, context: ToolContext
   );
 
   return response.success ? result : { ...result, isError: true };
+}
+
+function validateCreateToPostomatRequest(value: unknown): CreateWaybillToPostomatRequest {
+  const request = ensureObject<Record<string, unknown>>(value, 'request');
+
+  for (const field of [
+    'PayerType',
+    'PaymentMethod',
+    'DateTime',
+    'CargoType',
+    'ServiceType',
+    'Description',
+    'CitySender',
+    'Sender',
+    'SenderAddress',
+    'ContactSender',
+    'SendersPhone',
+    'CityRecipient',
+    'Recipient',
+    'RecipientAddress',
+    'ContactRecipient',
+    'RecipientsPhone',
+  ]) {
+    assertString(request[field], `request.${field}`);
+  }
+
+  if (!['Sender', 'Recipient', 'ThirdPerson'].includes(request['PayerType'] as string)) {
+    throw new Error('Field "request.PayerType" must be Sender, Recipient, or ThirdPerson');
+  }
+  if (!['Cash', 'NonCash'].includes(request['PaymentMethod'] as string)) {
+    throw new Error('Field "request.PaymentMethod" must be Cash or NonCash');
+  }
+  if (!isDateFormat(request['DateTime'])) {
+    throw new Error('Field "request.DateTime" must be a valid date in dd.mm.yyyy format');
+  }
+  if (!isValidPoshtomatCargoType(request['CargoType'] as never)) {
+    throw new Error('Field "request.CargoType" must be Parcel or Documents for postomat delivery');
+  }
+  if (!isValidPoshtomatServiceType(request['ServiceType'] as never)) {
+    throw new Error('Field "request.ServiceType" must be DoorsPostomat or WarehousePostomat');
+  }
+  if (!isPhoneNumber(request['SendersPhone'])) {
+    throw new Error('Field "request.SendersPhone" must contain 12 digits and start with 380');
+  }
+  if (!isPhoneNumber(request['RecipientsPhone'])) {
+    throw new Error('Field "request.RecipientsPhone" must contain 12 digits and start with 380');
+  }
+  if ((request['Description'] as string).length > 36) {
+    throw new Error('Field "request.Description" must not exceed 36 characters');
+  }
+  assertOptionalString(request['SenderWarehouseIndex'], 'request.SenderWarehouseIndex');
+  assertOptionalString(request['RecipientWarehouseIndex'], 'request.RecipientWarehouseIndex');
+
+  const weight = assertNumber(request['Weight'], 'request.Weight');
+  if (weight < 0.1 || weight > 20) {
+    throw new Error('Field "request.Weight" must be between 0.1 and 20 kg for postomat delivery');
+  }
+  const seatsAmount = assertNumber(request['SeatsAmount'], 'request.SeatsAmount');
+  if (!Number.isInteger(seatsAmount) || seatsAmount < 1) {
+    throw new Error('Field "request.SeatsAmount" must be a positive integer');
+  }
+  const cost = assertNumber(request['Cost'], 'request.Cost');
+  if (cost < 0 || cost > 10000) {
+    throw new Error('Field "request.Cost" must be between 0 and 10000 UAH for postomat delivery');
+  }
+
+  const optionsSeat = request['OptionsSeat'];
+  if (!Array.isArray(optionsSeat) || optionsSeat.length === 0) {
+    throw new Error('Field "request.OptionsSeat" must contain at least one seat for postomat delivery');
+  }
+  if (seatsAmount !== optionsSeat.length) {
+    throw new Error('Field "request.SeatsAmount" must match the number of request.OptionsSeat items');
+  }
+  optionsSeat.forEach((value, index) => {
+    const seat = ensureObject<Record<string, unknown>>(value, `request.OptionsSeat[${index}]`);
+    const normalizedSeat = {
+      ...seat,
+      Weight: assertNumber(seat['Weight'], `request.OptionsSeat[${index}].Weight`),
+      VolumetricWidth: assertNumber(seat['VolumetricWidth'], `request.OptionsSeat[${index}].VolumetricWidth`),
+      VolumetricLength: assertNumber(seat['VolumetricLength'], `request.OptionsSeat[${index}].VolumetricLength`),
+      VolumetricHeight: assertNumber(seat['VolumetricHeight'], `request.OptionsSeat[${index}].VolumetricHeight`),
+    };
+    if (
+      normalizedSeat.Weight <= 0 ||
+      normalizedSeat.VolumetricWidth <= 0 ||
+      normalizedSeat.VolumetricLength <= 0 ||
+      normalizedSeat.VolumetricHeight <= 0 ||
+      !isValidPoshtomatDimensions(normalizedSeat as never)
+    ) {
+      throw new Error(
+        `request.OptionsSeat[${index}] exceeds postomat limits: weight 20 kg, width 40 cm, length 60 cm, height 30 cm`,
+      );
+    }
+  });
+
+  return request as unknown as CreateWaybillToPostomatRequest;
 }
 
 async function handleCreateBatch(args: ToolArguments, context: ToolContext): Promise<CallToolResult> {
