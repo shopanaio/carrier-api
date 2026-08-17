@@ -11,6 +11,7 @@ import type {
   CreateWaybillWithOptionsRequest,
   CreateWaybillToPostomatRequest,
   CreatePoshtomatWaybillRequest,
+  OptionsSeatInput,
   UpdateWaybillRequest,
   DeleteWaybillRequest,
   CreateWaybillResponse,
@@ -21,7 +22,7 @@ import type {
   PriceCalculationRequest,
   PriceCalculationResponse,
 } from '../types/waybill';
-import { isValidPoshtomatDimensions } from '../types/waybill';
+import { getOptionsSeatDimensions, isValidPoshtomatDimensions } from '../types/waybill';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
 
@@ -45,46 +46,23 @@ export class WaybillService {
    * Create a standard waybill
    */
   async create(request: CreateWaybillRequest): Promise<CreateWaybillResponse> {
-    const apiRequest: NovaPoshtaRequest = {
-      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
-      modelName: NovaPoshtaModel.InternetDocument,
-      calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
-    };
-
-    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
+    return this.createWaybill(request);
   }
 
   /**
    * Create a waybill with additional options and services
    */
   async createWithOptions(request: CreateWaybillWithOptionsRequest): Promise<CreateWaybillResponse> {
-    const apiRequest: NovaPoshtaRequest = {
-      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
-      modelName: NovaPoshtaModel.InternetDocument,
-      calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
-    };
-
-    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
+    return this.createWaybill(request);
   }
 
   /**
    * Create a waybill for delivery to a postomat (with restrictions).
    *
-   * A postomat cannot be passed as SenderAddress to InternetDocument/save.
-   * Loading an API-created waybill into a sender postomat is completed in the
-   * Nova Poshta mobile application.
+   * Use create() when SenderAddress references a sender postomat.
    */
   async createToPostomat(request: CreateWaybillToPostomatRequest): Promise<CreateWaybillResponse> {
-    const apiRequest: NovaPoshtaRequest = {
-      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
-      modelName: NovaPoshtaModel.InternetDocument,
-      calledMethod: NovaPoshtaMethod.Save,
-      methodProperties: request as unknown as Record<string, unknown>,
-    };
-
-    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
+    return this.createWaybill(request);
   }
 
   /**
@@ -145,7 +123,7 @@ export class WaybillService {
       ...(this.apiKey ? { apiKey: this.apiKey } : {}),
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentPrice,
-      methodProperties: request as unknown as Record<string, unknown>,
+      methodProperties: normalizeWaybillRequest(request),
     };
 
     return await this.transport.request<PriceCalculationResponse['data']>(apiRequest);
@@ -233,39 +211,14 @@ export class WaybillService {
       return false;
     }
 
-    // Check shipment-level postomat limits
-    if (request.Weight === undefined || request.Weight < 0.1 || request.Weight > 20) {
-      return false;
-    }
-
-    if (request.Cost === undefined || request.Cost < 0 || request.Cost > 10000) {
-      return false;
-    }
-
-    if (!Number.isInteger(request.SeatsAmount) || (request.SeatsAmount ?? 0) < 1) {
-      return false;
-    }
-
-    if (!request.OptionsSeat || request.OptionsSeat.length !== request.SeatsAmount) {
-      return false;
-    }
-
-    return request.OptionsSeat.every(
-      seat =>
-        seat.Weight > 0 &&
-        seat.VolumetricWidth > 0 &&
-        seat.VolumetricLength > 0 &&
-        seat.VolumetricHeight > 0 &&
-        isValidPoshtomatDimensions(seat),
-    );
+    return this.hasValidPostomatLimits(request);
   }
 
   /**
-   * Check whether a postomat can be passed as SenderAddress to
-   * InternetDocument/save.
+   * Check whether InternetDocument/save accepts a postomat as SenderAddress.
    */
-  canUsePostomatAsSenderAddress(): false {
-    return false;
+  canUsePostomatAsSenderAddress(): true {
+    return true;
   }
 
   // =============================================================================
@@ -294,6 +247,48 @@ export class WaybillService {
    */
   async createPoshtomatExpressWaybill(request: CreatePoshtomatWaybillRequest): Promise<CreateWaybillResponse> {
     return this.createToPostomat(request);
+  }
+
+  private async createWaybill(
+    request: CreateWaybillRequest | CreateWaybillWithOptionsRequest | CreateWaybillToPostomatRequest,
+  ): Promise<CreateWaybillResponse> {
+    const apiRequest: NovaPoshtaRequest = {
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
+      modelName: NovaPoshtaModel.InternetDocument,
+      calledMethod: NovaPoshtaMethod.Save,
+      methodProperties: normalizeWaybillRequest(request),
+    };
+
+    return await this.transport.request<CreateWaybillResponse['data']>(apiRequest);
+  }
+
+  private hasValidPostomatLimits(request: PostomatDeliveryCandidate): boolean {
+    if (request.Weight === undefined || request.Weight < 0.1 || request.Weight > 20) {
+      return false;
+    }
+
+    if (request.Cost === undefined || request.Cost < 0 || request.Cost > 10000) {
+      return false;
+    }
+
+    if (!Number.isInteger(request.SeatsAmount) || (request.SeatsAmount ?? 0) < 1) {
+      return false;
+    }
+
+    if (!request.OptionsSeat || request.OptionsSeat.length !== request.SeatsAmount) {
+      return false;
+    }
+
+    return request.OptionsSeat.every(seat => {
+      const dimensions = getOptionsSeatDimensions(seat);
+      return (
+        dimensions.weight > 0 &&
+        dimensions.volumetricWidth > 0 &&
+        dimensions.volumetricLength > 0 &&
+        dimensions.volumetricHeight > 0 &&
+        isValidPoshtomatDimensions(seat)
+      );
+    });
   }
 
   /**
@@ -335,4 +330,40 @@ export class WaybillService {
   async getDocumentPrice(request: PriceCalculationRequest): Promise<PriceCalculationResponse> {
     return this.getPrice(request);
   }
+}
+
+function normalizeWaybillRequest(
+  request:
+    | CreateWaybillRequest
+    | CreateWaybillWithOptionsRequest
+    | CreateWaybillToPostomatRequest
+    | PriceCalculationRequest,
+): Record<string, unknown> {
+  const methodProperties = request as unknown as Record<string, unknown>;
+  if (!Array.isArray(methodProperties.OptionsSeat)) {
+    return methodProperties;
+  }
+
+  return {
+    ...methodProperties,
+    OptionsSeat: methodProperties.OptionsSeat.map(item => normalizeOptionsSeatItem(item as OptionsSeatInput)),
+  };
+}
+
+function normalizeOptionsSeatItem(item: OptionsSeatInput): Record<string, unknown> {
+  if ('weight' in item) {
+    return { ...item };
+  }
+
+  return {
+    weight: item.Weight,
+    volumetricWidth: item.VolumetricWidth,
+    volumetricLength: item.VolumetricLength,
+    volumetricHeight: item.VolumetricHeight,
+    ...(item.VolumetricVolume !== undefined ? { volumetricVolume: item.VolumetricVolume } : {}),
+    ...(item.PackRef !== undefined ? { packRef: item.PackRef } : {}),
+    ...(item.Cost !== undefined ? { cost: item.Cost } : {}),
+    ...(item.Description !== undefined ? { description: item.Description } : {}),
+    ...(item.SpecialCargo !== undefined ? { specialCargo: item.SpecialCargo } : {}),
+  };
 }

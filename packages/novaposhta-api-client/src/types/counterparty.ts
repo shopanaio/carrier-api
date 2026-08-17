@@ -19,7 +19,12 @@ export interface GetCounterpartiesRequest {
 export interface CounterpartyData {
   readonly Description: string;
   readonly Ref: CounterpartyRef;
-  readonly City: CityRef;
+  /** Legacy city value returned by the API; it is not guaranteed to be a CityRef. */
+  readonly City: string;
+  /** Human-readable city name suitable for CityName searches. */
+  readonly CityDescription: string;
+  /** Present only in API response variants that provide an explicit city reference. */
+  readonly CityRef?: CityRef;
   readonly Counterparty: string;
   readonly OwnershipForm: string;
   readonly OwnershipFormDescription: string;

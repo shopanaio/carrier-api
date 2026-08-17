@@ -246,7 +246,7 @@ export enum NovaPoshtaErrorCode {
   InternetDocumentNotFound = '20000200205',
   InternetDocumentNotFoundByOwner = '20000200206',
 
-  // Postomat direction restrictions
+  // Postomat availability restrictions
   SendingFromPostomatUnavailable = '20000204037',
 
   // Attorney and items errors
@@ -389,9 +389,9 @@ export const ERROR_MESSAGES: Partial<
     retryable: false,
   },
   [NovaPoshtaErrorCode.SendingFromPostomatUnavailable]: {
-    en: 'A postomat cannot be used as SenderAddress; continue sender postomat handling in the Nova Poshta mobile application',
-    ua: 'Відправка з поштомату доступна лише з мобільного додатку Nova Poshta',
-    ru: 'Отправка из почтомата доступна только в мобильном приложении Nova Poshta',
+    en: 'The selected sender postomat or request configuration is unavailable; verify the postomat, payment method, and seat fields',
+    ua: 'Обраний поштомат відправника або конфігурація запиту недоступні; перевірте поштомат, спосіб оплати та параметри місць',
+    ru: 'Выбранный почтомат отправителя или конфигурация запроса недоступны; проверьте почтомат, способ оплаты и параметры мест',
     category: ErrorCategory.BusinessLogic,
     severity: ErrorSeverity.Medium,
     retryable: false,

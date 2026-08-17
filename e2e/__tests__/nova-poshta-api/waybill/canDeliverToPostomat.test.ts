@@ -71,7 +71,8 @@ describe('WaybillService - canDeliverToPostomat', () => {
     expect(canDeliver).toBe(false);
   });
 
-  it('does not allow a postomat to be used as SenderAddress', () => {
-    expect(client.waybill.canUsePostomatAsSenderAddress()).toBe(false);
+  it('allows a postomat to be used as SenderAddress', () => {
+    expect(client.waybill.canUsePostomatAsSenderAddress()).toBe(true);
   });
+
 });

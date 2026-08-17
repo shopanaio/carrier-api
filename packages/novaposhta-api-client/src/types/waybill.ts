@@ -81,6 +81,8 @@ export interface CreateWaybillRequest extends BaseWaybillProperties {
   readonly RecipientWarehouseIndex?: String36;
   /** Total volume in cubic meters (optional if OptionsSeat not provided) */
   readonly VolumeGeneral?: Volume;
+  /** Cargo parameters; required by Nova Poshta for sender postomats */
+  readonly OptionsSeat?: readonly OptionsSeatInput[];
 }
 
 // Waybill with options (advanced features)
@@ -92,7 +94,7 @@ export interface CreateWaybillWithOptionsRequest extends BaseWaybillProperties {
   /** Total volume in cubic meters (optional if OptionsSeat provided) */
   readonly VolumeGeneral?: Volume;
   /** Cargo parameters for each seat */
-  readonly OptionsSeat: readonly OptionsSeatItem[];
+  readonly OptionsSeat: readonly OptionsSeatInput[];
   /** RedBox barcode (uppercase required) */
   readonly RedBoxBarcode?: String36;
   /** Third person payer ref (required if payerType is ThirdPerson) */
@@ -105,12 +107,12 @@ export interface CreateWaybillWithOptionsRequest extends BaseWaybillProperties {
 
 // Waybill creation for delivery to a postomat (with restrictions)
 export interface CreateWaybillToPostomatRequest extends BaseWaybillProperties {
-  /** Sender warehouse index (optional, but the sender itself cannot be a postomat) */
+  /** Sender warehouse index (optional) */
   readonly SenderWarehouseIndex?: String36;
   /** Recipient postomat index (optional) */
   readonly RecipientWarehouseIndex?: String36;
   /** Cargo parameters for each seat (required for delivery to a postomat) */
-  readonly OptionsSeat: readonly PoshtomatOptionsSeatItem[];
+  readonly OptionsSeat: readonly PoshtomatOptionsSeatInput[];
   /** Cargo type must be Parcel or Documents only */
   readonly CargoType: CargoType.Parcel | CargoType.Documents;
   /** Service type must explicitly target a postomat */
@@ -121,8 +123,8 @@ export interface CreateWaybillToPostomatRequest extends BaseWaybillProperties {
 
 /**
  * @deprecated Use CreateWaybillToPostomatRequest. Nova Poshta API v2 supports
- * delivery to a postomat. A postomat cannot be passed as SenderAddress to
- * InternetDocument/save.
+ * delivery to a postomat. Use CreateWaybillRequest with a postomat
+ * SenderAddress for sending from a postomat.
  */
 export type CreatePoshtomatWaybillRequest = CreateWaybillToPostomatRequest;
 
@@ -162,6 +164,26 @@ export interface OptionsSeatItem {
   readonly SpecialCargo?: '0' | '1';
 }
 
+/**
+ * Wire-format seat fields accepted by InternetDocument/save. The API uses
+ * lower camel case inside OptionsSeat even though the surrounding request uses
+ * PascalCase.
+ */
+export interface OptionsSeatWireItem {
+  readonly weight: Weight;
+  readonly volumetricWidth: Dimensions;
+  readonly volumetricLength: Dimensions;
+  readonly volumetricHeight: Dimensions;
+  readonly volumetricVolume?: Volume;
+  readonly packRef?: NovaPoshtaRef;
+  readonly cost?: Cost;
+  readonly description?: String36;
+  readonly specialCargo?: '0' | '1';
+}
+
+/** Both the legacy SDK shape and the API wire shape are accepted. */
+export type OptionsSeatInput = OptionsSeatItem | OptionsSeatWireItem;
+
 // Postomat-specific seat options with restrictions
 export interface PoshtomatOptionsSeatItem extends OptionsSeatItem {
   /** Max weight 20kg */
@@ -173,6 +195,15 @@ export interface PoshtomatOptionsSeatItem extends OptionsSeatItem {
   /** Max height 30cm */
   readonly VolumetricHeight: Dimensions; // max 30
 }
+
+export interface PoshtomatOptionsSeatWireItem extends OptionsSeatWireItem {
+  readonly weight: Weight;
+  readonly volumetricWidth: Dimensions;
+  readonly volumetricLength: Dimensions;
+  readonly volumetricHeight: Dimensions;
+}
+
+export type PoshtomatOptionsSeatInput = PoshtomatOptionsSeatItem | PoshtomatOptionsSeatWireItem;
 
 // Backward delivery configuration
 export interface BackwardDeliveryItem {
@@ -322,7 +353,7 @@ export interface PriceCalculationRequest {
   /** Cargo description ref (optional) */
   readonly CargoDescription?: NovaPoshtaRef;
   /** Options seat (optional) */
-  readonly OptionsSeat?: readonly OptionsSeatItem[];
+  readonly OptionsSeat?: readonly OptionsSeatInput[];
 }
 
 export interface BackwardDeliveryCalculation {
@@ -362,8 +393,16 @@ export interface PriceCalculationData {
 export type PriceCalculationResponse = NovaPoshtaResponse<readonly PriceCalculationData[]>;
 
 // Validation helpers
-export function isValidPoshtomatDimensions(seat: OptionsSeatItem): seat is PoshtomatOptionsSeatItem {
-  return seat.Weight <= 20 && seat.VolumetricWidth <= 40 && seat.VolumetricLength <= 60 && seat.VolumetricHeight <= 30;
+export function isValidPoshtomatDimensions(
+  seat: OptionsSeatInput,
+): seat is PoshtomatOptionsSeatInput {
+  const dimensions = getOptionsSeatDimensions(seat);
+  return (
+    dimensions.weight <= 20 &&
+    dimensions.volumetricWidth <= 40 &&
+    dimensions.volumetricLength <= 60 &&
+    dimensions.volumetricHeight <= 30
+  );
 }
 
 export function isValidPoshtomatCargoType(cargoType: CargoType): cargoType is CargoType.Parcel | CargoType.Documents {
@@ -376,15 +415,35 @@ export function isValidPoshtomatServiceType(
   return serviceType === ServiceType.DoorsPostomat || serviceType === ServiceType.WarehousePostomat;
 }
 
-export function calculateTotalWeight(seats: readonly OptionsSeatItem[]): Weight {
-  return seats.reduce((total, seat) => total + seat.Weight, 0) as Weight;
+export function calculateTotalWeight(seats: readonly OptionsSeatInput[]): Weight {
+  return seats.reduce((total, seat) => total + getOptionsSeatDimensions(seat).weight, 0) as Weight;
 }
 
-export function calculateTotalVolume(seats: readonly OptionsSeatItem[]): Volume {
+export function calculateTotalVolume(seats: readonly OptionsSeatInput[]): Volume {
   return seats.reduce((total, seat) => {
-    const volume = (seat.VolumetricWidth * seat.VolumetricLength * seat.VolumetricHeight) / 1000000; // cm³ to m³
+    const dimensions = getOptionsSeatDimensions(seat);
+    const volume =
+      (dimensions.volumetricWidth * dimensions.volumetricLength * dimensions.volumetricHeight) / 1000000; // cm³ to m³
     return total + volume;
   }, 0) as Volume;
+}
+
+export function getOptionsSeatDimensions(seat: OptionsSeatInput): {
+  weight: Weight;
+  volumetricWidth: Dimensions;
+  volumetricLength: Dimensions;
+  volumetricHeight: Dimensions;
+} {
+  if ('weight' in seat) {
+    return seat;
+  }
+
+  return {
+    weight: seat.Weight,
+    volumetricWidth: seat.VolumetricWidth,
+    volumetricLength: seat.VolumetricLength,
+    volumetricHeight: seat.VolumetricHeight,
+  };
 }
 
 // Type guards

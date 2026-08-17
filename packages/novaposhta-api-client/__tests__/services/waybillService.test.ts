@@ -291,10 +291,10 @@ describe('WaybillService', () => {
           RecipientWarehouseIndex: '11/1001',
           OptionsSeat: [
             {
-              Weight: 1.5,
-              VolumetricWidth: 10,
-              VolumetricLength: 20,
-              VolumetricHeight: 15,
+              weight: 1.5,
+              volumetricWidth: 10,
+              volumetricLength: 20,
+              volumetricHeight: 15,
             },
           ],
         },
@@ -348,6 +348,50 @@ describe('WaybillService', () => {
       await service.createForPostomat(request);
 
       expect(createToPostomat).toHaveBeenCalledWith(request);
+    });
+  });
+
+  describe('create with a sender postomat', () => {
+    it('normalizes legacy seat fields and keeps the postomat as SenderAddress', async () => {
+      const { transport, calls, setResponse } = createMockTransport();
+      setResponse({ success: true, data: [{ Ref: 'waybill-ref', IntDocNumber: '20400048799001' }] });
+      const client = createClient({ transport, baseUrl, apiKey }).use(new WaybillService());
+
+      await client.waybill.create({
+        PayerType: PayerType.Sender,
+        PaymentMethod: PaymentMethod.Cash,
+        DateTime: '01.01.2024',
+        CargoType: CargoType.Parcel,
+        Weight: 1,
+        ServiceType: ServiceType.WarehouseWarehouse,
+        SeatsAmount: 1,
+        Description: 'Postomat shipment',
+        Cost: 100,
+        CitySender: 'sender-city-ref',
+        Sender: 'sender-ref',
+        SenderAddress: 'sender-postomat-ref',
+        ContactSender: 'sender-contact-ref',
+        SendersPhone: '380501234567',
+        CityRecipient: 'recipient-city-ref',
+        Recipient: 'recipient-ref',
+        RecipientAddress: 'recipient-warehouse-ref',
+        ContactRecipient: 'recipient-contact-ref',
+        RecipientsPhone: '380507654321',
+        OptionsSeat: [
+          {
+            Weight: 1,
+            VolumetricWidth: 10,
+            VolumetricLength: 20,
+            VolumetricHeight: 15,
+          },
+        ],
+      });
+
+      expect(calls[0].body.methodProperties).toMatchObject({
+        SenderAddress: 'sender-postomat-ref',
+        ServiceType: ServiceType.WarehouseWarehouse,
+        OptionsSeat: [{ weight: 1, volumetricWidth: 10, volumetricLength: 20, volumetricHeight: 15 }],
+      });
     });
   });
 
@@ -719,12 +763,12 @@ describe('WaybillService', () => {
   });
 
   describe('canUsePostomatAsSenderAddress', () => {
-    it('should report that a postomat cannot be passed as SenderAddress', () => {
+    it('should report that a postomat can be passed as SenderAddress', () => {
       const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
         new WaybillService(),
       );
 
-      expect(client.waybill.canUsePostomatAsSenderAddress()).toBe(false);
+      expect(client.waybill.canUsePostomatAsSenderAddress()).toBe(true);
     });
   });
 });

@@ -54,10 +54,10 @@ const validPostomatRequest = {
   RecipientsPhone: '380501234568',
   OptionsSeat: [
     {
-      Weight: 1,
-      VolumetricWidth: 10,
-      VolumetricLength: 20,
-      VolumetricHeight: 15,
+      weight: 1,
+      volumetricWidth: 10,
+      volumetricLength: 20,
+      volumetricHeight: 15,
     },
   ],
 };
@@ -368,7 +368,7 @@ describe('waybill tools', () => {
         {
           request: {
             ...validPostomatRequest,
-            OptionsSeat: [{ ...validPostomatRequest.OptionsSeat[0], VolumetricWidth: 41 }],
+            OptionsSeat: [{ ...validPostomatRequest.OptionsSeat[0], volumetricWidth: 41 }],
           },
         },
         context,
@@ -379,38 +379,37 @@ describe('waybill tools', () => {
       expect(context.client.waybill.createToPostomat).not.toHaveBeenCalled();
     });
 
-    it('exposes the API restriction when SenderAddress is a postomat', async () => {
-      vi.mocked(context.client.waybill.createToPostomat).mockResolvedValue({
-        success: false,
-        data: [],
-        errors: ['Sending from Postomat is Unavailable'],
+    it('creates a sender-postomat waybill through the existing create tool', async () => {
+      vi.mocked(context.client.waybill.create).mockResolvedValue({
+        success: true,
+        data: [{ Ref: 'doc-from-postomat', IntDocNumber: '20400048799002' }] as any,
+        errors: [],
         warnings: [],
         info: [],
         messageCodes: [],
-        errorCodes: ['20000204037'],
+        errorCodes: [],
         warningCodes: [],
         infoCodes: [],
       });
 
       const result = await handleWaybillTool(
-        'waybill_create_to_postomat',
+        'waybill_create',
         {
-          request: { ...validPostomatRequest, SenderAddress: 'sender-postomat-ref' },
+          request: {
+            ...validPostomatRequest,
+            ServiceType: 'WarehouseWarehouse',
+            SenderAddress: 'sender-postomat-ref',
+            RecipientAddress: 'recipient-warehouse-ref',
+          },
         },
         context,
       );
 
-      expect(result.isError).toBe(true);
-      expect(result.content[0]).toMatchObject({
-        type: 'text',
-        text: expect.stringContaining('20000204037'),
-      });
-      expect(result.structuredContent).toEqual(
+      expect(result.isError).toBeUndefined();
+      expect(context.client.waybill.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          response: expect.objectContaining({
-            success: false,
-            errorCodes: ['20000204037'],
-          }),
+          ServiceType: 'WarehouseWarehouse',
+          SenderAddress: 'sender-postomat-ref',
         }),
       );
     });

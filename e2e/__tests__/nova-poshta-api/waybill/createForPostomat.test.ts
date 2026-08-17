@@ -1,9 +1,6 @@
 import {
   CargoType,
   createClient,
-  ErrorCategory,
-  getErrorInfo,
-  NovaPoshtaErrorCode,
   NovaPoshtaMethod,
   NovaPoshtaModel,
   PayerType,
@@ -11,6 +8,7 @@ import {
   ServiceType,
   WaybillService,
   type ClientContext,
+  type CreateWaybillRequest,
   type CreateWaybillToPostomatRequest,
   type NovaPoshtaRequest,
   type NovaPoshtaResponse,
@@ -72,7 +70,18 @@ describe('WaybillService - createToPostomat', () => {
       {
         modelName: NovaPoshtaModel.InternetDocument,
         calledMethod: NovaPoshtaMethod.Save,
-        methodProperties: postomatRequest,
+        methodProperties: {
+          ...postomatRequest,
+          OptionsSeat: [
+            {
+              volumetricVolume: 0.01,
+              volumetricWidth: 10,
+              volumetricLength: 10,
+              volumetricHeight: 10,
+              weight: 1,
+            },
+          ],
+        },
       },
     ]);
   });
@@ -84,31 +93,34 @@ describe('WaybillService - createToPostomat', () => {
     await testClient.waybill.createPoshtomatExpressWaybill(postomatRequest);
 
     expect(requests).toHaveLength(2);
-    expect(requests[0]?.methodProperties).toEqual(postomatRequest);
-    expect(requests[1]?.methodProperties).toEqual(postomatRequest);
+    expect(requests[0]?.methodProperties).toEqual(requests[1]?.methodProperties);
+    expect(requests[0]?.methodProperties.OptionsSeat).toEqual([
+      {
+        volumetricVolume: 0.01,
+        volumetricWidth: 10,
+        volumetricLength: 10,
+        volumetricHeight: 10,
+        weight: 1,
+      },
+    ]);
   });
 
-  it('propagates and classifies the unsupported sender-postomat API error', async () => {
-    const errorResponse: NovaPoshtaResponse<readonly never[]> = {
-      success: false,
-      data: [],
-      errors: ['Sending from a postomat is unavailable through InternetDocument/save'],
-      warnings: [],
-      info: [],
-      messageCodes: [],
-      errorCodes: [NovaPoshtaErrorCode.SendingFromPostomatUnavailable],
-      warningCodes: [],
-      infoCodes: [],
+  it('creates a waybill with a sender postomat and normalizes OptionsSeat', async () => {
+    const { testClient, requests } = createTestClient(successfulResponse);
+    const request: CreateWaybillRequest = {
+      ...postomatRequest,
+      ServiceType: ServiceType.WarehouseWarehouse,
+      SenderAddress: 'sender-postomat-ref',
+      RecipientAddress: 'recipient-warehouse-ref',
     };
-    const { testClient } = createTestClient(errorResponse);
 
-    const response = await testClient.waybill.createToPostomat(postomatRequest);
-    const errorInfo = getErrorInfo(response.errorCodes[0] ?? '');
+    const response = await testClient.waybill.create(request);
 
-    expect(response.success).toBe(false);
-    expect(errorInfo).toMatchObject({
-      category: ErrorCategory.BusinessLogic,
-      retryable: false,
+    expect(response.success).toBe(true);
+    expect(requests[0]?.methodProperties).toMatchObject({
+      ServiceType: ServiceType.WarehouseWarehouse,
+      SenderAddress: 'sender-postomat-ref',
+      OptionsSeat: [{ weight: 1, volumetricWidth: 10, volumetricLength: 10, volumetricHeight: 10 }],
     });
   });
 
@@ -120,6 +132,19 @@ describe('WaybillService - createToPostomat', () => {
 
     expect([ServiceType.DoorsPostomat, ServiceType.WarehousePostomat]).toContain(liveRequest.ServiceType);
     const response = await client.waybill.createToPostomat(liveRequest);
+
+    expect(response.success).toBe(true);
+    expect(response.data).toBeDefined();
+  });
+
+  const liveSenderRequestJson = process.env.NP_POSTOMAT_SENDER_WAYBILL_REQUEST;
+  const itWithLiveSenderFixture = process.env.NP_API_KEY && liveSenderRequestJson ? it : it.skip;
+
+  itWithLiveSenderFixture('creates a sender-postomat waybill against the Nova Poshta API', async () => {
+    const liveRequest = JSON.parse(liveSenderRequestJson!) as CreateWaybillRequest;
+
+    expect([ServiceType.WarehouseWarehouse, ServiceType.WarehouseDoors]).toContain(liveRequest.ServiceType);
+    const response = await client.waybill.create(liveRequest);
 
     expect(response.success).toBe(true);
     expect(response.data).toBeDefined();

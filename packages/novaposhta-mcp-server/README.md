@@ -203,7 +203,7 @@ Create a Nova Poshta waybill with additional options and services. Supports back
 
 Create a waybill for delivery **to a recipient postomat**. Recipient postomats have a 20 kg limit and require an `OptionsSeat` array with parcel dimensions.
 
-The request uses the same PascalCase fields as `CreateWaybillToPostomatRequest` in the API client. Use `DoorsPostomat` or `WarehousePostomat` as `ServiceType`; `CargoType` must be `Parcel` or `Documents`, declared `Cost` must not exceed 10,000 UAH, and `SeatsAmount` must match the number of `OptionsSeat` items. Each seat is limited to 20 kg, 40 cm wide, 60 cm long, and 30 cm high.
+The outer request uses PascalCase fields. Fields inside `OptionsSeat` use the API's lower camel case wire format. Use `DoorsPostomat` or `WarehousePostomat` as `ServiceType`; `CargoType` must be `Parcel` or `Documents`, declared `Cost` must not exceed 10,000 UAH, and `SeatsAmount` must match the number of `OptionsSeat` items. Each seat is limited to 20 kg, 40 cm wide, 60 cm long, and 30 cm high.
 
 ```json
 {
@@ -230,19 +230,25 @@ The request uses the same PascalCase fields as `CreateWaybillToPostomatRequest` 
     "RecipientsPhone": "380501234567",
     "OptionsSeat": [
       {
-        "Weight": 1,
-        "VolumetricWidth": 10,
-        "VolumetricLength": 20,
-        "VolumetricHeight": 15
+        "weight": 1,
+        "volumetricWidth": 10,
+        "volumetricLength": 20,
+        "volumetricHeight": 15
       }
     ]
   }
 }
 ```
 
-> **Important:** An ЕН for physical sending **from** a postomat can be created through the API, but a postomat must not be passed as `SenderAddress`. Create the ЕН with a supported sender address, then select it in the Nova Poshta mobile application to open and load the sender postomat. Passing a postomat as `SenderAddress` produces error `20000204037`.
-
 `waybill_create_for_postomat` remains available as a deprecated compatibility alias and accepts the same request.
+
+#### Sending from a postomat with `waybill_create`
+
+Use the existing `waybill_create` tool for physical sending **from a sender postomat**. Pass the postomat Ref as `SenderAddress`. Use `WarehouseWarehouse` for delivery to a branch or `WarehouseDoors` for delivery to an address. After creation, select the waybill in the Nova Poshta mobile application to open the locker and load the parcel.
+
+The tool uses the same postomat limits and lower camel case `OptionsSeat` fields shown above. Payment availability depends on the sender account. If Nova Poshta rejects `NonCash` for payer `Sender`, retry with an available method such as `Cash` or inspect the counterparty options.
+
+For warehouse discovery, `Counterparty.City` is not guaranteed to be a usable city Ref. Search warehouses with `CityDescription` when necessary and use the selected warehouse's `CityRef` in the waybill. The MCP server automatically retries API rate-limit code `20000401501` with incremental delays.
 
 #### `waybill_create_batch`
 
