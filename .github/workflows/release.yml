@@ -1,0 +1,123 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+      - beta
+    paths:
+      - '.changeset/**'
+      - 'packages/**/package.json'
+      - 'packages/**/src/**'
+      - 'packages/**/scripts/**'
+      - 'packages/**/build.js'
+      - 'packages/**/rollup.config.js'
+      - 'packages/**/tsup.config.ts'
+      - 'packages/**/tsconfig.json'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Version or publish packages
+    if: ${{ github.ref_name == 'main' || github.ref_name == 'beta' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Trusted Publishing is preferred. NPM_TOKEN is only needed to bootstrap
+      # packages that do not exist on npm yet and therefore cannot have a
+      # trusted publisher configured in the npm package settings.
+      - name: Configure npm token fallback
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          if [[ -n "$NPM_TOKEN" ]]; then
+            echo "NODE_AUTH_TOKEN=$NPM_TOKEN" >> "$GITHUB_ENV"
+          fi
+
+      - name: Validate source changes have changesets
+        if: ${{ github.event_name == 'push' }}
+        shell: bash
+        run: |
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+
+          if [[ "$before" =~ ^0+$ ]]; then
+            echo "Skipping changeset validation for initial branch push."
+            echo "SKIP_RELEASE=true" >> "$GITHUB_ENV"
+            exit 0
+          fi
+
+          changed_files="$(git diff --name-only "$before" "$after")"
+          printf '%s\n' "$changed_files"
+
+          has_package_source=false
+          has_package_manifest=false
+          has_changeset=false
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/((src|scripts)/|build\.js$|rollup\.config\.js$|tsup\.config\.ts$|tsconfig\.json$)'; then
+            has_package_source=true
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/package\.json$'; then
+            has_package_manifest=true
+          fi
+
+          if printf '%s\n' "$changed_files" | grep -Eq '^\.changeset/[^/]+\.md$'; then
+            has_changeset=true
+          fi
+
+          if [[ "$has_package_source" == "false" && "$has_package_manifest" == "false" && "$has_changeset" == "true" ]]; then
+            echo "::error::Changeset-only pushes are not allowed to trigger release automation."
+            exit 1
+          fi
+
+          if [[ "$has_package_source" == "false" && "$has_package_manifest" == "false" ]]; then
+            echo "No releasable package changes detected."
+            exit 0
+          fi
+
+          if [[ "$has_changeset" == "true" ]]; then
+            echo "Changeset found."
+            exit 0
+          fi
+
+          echo "::error::Package source, build, and manifest changes require a changeset before release automation can run."
+          exit 1
+
+      - name: Create release PR or publish
+        if: ${{ env.SKIP_RELEASE != 'true' }}
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: "${{ github.ref_name == 'beta' && 'yarn version:packages:beta' || 'yarn version:packages' }}"
+          publish: "${{ github.ref_name == 'beta' && 'yarn release:beta' || 'yarn release:stable' }}"
+          title: "${{ github.ref_name == 'beta' && 'chore: version packages (beta)' || 'chore: version packages' }}"
+          commit: "${{ github.ref_name == 'beta' && 'chore: version packages (beta)' || 'chore: version packages' }}"
+          createGithubReleases: "${{ github.ref_name == 'main' }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.CHANGESETS_TOKEN || secrets.GITHUB_TOKEN }}

@@ -312,6 +312,59 @@ We welcome contributions from the community! Whether it's bug fixes, new feature
 - Update documentation as needed
 - Use conventional commits (feat, fix, docs, chore, etc.)
 
+### Changesets and releases
+
+Package releases are automated with GitHub Actions and Changesets. Changes to
+package source files, package scripts, or package manifests must include a
+user-facing Changeset generated with:
+
+```sh
+yarn changeset
+```
+
+Select every affected public package and use `patch` for backwards-compatible
+fixes or `minor` for backwards-compatible features. Major Changesets and
+placeholder release notes are rejected automatically. Documentation-only,
+test-only, and repository maintenance changes do not need a Changeset.
+
+The `Changeset Required` workflow checks pull requests before release automation
+can run.
+
+Stable releases use the `main` branch:
+
+1. Merge a source change and its `.changeset/*.md` file into `main`.
+2. The `Release` workflow opens a `chore: version packages` pull request.
+3. Review and merge that version pull request.
+4. The same workflow builds and publishes changed packages to npm with the
+   `latest` tag and creates GitHub releases.
+
+Beta prereleases use the `beta` branch:
+
+1. Create or update `beta` from `main`.
+2. Merge beta-bound source changes and their Changesets into `beta`.
+3. The `Release` workflow opens a `chore: version packages (beta)` pull request.
+4. Review and merge that version pull request.
+5. The same workflow builds and publishes changed packages to npm with the
+   `beta` tag.
+
+The beta workflow enters Changesets prerelease mode automatically. Keep
+`.changeset/pre.json` out of `main`.
+
+Manual release packaging checks are:
+
+```sh
+yarn build
+yarn pack:dry-run
+```
+
+npm publishing uses Trusted Publishing/OIDC. Configure every public npm package
+to trust the `shopanaio/carrier-api` repository and
+`.github/workflows/release.yml`. Packages that do not exist on npm yet require a
+repository `NPM_TOKEN` secret for their first publication; it can be removed
+after Trusted Publishing is configured. A `CHANGESETS_TOKEN` secret is optional
+and is only needed when the default `GITHUB_TOKEN` cannot manage release pull
+requests.
+
 ### Reporting Issues
 
 Found a bug or have a feature request? Please [open an issue](https://github.com/shopanaio/carrier-api/issues) with:
