@@ -13,7 +13,7 @@ describe('Nova Poshta postomat errors', () => {
 
     expect(NovaPoshtaErrorCode.SendingFromPostomatUnavailable).toBe('20000204037');
     expect(info).toEqual({
-      en: 'Sending from a postomat is available only in the Nova Poshta mobile application',
+      en: 'A postomat cannot be used as SenderAddress; continue sender postomat handling in the Nova Poshta mobile application',
       ua: 'Відправка з поштомату доступна лише з мобільного додатку Nova Poshta',
       ru: 'Отправка из почтомата доступна только в мобильном приложении Nova Poshta',
       category: ErrorCategory.BusinessLogic,

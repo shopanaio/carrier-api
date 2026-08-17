@@ -203,7 +203,9 @@ Create a Nova Poshta waybill with additional options and services. Supports back
 
 Create a waybill for delivery **to a recipient postomat**. Recipient postomats have a 20 kg limit and require an `OptionsSeat` array with parcel dimensions.
 
-> **Important:** Nova Poshta API v2 does not support sending **from** a postomat. Error `20000204037` means that this direction is available only in the Nova Poshta mobile application. `SenderAddress` must therefore reference a branch or another sender location supported by the API.
+Use `DoorsPostomat` or `WarehousePostomat` as `ServiceType`.
+
+> **Important:** An ЕН for physical sending **from** a postomat can be created through the API, but a postomat must not be passed as `SenderAddress`. Create the ЕН with a supported sender address, then select it in the Nova Poshta mobile application to open and load the sender postomat. Passing a postomat as `SenderAddress` produces error `20000204037`.
 
 #### `waybill_create_batch`
 

@@ -68,8 +68,9 @@ export class WaybillService {
   /**
    * Create a waybill for delivery to a postomat (with restrictions).
    *
-   * Nova Poshta API v2 does not support sending from a postomat. Such
-   * shipments can only be created in the Nova Poshta mobile application.
+   * A postomat cannot be passed as SenderAddress to InternetDocument/save.
+   * Loading an API-created waybill into a sender postomat is completed in the
+   * Nova Poshta mobile application.
    */
   async createToPostomat(request: CreateWaybillToPostomatRequest): Promise<CreateWaybillResponse> {
     const apiRequest: NovaPoshtaRequest = {
@@ -224,7 +225,7 @@ export class WaybillService {
     }
 
     // Check service type
-    if (!request.ServiceType || !['DoorsWarehouse', 'WarehouseWarehouse'].includes(request.ServiceType)) {
+    if (!request.ServiceType || !['DoorsPostomat', 'WarehousePostomat'].includes(request.ServiceType)) {
       return false;
     }
 
@@ -237,10 +238,10 @@ export class WaybillService {
   }
 
   /**
-   * Check whether Nova Poshta API v2 supports sending from a postomat.
-   * Sending from a postomat is available only in the Nova Poshta mobile app.
+   * Check whether a postomat can be passed as SenderAddress to
+   * InternetDocument/save.
    */
-  canSendFromPostomat(): false {
+  canUsePostomatAsSenderAddress(): false {
     return false;
   }
 

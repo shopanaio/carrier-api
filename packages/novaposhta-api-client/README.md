@@ -299,7 +299,7 @@ const waybill = await client.waybill.createToPostomat({
   DateTime: '25.12.2024',
   CargoType: 'Parcel',
   Weight: 1,
-  ServiceType: 'WarehouseWarehouse',
+  ServiceType: 'WarehousePostomat',
   SeatsAmount: 1,
   Description: 'Test package',
   Cost: 500,
@@ -325,10 +325,10 @@ const waybill = await client.waybill.createToPostomat({
 });
 ```
 
-Nova Poshta API v2 does **not** support sending from a postomat. A response with error code `20000204037` means that this operation is available only in the Nova Poshta mobile application. The SDK exposes this capability explicitly:
+An express waybill for sending from a postomat can be created through the API, but the postomat itself must not be passed as `SenderAddress` to `InternetDocument/save`. Create the waybill with a supported sender address, then select that waybill in the Nova Poshta mobile application to open the sender postomat and load the parcel. Passing a postomat as `SenderAddress` results in error `20000204037`.
 
 ```ts
-client.waybill.canSendFromPostomat(); // false
+client.waybill.canUsePostomatAsSenderAddress(); // false
 ```
 
 `createForPostomat()` remains available as a deprecated compatibility alias for `createToPostomat()`.

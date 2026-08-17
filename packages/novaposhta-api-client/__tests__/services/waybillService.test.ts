@@ -256,7 +256,7 @@ describe('WaybillService', () => {
         DateTime: '01.01.2024',
         CargoType: CargoType.Parcel,
         Weight: 1.5,
-        ServiceType: ServiceType.WarehouseWarehouse,
+        ServiceType: ServiceType.WarehousePostomat,
         SeatsAmount: 1,
         Description: 'Test Package',
         Cost: 1000,
@@ -321,7 +321,7 @@ describe('WaybillService', () => {
         DateTime: '01.01.2024',
         CargoType: CargoType.Parcel,
         Weight: 1,
-        ServiceType: ServiceType.WarehouseWarehouse,
+        ServiceType: ServiceType.WarehousePostomat,
         SeatsAmount: 1,
         Description: 'Test Package',
         Cost: 500,
@@ -638,7 +638,7 @@ describe('WaybillService', () => {
 
       const result = client.waybill.canDeliverToPostomat({
         CargoType: CargoType.Parcel,
-        ServiceType: ServiceType.WarehouseWarehouse,
+        ServiceType: ServiceType.WarehousePostomat,
         Cost: 5000,
       });
 
@@ -652,7 +652,7 @@ describe('WaybillService', () => {
 
       const result = client.waybill.canDeliverToPostomat({
         CargoType: CargoType.Parcel,
-        ServiceType: ServiceType.WarehouseWarehouse,
+        ServiceType: ServiceType.WarehousePostomat,
         Cost: 15000,
       });
 
@@ -666,6 +666,20 @@ describe('WaybillService', () => {
 
       const result = client.waybill.canDeliverToPostomat({
         CargoType: 'Pallet' as any,
+        ServiceType: ServiceType.WarehousePostomat,
+        Cost: 5000,
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('should reject a warehouse service type that does not explicitly target a postomat', () => {
+      const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
+        new WaybillService(),
+      );
+
+      const result = client.waybill.canDeliverToPostomat({
+        CargoType: CargoType.Parcel,
         ServiceType: ServiceType.WarehouseWarehouse,
         Cost: 5000,
       });
@@ -674,13 +688,13 @@ describe('WaybillService', () => {
     });
   });
 
-  describe('canSendFromPostomat', () => {
-    it('should report that Nova Poshta API v2 does not support this direction', () => {
+  describe('canUsePostomatAsSenderAddress', () => {
+    it('should report that a postomat cannot be passed as SenderAddress', () => {
       const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
         new WaybillService(),
       );
 
-      expect(client.waybill.canSendFromPostomat()).toBe(false);
+      expect(client.waybill.canUsePostomatAsSenderAddress()).toBe(false);
     });
   });
 });

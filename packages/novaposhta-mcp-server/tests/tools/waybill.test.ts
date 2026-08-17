@@ -270,7 +270,7 @@ describe('waybill tools', () => {
             DateTime: '01.01.2024',
             CargoType: 'Parcel',
             Weight: 1,
-            ServiceType: 'WarehouseWarehouse',
+            ServiceType: 'WarehousePostomat',
             SeatsAmount: 1,
             Description: 'Test',
             Cost: 100,

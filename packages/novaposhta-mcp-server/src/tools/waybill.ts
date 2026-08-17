@@ -92,7 +92,7 @@ const waybillTools: Tool[] = [
   {
     name: 'waybill_create_for_postomat',
     description:
-      'Create a waybill for delivery TO a recipient postomat via InternetDocument/save (doc 1.2). Sending FROM a postomat is not supported by Nova Poshta API v2 and is available only in the Nova Poshta mobile app. Recipient postomats have a 20 kg limit and require OptionsSeat dimensions.',
+      'Create a waybill for delivery TO a recipient postomat via InternetDocument/save (doc 1.2), using ServiceType DoorsPostomat or WarehousePostomat. For physical sending FROM a postomat, create the waybill with a supported SenderAddress and use the Nova Poshta mobile app to open and load the locker; do not pass a postomat as SenderAddress. Recipient postomats have a 20 kg limit and require OptionsSeat dimensions.',
     inputSchema: {
       type: 'object',
       properties: {

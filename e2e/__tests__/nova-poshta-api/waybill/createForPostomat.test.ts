@@ -10,7 +10,7 @@ describe('WaybillService - createToPostomat', () => {
       DateTime: '25.12.2024',
       CargoType: CargoType.Parcel,
       Weight: 1,
-      ServiceType: ServiceType.WarehouseWarehouse,
+      ServiceType: ServiceType.WarehousePostomat,
       SeatsAmount: 1,
       Description: 'Test package for Postomat',
       Cost: 500, // Max 10000 for postomat

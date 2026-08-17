@@ -113,16 +113,16 @@ export interface CreateWaybillToPostomatRequest extends BaseWaybillProperties {
   readonly OptionsSeat: readonly PoshtomatOptionsSeatItem[];
   /** Cargo type must be Parcel or Documents only */
   readonly CargoType: CargoType.Parcel | CargoType.Documents;
-  /** Service type must be DoorsWarehouse or WarehouseWarehouse */
-  readonly ServiceType: ServiceType.DoorsWarehouse | ServiceType.WarehouseWarehouse;
+  /** Service type must explicitly target a postomat */
+  readonly ServiceType: ServiceType.DoorsPostomat | ServiceType.WarehousePostomat;
   /** Max declared value 10000 UAH */
   readonly Cost: Cost; // max 10000
 }
 
 /**
  * @deprecated Use CreateWaybillToPostomatRequest. Nova Poshta API v2 supports
- * delivery to a postomat, but sending from a postomat is available only in the
- * Nova Poshta mobile application.
+ * delivery to a postomat. A postomat cannot be passed as SenderAddress to
+ * InternetDocument/save.
  */
 export type CreatePoshtomatWaybillRequest = CreateWaybillToPostomatRequest;
 
@@ -372,8 +372,8 @@ export function isValidPoshtomatCargoType(cargoType: CargoType): cargoType is Ca
 
 export function isValidPoshtomatServiceType(
   serviceType: ServiceType,
-): serviceType is ServiceType.DoorsWarehouse | ServiceType.WarehouseWarehouse {
-  return serviceType === ServiceType.DoorsWarehouse || serviceType === ServiceType.WarehouseWarehouse;
+): serviceType is ServiceType.DoorsPostomat | ServiceType.WarehousePostomat {
+  return serviceType === ServiceType.DoorsPostomat || serviceType === ServiceType.WarehousePostomat;
 }
 
 export function calculateTotalWeight(seats: readonly OptionsSeatItem[]): Weight {
