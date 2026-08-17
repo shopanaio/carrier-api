@@ -90,6 +90,10 @@ export enum ServiceType {
   WarehouseWarehouse = 'WarehouseWarehouse',
   /** Warehouse to door delivery */
   WarehouseDoors = 'WarehouseDoors',
+  /** Door to postomat delivery */
+  DoorsPostomat = 'DoorsPostomat',
+  /** Warehouse to postomat delivery */
+  WarehousePostomat = 'WarehousePostomat',
 }
 
 // Payer types

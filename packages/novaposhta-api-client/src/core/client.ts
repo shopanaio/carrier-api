@@ -15,10 +15,21 @@ export interface ClientContext {
   baseUrl: string;
   apiKey?: string;
   system?: 'DevCentre';
+  /** Retry API-level rate-limit responses (error code 20000401501). */
+  rateLimitRetry?: false | RateLimitRetryOptions;
+}
+
+export interface RateLimitRetryOptions {
+  /** Number of retries after the initial request. Defaults to 2. */
+  maxRetries?: number;
+  /** Delay before the first retry. Defaults to 1000 ms. */
+  delayMs?: number;
 }
 
 // Adapter from function-style transport to interface-style transport for services
 export function toHttpTransport(ctx: ClientContext): HttpTransport {
+  const retry = normalizeRateLimitRetry(ctx.rateLimitRetry);
+
   return {
     async request<T = unknown>(request: NovaPoshtaRequest): Promise<NovaPoshtaResponse<T>> {
       const { apiKey, system, ...rest } = request as NovaPoshtaRequest & { apiKey?: string; system?: 'DevCentre' };
@@ -28,14 +39,49 @@ export function toHttpTransport(ctx: ClientContext): HttpTransport {
         ...(system || ctx.system ? { system: (system || ctx.system) as 'DevCentre' } : {}),
       };
 
-      const response = await ctx.transport<NovaPoshtaRequest, NovaPoshtaResponse<T>>({
-        url: ctx.baseUrl,
-        body: finalRequest,
-      });
+      for (let attempt = 0; ; attempt += 1) {
+        const response = await ctx.transport<NovaPoshtaRequest, NovaPoshtaResponse<T>>({
+          url: ctx.baseUrl,
+          body: finalRequest,
+        });
 
-      return response.data;
+        if (!isRateLimited(response.data) || !retry || attempt >= retry.maxRetries) {
+          return response.data;
+        }
+
+        await wait(retry.delayMs * (attempt + 1));
+      }
     },
   };
+}
+
+function normalizeRateLimitRetry(
+  options: ClientContext['rateLimitRetry'],
+): Required<RateLimitRetryOptions> | null {
+  if (options === false) {
+    return null;
+  }
+
+  const maxRetries = options?.maxRetries ?? 2;
+  const delayMs = options?.delayMs ?? 1000;
+  assertNonNegativeInteger(maxRetries, 'rateLimitRetry.maxRetries');
+  assertNonNegativeInteger(delayMs, 'rateLimitRetry.delayMs');
+
+  return { maxRetries, delayMs };
+}
+
+function assertNonNegativeInteger(value: number, name: string): void {
+  if (!Number.isFinite(value) || !Number.isInteger(value) || value < 0) {
+    throw new TypeError(`${name} must be a finite non-negative integer`);
+  }
+}
+
+function isRateLimited(response: NovaPoshtaResponse<unknown>): boolean {
+  return response.errorCodes?.includes('20000401501') ?? false;
+}
+
+function wait(delayMs: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, delayMs));
 }
 
 // Types to hoist only public methods

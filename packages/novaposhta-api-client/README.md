@@ -288,6 +288,89 @@ const waybill = await client.waybill.create({
 console.log('Waybill created:', waybill.data[0].IntDocNumber);
 ```
 
+### Delivery to a postomat
+
+Nova Poshta API v2 supports delivery **to** a recipient postomat. Use `createToPostomat()` and pass the postomat reference as `RecipientAddress`:
+
+```ts
+const waybill = await client.waybill.createToPostomat({
+  PayerType: 'Sender',
+  PaymentMethod: 'Cash',
+  DateTime: '25.12.2024',
+  CargoType: 'Parcel',
+  Weight: 1,
+  ServiceType: 'WarehousePostomat',
+  SeatsAmount: 1,
+  Description: 'Test package',
+  Cost: 500,
+  CitySender: 'sender-city-ref',
+  Sender: 'sender-counterparty-ref',
+  SenderAddress: 'sender-branch-ref',
+  ContactSender: 'sender-contact-ref',
+  SendersPhone: '380671234567',
+  CityRecipient: 'recipient-city-ref',
+  Recipient: 'recipient-counterparty-ref',
+  RecipientAddress: 'recipient-postomat-ref',
+  RecipientWarehouseIndex: '11/1001',
+  ContactRecipient: 'recipient-contact-ref',
+  RecipientsPhone: '380501234567',
+  OptionsSeat: [
+    {
+      weight: 1,
+      volumetricWidth: 10,
+      volumetricLength: 20,
+      volumetricHeight: 15,
+    },
+  ],
+});
+```
+
+### Sending from a postomat
+
+Use the existing `create()` method and pass the postomat reference as `SenderAddress`. A sender postomat behaves as a warehouse origin, so use `WarehouseWarehouse` for delivery to a branch or `WarehouseDoors` for delivery to an address:
+
+```typescript
+const waybill = await client.waybill.create({
+  PayerType: 'Sender',
+  PaymentMethod: 'Cash',
+  DateTime: '25.12.2024',
+  CargoType: 'Parcel',
+  Weight: 1,
+  ServiceType: 'WarehouseWarehouse',
+  SeatsAmount: 1,
+  Description: 'Postomat shipment',
+  Cost: 500,
+  CitySender: 'sender-city-ref',
+  Sender: 'sender-counterparty-ref',
+  SenderAddress: 'sender-postomat-ref',
+  ContactSender: 'sender-contact-ref',
+  SendersPhone: '380671234567',
+  CityRecipient: 'recipient-city-ref',
+  Recipient: 'recipient-counterparty-ref',
+  RecipientAddress: 'recipient-warehouse-ref',
+  ContactRecipient: 'recipient-contact-ref',
+  RecipientsPhone: '380501234567',
+  OptionsSeat: [
+    {
+      weight: 1,
+      volumetricWidth: 10,
+      volumetricLength: 20,
+      volumetricHeight: 15,
+    },
+  ],
+});
+```
+
+After creating the waybill, select it in the Nova Poshta mobile application to open the sender locker and load the parcel. Payment availability depends on the sender account: if `NonCash` is rejected, use an available payment method such as `Cash` or inspect the counterparty options.
+
+> `OptionsSeat` is unusual: the outer request uses PascalCase, but the real API wire fields inside each seat use lower camel case (`weight`, `volumetricWidth`, `volumetricLength`, `volumetricHeight`). The client also accepts the former PascalCase SDK shape and normalizes it for backwards compatibility.
+
+When looking up warehouses, do not assume that `Counterparty.City` is a city reference. Search with `CityDescription` when necessary, then use the selected warehouse's `CityRef` in the waybill request.
+
+API error `20000401501` means that requests are being sent too quickly. The client retries this response with incremental delays by default. Set `rateLimitRetry: false` in `createClient()` to disable retries or provide `{ maxRetries, delayMs }` to tune them.
+
+`createForPostomat()` remains available as a deprecated compatibility alias for `createToPostomat()`.
+
 ---
 
 ## 🛠️ Custom Transport

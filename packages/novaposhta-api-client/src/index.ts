@@ -59,7 +59,7 @@
 
 // Core client (flat API via use(new Service()))
 export { createClient } from './core/client';
-export type { ClientContext, Client, ServiceAPI } from './core/client';
+export type { ClientContext, Client, ServiceAPI, RateLimitRetryOptions } from './core/client';
 
 export type { HttpTransport } from './http/transport';
 
@@ -177,11 +177,16 @@ export type {
 export type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
+  CreateWaybillToPostomatRequest,
   CreatePoshtomatWaybillRequest,
   UpdateWaybillRequest,
   DeleteWaybillRequest,
   OptionsSeatItem,
+  OptionsSeatWireItem,
+  OptionsSeatInput,
   PoshtomatOptionsSeatItem,
+  PoshtomatOptionsSeatWireItem,
+  PoshtomatOptionsSeatInput,
   BackwardDeliveryItem,
   AdditionalServices,
   WaybillCreationData,
@@ -208,6 +213,7 @@ export {
   isValidPoshtomatServiceType,
   calculateTotalWeight,
   calculateTotalVolume,
+  getOptionsSeatDimensions,
   hasAdditionalServices,
   hasBackwardDelivery,
   isThirdPersonPayer,

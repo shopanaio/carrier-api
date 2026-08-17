@@ -58,6 +58,7 @@ export class NovaPoshtaMCPServer {
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       system: config.system,
+      rateLimitRetry: { maxRetries: 3, delayMs: 1200 },
     })
       .use(new AddressService())
       .use(new ReferenceService())

@@ -246,6 +246,9 @@ export enum NovaPoshtaErrorCode {
   InternetDocumentNotFound = '20000200205',
   InternetDocumentNotFoundByOwner = '20000200206',
 
+  // Postomat availability restrictions
+  SendingFromPostomatUnavailable = '20000204037',
+
   // Attorney and items errors
   IsTakeAttorneyUnavailable = '20000200207',
   ItemsEmpty = '20000200208',
@@ -382,6 +385,14 @@ export const ERROR_MESSAGES: Partial<
     ua: 'Вартість занадто висока',
     ru: 'Стоимость слишком высокая',
     category: ErrorCategory.Validation,
+    severity: ErrorSeverity.Medium,
+    retryable: false,
+  },
+  [NovaPoshtaErrorCode.SendingFromPostomatUnavailable]: {
+    en: 'The selected sender postomat or request configuration is unavailable; verify the postomat, payment method, and seat fields',
+    ua: 'Обраний поштомат відправника або конфігурація запиту недоступні; перевірте поштомат, спосіб оплати та параметри місць',
+    ru: 'Выбранный почтомат отправителя или конфигурация запроса недоступны; проверьте почтомат, способ оплаты и параметры мест',
+    category: ErrorCategory.BusinessLogic,
     severity: ErrorSeverity.Medium,
     retryable: false,
   },
