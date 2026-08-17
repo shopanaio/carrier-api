@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.0.1
+
+### Patch Changes
+
+- b1c78f9: Add automated package publishing and correct Nova Poshta postomat service handling.
+
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
@@ -10,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.0.1-alpha.3] - 2025-11-20
 
 ### Added
+
 - **CounterpartyService** with full CRUD methods plus helper lookups:
   - `getCounterparties()` - Get counterparties list with filtering
   - `getCounterpartyAddresses()` - Get addresses for specific counterparty
@@ -45,6 +52,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Aggregate union types for better type inference
 
 ### Changed
+
 - Extended `NovaPoshtaMethod` enum with missing Common and Counterparty endpoints:
   - `GetTypesOfPayers`, `GetPaymentForms`, `GetTypesOfCounterparties`
   - `GetCounterparties`, `GetCounterpartyAddresses`, `GetCounterpartyContactPersons`, `GetCounterpartyOptions`
@@ -60,11 +68,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Reference data retrieval examples
 
 ### Fixed
+
 - Added missing JSDoc comment for `limit` field in `GetCargoDescriptionListRequest`
 - Fixed TypeScript compilation errors with proper type narrowing in counterparty service
 - Code formatting improvements with Prettier
 
 ### Testing
+
 - Added 18+ new unit tests for CounterpartyService (private person, organization, CRUD operations)
 - Added 3+ new unit tests for ReferenceService (new dictionary methods)
 - Added 3+ new unit tests for AddressService CRUD methods
@@ -76,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 #### Core Features
+
 - Plugin-based architecture with `.use()` method for service registration
 - Type-safe Nova Poshta API client with full TypeScript support
 - Transport-agnostic design - inject your own HTTP transport implementation
@@ -83,6 +94,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Namespaced API (`client.address.*`, `client.reference.*`, etc.)
 
 #### Services
+
 - **AddressService**: City, settlement, and street search and lookup
   - `getCities()` - Get cities with search and pagination
   - `getSettlements()` - Get settlements
@@ -132,6 +144,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `canDeliverToPostomat()` - Check postomat delivery availability
 
 #### Types & Enums
+
 - Comprehensive TypeScript types for all API requests and responses
 - Enums for all Nova Poshta constants:
   - `ServiceType`, `CargoType`, `PayerType`, `PaymentMethod`
@@ -140,17 +153,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Full type inference support
 
 #### Testing
+
 - 60 unit tests with mocked transport (100% pass rate)
 - Complete test coverage for all services
 - Mock transport utilities for testing
 
 ### Technical Details
+
 - Zero runtime dependencies (peer dependency: `typescript >= 4.9.0`)
 - ESM module support with proper `exports` field
 - Source maps included for debugging
 - Tree-shaking support via `sideEffects: false`
 
 ### Documentation
+
 - Comprehensive README with examples
 - TypeScript type documentation
 - Usage examples for all services
