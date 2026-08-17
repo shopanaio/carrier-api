@@ -631,16 +631,28 @@ describe('WaybillService', () => {
   });
 
   describe('canDeliverToPostomat', () => {
+    const validPostomatRequest = {
+      CargoType: CargoType.Parcel,
+      ServiceType: ServiceType.WarehousePostomat,
+      Weight: 1,
+      Cost: 5000,
+      SeatsAmount: 1,
+      OptionsSeat: [
+        {
+          Weight: 1,
+          VolumetricWidth: 10,
+          VolumetricLength: 20,
+          VolumetricHeight: 15,
+        },
+      ],
+    } as const;
+
     it('should return true for valid postomat delivery', () => {
       const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
         new WaybillService(),
       );
 
-      const result = client.waybill.canDeliverToPostomat({
-        CargoType: CargoType.Parcel,
-        ServiceType: ServiceType.WarehousePostomat,
-        Cost: 5000,
-      });
+      const result = client.waybill.canDeliverToPostomat(validPostomatRequest);
 
       expect(result).toBe(true);
     });
@@ -651,8 +663,7 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
-        CargoType: CargoType.Parcel,
-        ServiceType: ServiceType.WarehousePostomat,
+        ...validPostomatRequest,
         Cost: 15000,
       });
 
@@ -665,9 +676,8 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
+        ...validPostomatRequest,
         CargoType: 'Pallet' as any,
-        ServiceType: ServiceType.WarehousePostomat,
-        Cost: 5000,
       });
 
       expect(result).toBe(false);
@@ -679,9 +689,29 @@ describe('WaybillService', () => {
       );
 
       const result = client.waybill.canDeliverToPostomat({
-        CargoType: CargoType.Parcel,
+        ...validPostomatRequest,
         ServiceType: ServiceType.WarehouseWarehouse,
-        Cost: 5000,
+      });
+
+      expect(result).toBe(false);
+    });
+
+    it('should reject shipment weight above the postomat limit', () => {
+      const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
+        new WaybillService(),
+      );
+
+      expect(client.waybill.canDeliverToPostomat({ ...validPostomatRequest, Weight: 21 })).toBe(false);
+    });
+
+    it('should reject seat dimensions above the postomat limits', () => {
+      const client = createClient({ transport: createMockTransport().transport, baseUrl, apiKey }).use(
+        new WaybillService(),
+      );
+
+      const result = client.waybill.canDeliverToPostomat({
+        ...validPostomatRequest,
+        OptionsSeat: [{ ...validPostomatRequest.OptionsSeat[0], VolumetricWidth: 41 }],
       });
 
       expect(result).toBe(false);

@@ -10,6 +10,14 @@ describe('WaybillService - canDeliverToPostomat', () => {
     Cost,
     CargoType: CargoType.Parcel,
     SeatsAmount: 1,
+    OptionsSeat: [
+      {
+        Weight: 1,
+        VolumetricWidth: 10,
+        VolumetricLength: 20,
+        VolumetricHeight: 15,
+      },
+    ],
   });
 
   it.each([ServiceType.WarehousePostomat, ServiceType.DoorsPostomat])(
@@ -39,6 +47,25 @@ describe('WaybillService - canDeliverToPostomat', () => {
     const canDeliver = client.waybill.canDeliverToPostomat({
       ...createRequest(ServiceType.WarehousePostomat),
       CargoType: CargoType.Cargo,
+    });
+
+    expect(canDeliver).toBe(false);
+  });
+
+  it('rejects shipment weight above the postomat limit', () => {
+    const canDeliver = client.waybill.canDeliverToPostomat({
+      ...createRequest(ServiceType.WarehousePostomat),
+      Weight: 21,
+    });
+
+    expect(canDeliver).toBe(false);
+  });
+
+  it('rejects seat dimensions above the postomat limits', () => {
+    const request = createRequest(ServiceType.WarehousePostomat);
+    const canDeliver = client.waybill.canDeliverToPostomat({
+      ...request,
+      OptionsSeat: [{ ...request.OptionsSeat[0], VolumetricWidth: 41 }],
     });
 
     expect(canDeliver).toBe(false);

@@ -21,8 +21,12 @@ import type {
   PriceCalculationRequest,
   PriceCalculationResponse,
 } from '../types/waybill';
+import { isValidPoshtomatDimensions } from '../types/waybill';
 import type { NovaPoshtaRequest } from '../types/base';
 import { NovaPoshtaModel, NovaPoshtaMethod } from '../types/enums';
+
+type PostomatDeliveryCandidate = Partial<CreateWaybillRequest> &
+  Pick<Partial<CreateWaybillToPostomatRequest>, 'OptionsSeat'>;
 
 /**
  * Service for managing waybills (express documents)
@@ -218,7 +222,7 @@ export class WaybillService {
   /**
    * Check if delivery to a postomat is available for the request
    */
-  canDeliverToPostomat(request: Partial<CreateWaybillRequest>): boolean {
+  canDeliverToPostomat(request: PostomatDeliveryCandidate): boolean {
     // Check cargo type
     if (!request.CargoType || !['Parcel', 'Documents'].includes(request.CargoType)) {
       return false;
@@ -229,12 +233,31 @@ export class WaybillService {
       return false;
     }
 
-    // Check declared value
-    if (request.Cost && request.Cost > 10000) {
+    // Check shipment-level postomat limits
+    if (request.Weight === undefined || request.Weight < 0.1 || request.Weight > 20) {
       return false;
     }
 
-    return true;
+    if (request.Cost === undefined || request.Cost < 0 || request.Cost > 10000) {
+      return false;
+    }
+
+    if (!Number.isInteger(request.SeatsAmount) || (request.SeatsAmount ?? 0) < 1) {
+      return false;
+    }
+
+    if (!request.OptionsSeat || request.OptionsSeat.length !== request.SeatsAmount) {
+      return false;
+    }
+
+    return request.OptionsSeat.every(
+      seat =>
+        seat.Weight > 0 &&
+        seat.VolumetricWidth > 0 &&
+        seat.VolumetricLength > 0 &&
+        seat.VolumetricHeight > 0 &&
+        isValidPoshtomatDimensions(seat),
+    );
   }
 
   /**
