@@ -338,9 +338,11 @@ export type DocumentMovementResponse = NovaPoshtaResponse<readonly DocumentMovem
 // Document list request
 export interface DocumentListRequest {
   /** Date from (format: dd.mm.yyyy) */
-  readonly DateTimeFrom: NovaPoshtaDate;
+  readonly DateTimeFrom?: NovaPoshtaDate;
   /** Date to (format: dd.mm.yyyy) */
-  readonly DateTimeTo: NovaPoshtaDate;
+  readonly DateTimeTo?: NovaPoshtaDate;
+  /** Exact document references for account-scoped recovery reads. */
+  readonly DocumentRefs?: readonly NovaPoshtaRef[];
   /** Page number */
   readonly Page?: number;
   /** Get full list */

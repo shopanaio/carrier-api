@@ -10,6 +10,7 @@ import type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
   CreateWaybillToPostomatRequest,
+  CreateWaybillForPrivateRecipientRequest,
   CreatePoshtomatWaybillRequest,
   OptionsSeatInput,
   UpdateWaybillRequest,
@@ -54,6 +55,16 @@ export class WaybillService {
    */
   async createWithOptions(request: CreateWaybillWithOptionsRequest): Promise<CreateWaybillResponse> {
     return this.createWaybill(request);
+  }
+
+  /** Create a waybill for a private recipient supplied directly on the document. */
+  async createForPrivateRecipient(request: CreateWaybillForPrivateRecipientRequest): Promise<CreateWaybillResponse> {
+    return this.transport.request<CreateWaybillResponse['data']>({
+      ...(this.apiKey ? { apiKey: this.apiKey } : {}),
+      modelName: NovaPoshtaModel.InternetDocument,
+      calledMethod: NovaPoshtaMethod.Save,
+      methodProperties: request as unknown as Record<string, unknown>,
+    });
   }
 
   /**
