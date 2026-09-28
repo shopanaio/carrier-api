@@ -13,3 +13,12 @@ uploads/
 libs/
 dist/
 coverage/
+
+# Yarn (no zero-installs)
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*

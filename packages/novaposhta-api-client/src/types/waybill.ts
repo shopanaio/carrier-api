@@ -139,7 +139,43 @@ export interface UpdateWaybillRequest extends BaseWaybillProperties {
 // Delete waybill request
 export interface DeleteWaybillRequest {
   /** Document refs to delete */
-  readonly DocumentRefs: readonly DocumentRef[];
+  readonly DocumentRefs: readonly DocumentRef[] | DocumentRef;
+}
+
+/** Private-person recipient fields accepted by InternetDocument/save without creating a counterparty. */
+export interface CreateWaybillForPrivateRecipientRequest {
+  readonly ServiceType: string;
+  readonly PayerType: 'Sender' | 'Recipient';
+  readonly PaymentMethod: 'Cash';
+  readonly Description: string;
+  readonly Sender: CounterpartyRef;
+  readonly ContactSender: ContactRef;
+  readonly CitySender: CityRef;
+  readonly SenderAddress: AddressRef;
+  readonly SendersPhone: PhoneNumber;
+  readonly CityRecipient: CityRef;
+  readonly RecipientType: 'PrivatePerson';
+  readonly RecipientName: string;
+  readonly RecipientAddress: AddressRef | WarehouseRef;
+  readonly RecipientsPhone: PhoneNumber;
+  readonly RecipientHouse?: string;
+  readonly RecipientFlat?: string;
+  readonly AdditionalInformation?: string;
+  readonly Weight: string;
+  readonly Cost: string;
+  readonly SeatsAmount: string;
+  readonly CargoType: 'Parcel';
+  readonly OptionsSeat: readonly {
+    readonly weight: string;
+    readonly volumetricWidth: string;
+    readonly volumetricHeight: string;
+    readonly volumetricLength: string;
+  }[];
+  readonly BackwardDeliveryData?: readonly {
+    readonly CargoType: 'Money';
+    readonly PayerType: 'Recipient';
+    readonly RedeliveryString: string;
+  }[];
 }
 
 // Cargo seat options
