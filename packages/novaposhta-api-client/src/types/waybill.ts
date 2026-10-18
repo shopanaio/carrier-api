@@ -10,6 +10,7 @@ import type {
   ContactRef,
   AddressRef,
   WarehouseRef,
+  StreetRef,
   DocumentRef,
   String36,
   String50,
@@ -143,7 +144,21 @@ export interface DeleteWaybillRequest {
 }
 
 /** Private-person recipient fields accepted by InternetDocument/save without creating a counterparty. */
-export interface CreateWaybillForPrivateRecipientRequest {
+export type CreateWaybillForPrivateRecipientRequest = PrivateRecipientWaybillFields &
+  (
+    | {
+        /** Recipient warehouse or postomat */
+        readonly RecipientAddress: AddressRef | WarehouseRef;
+      }
+    | {
+        /** Settlement street (SettlementStreetRef from searchSettlementStreets) for door delivery */
+        readonly RecipientStreetRef: StreetRef;
+        readonly RecipientHouse: string;
+        readonly RecipientFlat?: string;
+      }
+  );
+
+interface PrivateRecipientWaybillFields {
   readonly ServiceType: string;
   readonly PayerType: 'Sender' | 'Recipient';
   readonly PaymentMethod: 'Cash';
@@ -156,10 +171,7 @@ export interface CreateWaybillForPrivateRecipientRequest {
   readonly CityRecipient: CityRef;
   readonly RecipientType: 'PrivatePerson';
   readonly RecipientName: string;
-  readonly RecipientAddress: AddressRef | WarehouseRef;
   readonly RecipientsPhone: PhoneNumber;
-  readonly RecipientHouse?: string;
-  readonly RecipientFlat?: string;
   readonly AdditionalInformation?: string;
   readonly Weight: string;
   readonly Cost: string;
