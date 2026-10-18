@@ -1,5 +1,5 @@
 // code and comments in English
-import type { HttpTransport, RetryOptions, Secret } from '@shopana/carrier-core';
+import type { HttpLogger, HttpTransport, RetryOptions, Secret } from '@shopana/carrier-core';
 import type { UkrposhtaEnvironment } from '../config';
 
 export interface UkrposhtaContractConfig {
@@ -15,4 +15,6 @@ export interface UkrposhtaContractConfig {
   formsBaseUrl?: string;
   retry?: RetryOptions | false;
   timeoutMs?: number;
+  /** Receives one event per attempt; the bearer and the counterparty token are masked. */
+  logger?: HttpLogger;
 }
