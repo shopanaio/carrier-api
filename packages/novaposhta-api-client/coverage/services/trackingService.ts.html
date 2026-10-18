@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.33% </span>
+                <span class="strong">93.5% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>70/75</span>
+                <span class='fraction'>72/77</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">84.21% </span>
+                <span class="strong">84.12% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>48/57</span>
+                <span class='fraction'>53/63</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">86.95% </span>
+                <span class="strong">88% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>20/23</span>
+                <span class='fraction'>22/25</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">93.24% </span>
+                <span class="strong">93.42% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>69/74</span>
+                <span class='fraction'>71/76</span>
             </div>
         
             
@@ -420,7 +420,24 @@
 <a name='L355'></a><a href='#L355'>355</a>
 <a name='L356'></a><a href='#L356'>356</a>
 <a name='L357'></a><a href='#L357'>357</a>
-<a name='L358'></a><a href='#L358'>358</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<a name='L358'></a><a href='#L358'>358</a>
+<a name='L359'></a><a href='#L359'>359</a>
+<a name='L360'></a><a href='#L360'>360</a>
+<a name='L361'></a><a href='#L361'>361</a>
+<a name='L362'></a><a href='#L362'>362</a>
+<a name='L363'></a><a href='#L363'>363</a>
+<a name='L364'></a><a href='#L364'>364</a>
+<a name='L365'></a><a href='#L365'>365</a>
+<a name='L366'></a><a href='#L366'>366</a>
+<a name='L367'></a><a href='#L367'>367</a>
+<a name='L368'></a><a href='#L368'>368</a>
+<a name='L369'></a><a href='#L369'>369</a>
+<a name='L370'></a><a href='#L370'>370</a>
+<a name='L371'></a><a href='#L371'>371</a>
+<a name='L372'></a><a href='#L372'>372</a>
+<a name='L373'></a><a href='#L373'>373</a>
+<a name='L374'></a><a href='#L374'>374</a>
+<a name='L375'></a><a href='#L375'>375</a></td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -479,6 +496,11 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">8x</span>
@@ -508,6 +530,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
@@ -518,6 +546,12 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -835,7 +869,12 @@ export class TrackingService {
       ...(this.apiKey ? { apiKey: this.apiKey } : <span class="branch-1 cbranch-no" title="branch not covered" >{})</span>,
       modelName: NovaPoshtaModel.TrackingDocument,
       calledMethod: NovaPoshtaMethod.GetStatusDocuments,
-      methodProperties: request as unknown as Record&lt;string, unknown&gt;,
+      methodProperties: {
+        Documents: request.documents.map(doc =&gt; ({
+          DocumentNumber: doc.documentNumber,
+          Phone: doc.phone,
+        })),
+      },
     };
 &nbsp;
     return await this.transport.request&lt;TrackingResponse['data']&gt;(apiRequest);
@@ -846,7 +885,7 @@ export class TrackingService {
    */
   async trackDocument(documentNumber: string, phone?: string): Promise&lt;TrackingStatusData | null&gt; {
     const response = await this.trackDocuments({
-      Documents: [{ DocumentNumber: documentNumber, Phone: phone as any }],
+      documents: [{ documentNumber, phone: phone as any }],
     });
 &nbsp;
     if (response.success &amp;&amp; response.data.length &gt; 0) {
@@ -863,8 +902,14 @@ export class TrackingService {
     const apiRequest: NovaPoshtaRequest = {
       ...(this.apiKey ? { apiKey: this.apiKey } : <span class="branch-1 cbranch-no" title="branch not covered" >{})</span>,
       modelName: NovaPoshtaModel.TrackingDocument,
-      calledMethod: NovaPoshtaMethod.GetStatusDocuments,
-      methodProperties: request as unknown as Record&lt;string, unknown&gt;,
+      calledMethod: NovaPoshtaMethod.GetDocumentsEWMovement,
+      methodProperties: {
+        Documents: request.documents.map(doc =&gt; ({
+          DocumentNumber: doc.documentNumber,
+          Phone: doc.phone,
+        })),
+        ShowDeliveryDetails: request.showDeliveryDetails ? '1' : <span class="branch-1 cbranch-no" title="branch not covered" >'0',</span>
+      },
     };
 &nbsp;
     return await this.transport.request&lt;DocumentMovementResponse['data']&gt;(apiRequest);
@@ -878,7 +923,13 @@ export class TrackingService {
       ...(this.apiKey ? { apiKey: this.apiKey } : <span class="branch-1 cbranch-no" title="branch not covered" >{})</span>,
       modelName: NovaPoshtaModel.InternetDocument,
       calledMethod: NovaPoshtaMethod.GetDocumentList,
-      methodProperties: request as unknown as Record&lt;string, unknown&gt;,
+      methodProperties: {
+        DateTimeFrom: request.dateTimeFrom,
+        DateTimeTo: request.dateTimeTo,
+        Page: request.page?.toString() || '1',
+        GetFullList: request.getFullList || '0',
+        DateTime: request.dateTime,
+      },
     };
 &nbsp;
     return await this.transport.request&lt;DocumentListResponse['data']&gt;(apiRequest);
@@ -892,15 +943,15 @@ export class TrackingService {
     failed: string[];
     statistics: TrackingStatistics;
   }&gt; {
-    const documents = documentNumbers.map(num =&gt; ({ DocumentNumber: num }));
-    const response = await this.trackDocuments({ Documents: documents });
+    const documents = documentNumbers.map(num =&gt; ({ documentNumber: num }));
+    const response = await this.trackDocuments({ documents });
 &nbsp;
     const successful: TrackingStatusData[] = [];
     const failed: string[] = [];
 &nbsp;
     if (response.success &amp;&amp; response.data) {
       response.data.forEach((item, index) =&gt; {
-        if (item &amp;&amp; item.StatusCode !== DeliveryStatus.NotFound) {
+        if (item &amp;&amp; item.statusCode !== DeliveryStatus.NotFound) {
           successful.push(item);
         } else {
           failed.push(documentNumbers[index] || <span class="branch-1 cbranch-no" title="branch not covered" >'unknown')</span>;
@@ -926,14 +977,14 @@ export class TrackingService {
     return results.filter(result =&gt; {
       // Filter by status
       if (filter.status &amp;&amp; filter.status.length &gt; 0) {
-        if (!filter.status.includes(result.StatusCode)) {
+        if (!filter.status.includes(result.statusCode)) {
           return false;
         }
       }
 &nbsp;
       // Filter by date range
       if (filter.dateFrom || filter.dateTo) {
-        const resultDate = new Date(result.DateCreated);
+        const resultDate = new Date(result.dateCreated);
 &nbsp;
         if (filter.dateFrom &amp;&amp; resultDate &lt; new Date(filter.dateFrom)) {
           return false;
@@ -945,12 +996,12 @@ export class TrackingService {
       }
 &nbsp;
       // Filter by sender city
-      if (filter.citySender &amp;&amp; !result.CitySender.includes(filter.citySender)) {
+      if (filter.citySender &amp;&amp; !result.citySender.includes(filter.citySender)) {
         return false;
       }
 &nbsp;
       // Filter by recipient city
-      if (filter.cityRecipient &amp;&amp; !result.CityRecipient.includes(filter.cityRecipient)) {
+      if (filter.cityRecipient &amp;&amp; !result.cityRecipient.includes(filter.cityRecipient)) {
         return false;
       }
 &nbsp;
@@ -972,7 +1023,7 @@ export class TrackingService {
     };
 &nbsp;
     results.forEach(result =&gt; {
-      switch (result.StatusCode) {
+      switch (result.statusCode) {
         case DeliveryStatus.Received:
         case DeliveryStatus.ReceivedAwaitingMoneyTransfer:
         case DeliveryStatus.ReceivedAndMoneyTransferred:
@@ -1014,7 +1065,7 @@ export class TrackingService {
       DeliveryStatus.Received,
       DeliveryStatus.ReceivedAwaitingMoneyTransfer,
       DeliveryStatus.ReceivedAndMoneyTransferred,
-    ].includes(status.StatusCode);
+    ].includes(status.statusCode);
   }
 &nbsp;
   /**
@@ -1025,7 +1076,7 @@ export class TrackingService {
       DeliveryStatus.InTransitToRecipientCity,
       DeliveryStatus.OnTheWayToRecipient,
       DeliveryStatus.BeingPacked,
-    ].includes(status.StatusCode);
+    ].includes(status.statusCode);
   }
 &nbsp;
   /**
@@ -1036,7 +1087,7 @@ export class TrackingService {
       DeliveryStatus.ArrivedAtWarehouse,
       DeliveryStatus.ArrivedAtPostomat,
       DeliveryStatus.InRecipientCityAwaitingDelivery,
-    ].includes(status.StatusCode);
+    ].includes(status.statusCode);
   }
 &nbsp;
   /**
@@ -1119,9 +1170,9 @@ export class TrackingService {
     }&gt;;
   }): Promise&lt;TrackingResponse&gt; {
 <span class="cstat-no" title="statement not covered" >    return this.trackDocuments({</span>
-      Documents: request.documents.map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; (<span class="cstat-no" title="statement not covered" >{</span>
-        DocumentNumber: doc.documentNumber,
-        Phone: doc.phone as any,
+      documents: request.documents.map(<span class="fstat-no" title="function not covered" >doc </span>=&gt; (<span class="cstat-no" title="statement not covered" >{</span>
+        documentNumber: doc.documentNumber,
+        phone: doc.phone as any,
       })),
     });
   }
@@ -1141,7 +1192,7 @@ export class TrackingService {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-10-18T20:49:11.180Z
+                at 2025-10-11T18:45:23.151Z
             </div>
         <script src="../prettify.js"></script>
         <script>
