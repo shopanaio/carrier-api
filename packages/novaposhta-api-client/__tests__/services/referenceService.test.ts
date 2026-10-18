@@ -1,4 +1,4 @@
-import { createClient } from '../../src/core/client';
+import { createClient } from '../mocks/client';
 import { ReferenceService } from '../../src/services/referenceService';
 import { createMockTransport } from '../mocks/transport';
 

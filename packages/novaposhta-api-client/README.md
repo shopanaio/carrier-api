@@ -38,13 +38,13 @@ Modern Nova Poshta API client built with TypeScript, featuring **plugin architec
 
 ```bash
 # NPM
-npm install @shopana/novaposhta-api-client @shopana/novaposhta-transport-fetch
+npm install @shopana/novaposhta-api-client
 
 # Yarn
-yarn add @shopana/novaposhta-api-client @shopana/novaposhta-transport-fetch
+yarn add @shopana/novaposhta-api-client
 
 # PNPM
-pnpm add @shopana/novaposhta-api-client @shopana/novaposhta-transport-fetch
+pnpm add @shopana/novaposhta-api-client
 ```
 
 ---
@@ -52,29 +52,16 @@ pnpm add @shopana/novaposhta-api-client @shopana/novaposhta-transport-fetch
 ## ⚡ Quick Start
 
 ```typescript
-import {
-  createClient,
-  AddressService,
-  CounterpartyService,
-  ContactPersonService,
-  ReferenceService,
-  TrackingService,
-  WaybillService,
-} from '@shopana/novaposhta-api-client';
-import { createFetchHttpTransport } from '@shopana/novaposhta-transport-fetch';
+import { createNovaPoshtaClient } from '@shopana/novaposhta-api-client';
 
-const client = createClient({
-  transport: createFetchHttpTransport(),           // external transport (HTTP POST JSON)
-  baseUrl: 'https://api.novaposhta.ua/v2.0/json/', // NP JSON endpoint
-  // apiKey is optional; it will be sent only if provided
+// All six services mounted; the fetch transport of @shopana/carrier-core is the default.
+const client = createNovaPoshtaClient({
+  // apiKey is optional; it is sent only if provided
   apiKey: process.env.NP_API_KEY,
-})
-  .use(new AddressService())
-  .use(new CounterpartyService())
-  .use(new ContactPersonService())
-  .use(new ReferenceService())
-  .use(new TrackingService())
-  .use(new WaybillService());
+});
+
+// Or mount only the services you need:
+//   createClient(createNovaPoshtaContext({ apiKey })).use(new AddressService()).use(new TrackingService());
 
 // Namespaced API
 const cities = await client.address.getCities({});
@@ -367,7 +354,7 @@ After creating the waybill, select it in the Nova Poshta mobile application to o
 
 When looking up warehouses, do not assume that `Counterparty.City` is a city reference. Search with `CityDescription` when necessary, then use the selected warehouse's `CityRef` in the waybill request.
 
-API error `20000401501` means that requests are being sent too quickly. The client retries this response with incremental delays by default. Set `rateLimitRetry: false` in `createClient()` to disable retries or provide `{ maxRetries, delayMs }` to tune them.
+API error `20000401501` means that requests are being sent too quickly. The client retries this response with incremental delays by default. Pass `retry: false` to `createNovaPoshtaClient()` to disable retries or `retry: { maxRetries, baseDelayMs }` to tune them (default: two retries, 1 s base delay, exponential backoff).
 
 `createForPostomat()` remains available as a deprecated compatibility alias for `createToPostomat()`.
 
@@ -375,48 +362,23 @@ API error `20000401501` means that requests are being sent too quickly. The clie
 
 ## 🛠️ Custom Transport
 
-Don't want to use the fetch transport? Create your own:
+The client is built on [`@shopana/carrier-core`](../carrier-core). A transport is a function `(HttpRequest) => Promise<HttpResponse>` that resolves for every HTTP status and rejects only when no response arrived. Pass your own through `transport`; retry, rate limiting, timeouts and logging are options of the same config:
 
 ```typescript
-// Minimal HTTP POST JSON transport using fetch
-export function createSimpleFetchTransport() {
-  return async ({ url, body, signal }: { url: string; body: unknown; signal?: AbortSignal }) => {
-    const res = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify(body),
-      signal,
-    });
-    return { status: res.status, data: await res.json() };
-  };
-}
+import { createNovaPoshtaClient } from '@shopana/novaposhta-api-client';
+import type { HttpTransport } from '@shopana/carrier-core';
 
-const client = createClient({
-  transport: createSimpleFetchTransport(),
-  baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-  apiKey: process.env.NOVA_POSHTA_API_KEY, // optional
-});
-```
+const transport: HttpTransport = async request => {
+  const res = await myHttpClient.post(request.url, request.body); // request.body = { kind: 'json', value }
+  return { status: res.status, headers: res.headers, data: res.data };
+};
 
-### Using Axios
-
-```typescript
-import axios from 'axios';
-
-function createAxiosTransport() {
-  return async ({ url, body, signal }) => {
-    const response = await axios.post(url, body, {
-      headers: { 'Content-Type': 'application/json' },
-      signal,
-    });
-    return { status: response.status, data: response.data };
-  };
-}
-
-const client = createClient({
-  transport: createAxiosTransport(),
-  baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
+const client = createNovaPoshtaClient({
+  transport,
   apiKey: process.env.NOVA_POSHTA_API_KEY,
+  retry: { maxRetries: 3 },
+  rateLimit: { limit: 100, intervalMs: 60_000 },
+  timeoutMs: 30_000,
 });
 ```
 
@@ -428,7 +390,7 @@ const client = createClient({
 Connect only the services you need. Each service is a separate plugin:
 
 ```typescript
-const client = createClient({ transport, baseUrl, apiKey })
+const client = createClient(createNovaPoshtaContext({ transport, apiKey }))
   .use(new AddressService())      // Only if you need address operations
   .use(new TrackingService());    // Only if you need tracking
 
@@ -464,7 +426,7 @@ const waybill = await client.waybill.create({
 ```
 
 ### Transport Agnostic
-The client doesn't make HTTP calls directly. Instead, it uses an injected transport:
+HTTP is delegated to `@shopana/carrier-core`, whose transport can be replaced:
 
 - ✅ Easy testing with mock transports
 - ✅ Use any HTTP client (fetch, axios, node-fetch, etc.)
@@ -566,27 +528,23 @@ The only requirement is the ability to make HTTP POST requests with JSON.
 ### Mocking the Transport
 
 ```typescript
-import { createClient, AddressService } from '@shopana/novaposhta-api-client';
+import { createClient, createNovaPoshtaContext, AddressService } from '@shopana/novaposhta-api-client';
 
-const mockTransport = async ({ url, body }) => {
-  // Mock implementation
-  return {
-    status: 200,
-    data: {
-      success: true,
-      data: [{ Ref: 'test-ref', Description: 'Test City' }],
-      errors: [],
-      warnings: [],
-      info: [],
-    },
-  };
-};
+const mockTransport = async () => ({
+  status: 200,
+  headers: {},
+  data: {
+    success: true,
+    data: [{ Ref: 'test-ref', Description: 'Test City' }],
+    errors: [],
+    warnings: [],
+    info: [],
+  },
+});
 
-const client = createClient({
-  transport: mockTransport,
-  baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-  apiKey: 'test-key',
-}).use(new AddressService());
+const client = createClient(createNovaPoshtaContext({ transport: mockTransport, apiKey: 'test-key' })).use(
+  new AddressService(),
+);
 
 // Now you can test without real API calls
 const result = await client.address.searchCities({ FindByString: 'Test' });
@@ -600,14 +558,9 @@ expect(result.data).toHaveLength(1);
 ### Complete E-commerce Integration
 
 ```typescript
-import { createClient, AddressService, WaybillService, CounterpartyService } from '@shopana/novaposhta-api-client';
-import { createFetchHttpTransport } from '@shopana/novaposhta-transport-fetch';
+import { createClient, createNovaPoshtaContext, AddressService, WaybillService, CounterpartyService } from '@shopana/novaposhta-api-client';
 
-const client = createClient({
-  transport: createFetchHttpTransport(),
-  baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-  apiKey: process.env.NOVA_POSHTA_API_KEY,
-})
+const client = createClient(createNovaPoshtaContext({ apiKey: process.env.NOVA_POSHTA_API_KEY }))
   .use(new AddressService())
   .use(new WaybillService())
   .use(new CounterpartyService());

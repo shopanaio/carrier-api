@@ -19,7 +19,7 @@ test('discovers the repository packages in build order', () => {
   before('@shopana/carrier-core', '@shopana/carrier-testing');
   before('@shopana/carrier-contracts', '@shopana/carrier-testing');
   before('@shopana/carrier-testing', '@shopana/demo-post-api-client');
-  // Imported but not declared (bundled by esbuild).
-  before('@shopana/novaposhta-transport-fetch', '@shopana/novaposhta-mcp-server');
+  before('@shopana/carrier-core', '@shopana/novaposhta-api-client');
+  before('@shopana/novaposhta-api-client', '@shopana/novaposhta-mcp-server');
   assert.equal(listPackages().find(p => p.name === '@shopana/demo-post-api-client').private, true);
 });

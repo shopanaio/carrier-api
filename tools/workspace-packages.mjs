@@ -27,7 +27,7 @@ export function listPackages(rootDir = root) {
         scripts: manifest.scripts ?? {},
         dependsOn: [
           ...Object.keys({ ...manifest.dependencies, ...manifest.devDependencies, ...manifest.peerDependencies }),
-          // Bundled packages (the MCP server inlines novaposhta-transport-fetch) are imported without being declared.
+          // Bundled packages (inlined by esbuild) are imported without being declared.
           ...importedScopedPackages(join(packagesDir, entry.name, 'src')),
         ],
       };

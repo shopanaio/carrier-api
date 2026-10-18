@@ -2,8 +2,8 @@
   "name": "@shopana/novaposhta-api-client",
   "version": "0.0.1",
   "description": "Fully typed Nova Poshta API client for Node.js and browsers with enterprise-grade features",
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist/**/*",
@@ -11,12 +11,10 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "npm run clean && tsc -p tsconfig.json",
+    "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
     "clean": "rm -rf dist",
-    "dev": "tsc -w -p tsconfig.json",
-    "type-check": "tsc --noEmit",
+    "type-check": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
-    "test:watch": "jest --watch",
     "test:coverage": "jest --coverage"
   },
   "keywords": [
@@ -58,26 +56,23 @@
     "url": "https://github.com/shopanaio/carrier-api/issues"
   },
   "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/novaposhta-api-client#readme",
-  "dependencies": {},
-  "devDependencies": {
-    "@types/jest": "^29.5.8",
-    "@types/node": "^20.9.0",
-    "jest": "^29.7.0",
-    "ts-jest": "^29.1.1",
-    "typescript": "^5.2.2"
+  "dependencies": {
+    "@shopana/carrier-core": "^0.0.1"
   },
-  "peerDependencies": {
-    "typescript": ">=4.9.0"
-  },
+  "devDependencies": {},
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
     },
     "./package.json": "./package.json"
   },
   "sideEffects": false,
   "publishConfig": {
     "access": "public"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }

@@ -1,4 +1,4 @@
-import { createClient } from '../../src/core/client';
+import { createClient } from '../mocks/client';
 import { WaybillService } from '../../src/services/waybillService';
 import { createMockTransport } from '../mocks/transport';
 import { PayerType, PaymentMethod, CargoType, ServiceType } from '../../src/types/enums';

@@ -39,7 +39,7 @@ export class WaybillService {
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
-    this.apiKey = ctx.apiKey;
+    this.apiKey = ctx.config.apiKey;
   }
 
   /**
