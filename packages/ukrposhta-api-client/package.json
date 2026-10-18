@@ -1,7 +1,7 @@
 {
   "name": "@shopana/ukrposhta-api-client",
   "version": "0.0.0",
-  "description": "Typed Ukrposhta API client with a carrier-contracts adapter and a contract simulator",
+  "description": "Typed Ukrposhta API client (eCom, status tracking, address classifier) with a carrier-contracts adapter",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -17,8 +17,7 @@
     "type-check": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "gen:spec": "node scripts/gen-ecom-spec.mjs",
-    "gen:spec:check": "node scripts/gen-ecom-spec.mjs --check"
+    "test:e2e": "jest --config jest.e2e.config.js --passWithNoTests"
   },
   "keywords": [
     "carrier",
@@ -43,17 +42,6 @@
     "@shopana/carrier-core": "^0.0.1",
     "@shopana/carrier-contracts": "^0.0.1"
   },
-  "peerDependencies": {
-    "@shopana/carrier-testing": ">=0.0.1 <1.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@shopana/carrier-testing": {
-      "optional": true
-    }
-  },
-  "devDependencies": {
-    "@shopana/carrier-testing": "^0.0.1"
-  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -74,11 +62,6 @@
       "types": "./dist/adapter/index.d.ts",
       "import": "./dist/adapter/index.mjs",
       "require": "./dist/adapter/index.cjs"
-    },
-    "./simulator": {
-      "types": "./dist/simulator/index.d.ts",
-      "import": "./dist/simulator/index.mjs",
-      "require": "./dist/simulator/index.cjs"
     },
     "./package.json": "./package.json"
   },

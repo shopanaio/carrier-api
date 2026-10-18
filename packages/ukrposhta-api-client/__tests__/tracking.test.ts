@@ -1,131 +1,160 @@
 import { CarrierErrorCategory, isCarrierError } from '@shopana/carrier-core';
-import { SimClock } from '@shopana/carrier-testing';
 import { createUkrposhtaTrackingClient, effectiveEventCode, lifecycleStatusOf } from '../src';
-import { createUkrposhtaTrackingSimulator } from '../src/simulator';
+import { statusEvent } from './helpers/fixtures';
+import { createMockTransport, fail, ok } from './helpers/mock';
+
+const BASE = '/status-tracking/0.0.1';
 
 function setup() {
-  const clock = new SimClock();
-  const sim = createUkrposhtaTrackingSimulator({ clock });
+  const mock = createMockTransport();
   const client = createUkrposhtaTrackingClient({
-    transport: sim.transport,
+    transport: mock.transport,
     bearer: 'tracking-bearer',
-    retry: { sleep: clock.sleep, clock },
+    retry: { sleep: async () => undefined },
   });
-  return { sim, client, clock };
+  return { mock, client };
 }
 
 describe('TrackingService', () => {
   it('sends the tracking bearer, not a counterparty token', async () => {
-    const { sim, client } = setup();
-    sim.seed('0500100031143', [10100, 20700, 41000]);
-    const events = await client.tracking.getStatuses('0500100031143');
-    expect(events.map(e => e.event)).toEqual([10100, 20700, 41000]);
-    const call = sim.calls[0]!;
-    expect(call.headers.authorization).toBe('Bearer tracking-bearer');
-    expect(call.query).toEqual({ barcode: '0500100031143' });
+    const { mock, client } = setup();
+    mock.on({
+      method: 'GET',
+      path: `${BASE}/statuses`,
+      respond: ok([statusEvent('B1', 10100), statusEvent('B1', 41000)]),
+    });
+    const events = await client.tracking.getStatuses('B1');
+    expect(events.map(e => e.event)).toEqual([10100, 41000]);
+    expect(mock.last()).toMatchObject({
+      method: 'GET',
+      query: { barcode: 'B1' },
+      headers: { authorization: 'Bearer tracking-bearer' },
+    });
+    expect(mock.last().query).not.toHaveProperty('token');
+  });
+
+  it('uses the production host by default and the sandbox host on request', async () => {
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/statuses/last`, respond: ok(statusEvent('B1', 10100)) });
+    await client.tracking.getLastStatus('B1');
+    expect(new URL(mock.last().request.url).origin).toBe('https://www.ukrposhta.ua');
+    const sandbox = createUkrposhtaTrackingClient({ transport: mock.transport, bearer: 'b', environment: 'sandbox' });
+    await sandbox.tracking.getLastStatus('B1');
+    expect(new URL(mock.last().request.url).origin).toBe('https://dev.ukrposhta.ua');
   });
 
   it('passes the language', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100]);
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/statuses`, respond: ok([]) });
     await client.tracking.getStatuses('B1', { lang: 'en' });
-    expect(sim.calls[0]!.query).toEqual({ barcode: 'B1', lang: 'en' });
+    expect(mock.last().query).toEqual({ barcode: 'B1', lang: 'en' });
   });
 
   it('reads the last status', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100, 21700]);
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/statuses/last`, respond: ok(statusEvent('B1', 21700)) });
     await expect(client.tracking.getLastStatus('B1')).resolves.toMatchObject({ event: 21700 });
   });
 
-  it('batches statuses and last statuses', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100, 41000]);
-    sim.seed('B2', [10100]);
-    const all = await client.tracking.getStatusesBatch(['B1', 'B2', 'GONE']);
-    expect(all.map(e => e.barcode)).toEqual(['B1', 'B1', 'B2']);
-    const lastOnly = await client.tracking.getLastStatusesBatch(['B1', 'B2']);
-    expect(lastOnly.map(e => e.event)).toEqual([41000, 10100]);
+  it('posts barcode lists for statuses and last statuses', async () => {
+    const { mock, client } = setup();
+    mock.on({ method: 'POST', path: `${BASE}/statuses`, respond: ok([statusEvent('B1', 10100)]) });
+    mock.on({ method: 'POST', path: `${BASE}/statuses/last`, respond: ok([statusEvent('B1', 41000)]) });
+    await client.tracking.getStatusesBatch(['B1', 'B2'], { lang: 'en' });
+    expect(mock.last()).toMatchObject({
+      method: 'POST',
+      path: `${BASE}/statuses`,
+      body: ['B1', 'B2'],
+      query: { lang: 'en' },
+    });
+    await client.tracking.getLastStatusesBatch(['B1']);
+    expect(mock.last()).toMatchObject({ path: `${BASE}/statuses/last`, body: ['B1'] });
   });
 
   it('splits found and not found barcodes', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100, 41000]);
-    const all = await client.tracking.getStatusesBatchWithNotFound(['B1', 'GONE']);
-    expect(Object.keys(all.found)).toEqual(['B1']);
-    expect(all.notFound).toEqual(['GONE']);
-    const last = await client.tracking.getLastStatusesBatchWithNotFound(['B1', 'GONE']);
-    expect(last.found.B1).toHaveLength(1);
-    expect(last.notFound).toEqual(['GONE']);
+    const { mock, client } = setup();
+    const answer = { found: { B1: [statusEvent('B1', '41000')] }, notFound: ['GONE'] };
+    mock.on({ method: 'POST', path: `${BASE}/statuses/with-not-found`, respond: ok(answer) });
+    mock.on({ method: 'POST', path: `${BASE}/statuses/last/with-not-found`, respond: ok(answer) });
+    expect(await client.tracking.getStatusesBatchWithNotFound(['B1', 'GONE'])).toEqual(answer);
+    expect(await client.tracking.getLastStatusesBatchWithNotFound(['B1', 'GONE'])).toEqual(answer);
+    expect(mock.last().path).toBe(`${BASE}/statuses/last/with-not-found`);
   });
 
   it('reads by recipient phone', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100, 21700]);
-    await expect(
-      client.tracking.getLastStatusByPhone({ barcode: 'B1', recipientPhoneNumber: '380634440999' }),
-    ).resolves.toMatchObject({ event: 21700 });
-    const many = await client.tracking.getStatusesByPhoneBatch([
-      { barcode: 'B1', recipientPhoneNumber: '380634440999' },
-    ]);
-    expect(many).toHaveLength(1);
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/extra-statuses/last`, respond: ok(statusEvent('B1', 21700)) });
+    mock.on({ method: 'POST', path: `${BASE}/extra-statuses/last`, respond: ok([statusEvent('B1', 21700)]) });
+    await client.tracking.getLastStatusByPhone({ barcode: 'B1', recipientPhoneNumber: '380634440999' });
+    expect(mock.last().query).toEqual({ barcode: 'B1', recipientPhoneNumber: '380634440999' });
+    await client.tracking.getStatusesByPhoneBatch([{ barcode: 'B1', recipientPhoneNumber: '380634440999' }]);
+    expect(mock.last().body).toEqual([{ barcode: 'B1', recipientPhoneNumber: '380634440999' }]);
   });
 
   it('reads the route in both languages', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100]);
-    await expect(client.tracking.getRoute('B1')).resolves.toEqual({ from: 'УКРАЇНА м.Київ', to: 'УКРАЇНА м.Львів' });
-    await expect(client.tracking.getRoute('B1', { lang: 'en' })).resolves.toEqual({
-      from: 'UKRAINE Kyiv',
-      to: 'UKRAINE Lviv',
+    const { mock, client } = setup();
+    mock.on({
+      method: 'GET',
+      path: `${BASE}/barcodes/{barcode}/route`,
+      respond: ok({ from: 'УКРАЇНА м.Київ', to: 'УКРАЇНА с.Біляни' }),
     });
-    expect(sim.calls[1]!.path).toBe('/barcodes/B1/route/in-lang/EN');
+    mock.on({
+      method: 'GET',
+      path: `${BASE}/barcodes/{barcode}/route/in-lang/{lang}`,
+      respond: ok({ from: 'UKRAINE Kyiv', to: 'UKRAINE Biliany' }),
+    });
+    await expect(client.tracking.getRoute('B1')).resolves.toEqual({ from: 'УКРАЇНА м.Київ', to: 'УКРАЇНА с.Біляни' });
+    await expect(client.tracking.getRoute('B1', { lang: 'en' })).resolves.toMatchObject({ from: 'UKRAINE Kyiv' });
+    expect(mock.last().path).toBe(`${BASE}/barcodes/B1/route/in-lang/EN`);
+    await client.tracking.getRoute('B1', { lang: 'ua' });
+    expect(mock.last().path).toBe(`${BASE}/barcodes/B1/route/in-lang/UA`);
   });
 
   it('maps an unknown barcode to a not_found CarrierError', async () => {
-    const { client } = setup();
-    const error = await client.tracking.getStatuses('NOPE').catch(e => e);
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/statuses`, respond: fail(404, 'UPE02002', 'Shipment not found') });
+    const error = await client.tracking.getStatuses('NOPE').catch((e: unknown) => e);
     expect(isCarrierError(error)).toBe(true);
     expect(error).toMatchObject({ code: 'UPE02002', category: CarrierErrorCategory.NotFound, httpStatus: 404 });
   });
 
   it('maps a rejected bearer', async () => {
-    const { sim } = setup();
-    const noAuthClient = createUkrposhtaTrackingClient({ transport: sim.transport, bearer: '' });
-    sim.seed('B1', [10100]);
-    // An empty bearer still sends the "Bearer " prefix; a missing header is simulated through a direct call.
-    const response = await sim.transport({
-      method: 'GET',
-      url: 'https://www.ukrposhta.ua/status-tracking/0.0.1/statuses?barcode=B1',
+    const { mock, client } = setup();
+    mock.on({ method: 'GET', path: `${BASE}/statuses`, respond: fail(401, 'UPE05001', 'Wrong token') });
+    await expect(client.tracking.getStatuses('B1')).rejects.toMatchObject({
+      category: CarrierErrorCategory.Authentication,
     });
-    expect(response.status).toBe(401);
-    expect(noAuthClient.tracking).toBeDefined();
   });
 
-  it('retries a 503', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100]);
-    sim.fail({ operation: 'getStatuses', status: 503, body: { message: 'down' } });
+  it('retries a 503 on GET and on the read-only batch POSTs', async () => {
+    const { mock, client } = setup();
+    let attempts = 0;
+    mock.on({
+      method: 'GET',
+      path: `${BASE}/statuses`,
+      respond: () => (attempts++ === 0 ? fail(503, 'UPE08000', 'down') : ok([statusEvent('B1', 10100)])),
+    });
     await expect(client.tracking.getStatuses('B1')).resolves.toHaveLength(1);
-    expect(sim.callsTo('getStatuses')).toHaveLength(2);
-  });
-
-  it('repeats a batch POST after a 503 (reads are idempotent)', async () => {
-    const { sim, client } = setup();
-    sim.seed('B1', [10100]);
-    sim.fail({ operation: 'getLastStatusesBatch', status: 503, body: { message: 'down' } });
+    expect(attempts).toBe(2);
+    let batchAttempts = 0;
+    mock.on({
+      method: 'POST',
+      path: `${BASE}/statuses/last`,
+      respond: () => (batchAttempts++ === 0 ? fail(503, 'UPE08000', 'down') : ok([statusEvent('B1', 10100)])),
+    });
     await expect(client.tracking.getLastStatusesBatch(['B1'])).resolves.toHaveLength(1);
+    expect(batchAttempts).toBe(2);
   });
 
   it('rejects empty and oversized batches before sending', () => {
-    const { sim, client } = setup();
+    const { mock, client } = setup();
     expect(() => client.tracking.getStatusesBatch([])).toThrow(/At least one barcode/);
     expect(() => client.tracking.getStatusesBatch(Array.from({ length: 51 }, (_, i) => `B${i}`))).toThrow(/At most 50/);
     expect(() => client.tracking.getLastStatusesBatch(Array.from({ length: 101 }, (_, i) => `B${i}`))).toThrow(
       /At most 100/,
     );
     expect(() => client.tracking.getStatusesByPhoneBatch([])).toThrow(/At least one/);
-    expect(sim.calls).toHaveLength(0);
+    expect(mock.calls).toHaveLength(0);
   });
 });
 

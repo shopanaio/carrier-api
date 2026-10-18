@@ -1,10 +1,8 @@
 import { money } from '@shopana/carrier-contracts';
 import type { Address, CreateShipmentInput, Party } from '@shopana/carrier-contracts';
 import { CarrierErrorCategory } from '@shopana/carrier-core';
-import { isPdf, runAdapterConformance } from '@shopana/carrier-testing';
 import {
   AddressesService,
-  ClassifierService,
   ClientsService,
   LabelsService,
   PricingService,
@@ -14,29 +12,17 @@ import {
   createUkrposhtaContractClient,
   createUkrposhtaTrackingClient,
 } from '../src';
+import type { ClientInput } from '../src';
 import { createUkrposhtaAdapter, kyivLocalToIso, ukrposhtaStatusMap } from '../src/adapter';
-import { createUkrposhtaSimulator } from '../src/simulator';
+import { addressFrom, clientFrom, shipmentFrom, statusEvent } from './helpers/fixtures';
+import { createMockTransport, fail, ok } from './helpers/mock';
+import type { MockCall } from './helpers/mock';
 
-function setup(only: Array<'ecom' | 'tracking' | 'classifier'> = ['ecom', 'tracking', 'classifier']) {
-  const world = createUkrposhtaSimulator();
-  const retry = { sleep: world.clock.sleep, clock: world.clock };
-  const base = { transport: world.transport, retry };
-  const ecom = createUkrposhtaContractClient({ ...base, bearer: 'ecom', counterpartyToken: 'cp' })
-    .use(new AddressesService())
-    .use(new ClientsService())
-    .use(new ShipmentsService())
-    .use(new PricingService())
-    .use(new ShipmentGroupsService())
-    .use(new LabelsService());
-  const tracking = createUkrposhtaTrackingClient({ ...base, bearer: 'tracking' });
-  const classifier = createUkrposhtaClassifierClient({ ...base, bearer: 'ecom' });
-  const adapter = createUkrposhtaAdapter({
-    ...(only.includes('ecom') ? { ecom } : {}),
-    ...(only.includes('tracking') ? { tracking } : {}),
-    ...(only.includes('classifier') ? { classifier } : {}),
-  });
-  return { world, adapter, ecom };
-}
+const ECOM = '/ecom/0.0.1';
+const FORMS = '/forms/ecom/0.0.1';
+const TRACKING = '/status-tracking/0.0.1';
+const CLASSIFIER = '/address-classifier-ws';
+const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]);
 
 const senderAddress: Address = { country: 'UA', postalCode: '04071', city: 'Київ', street: 'Хорива', building: '40' };
 const recipientAddress: Address = {
@@ -46,7 +32,6 @@ const recipientAddress: Address = {
   street: 'Городоцька',
   building: '1',
 };
-
 const sender: Party = {
   contact: { firstName: 'Петро', lastName: 'Петренко', phone: '+380672802273' },
   point: { type: 'door', address: senderAddress },
@@ -70,21 +55,92 @@ const shipmentInput: CreateShipmentInput = {
   reference: 'order-1',
 };
 
+const bodyOf = <T>(call: MockCall) => call.body as T;
+
+/** A mock of the eCom host: every create echoes the request, lookups by external id answer 404. */
+function ecomMock() {
+  const mock = createMockTransport();
+  mock.on({
+    method: 'GET',
+    path: `${ECOM}/clients/external-id/{id}`,
+    respond: fail(404, 'UPE02001', 'Client not found'),
+  });
+  mock.on({ method: 'POST', path: `${ECOM}/addresses`, respond: call => ok(addressFrom(bodyOf(call))) });
+  mock.on({ method: 'POST', path: `${ECOM}/clients`, respond: call => ok(clientFrom(bodyOf<ClientInput>(call))) });
+  mock.on({
+    method: 'POST',
+    path: `${ECOM}/shipments`,
+    respond: call => {
+      const body = bodyOf<Parameters<typeof shipmentFrom>[0]>(call);
+      return ok(
+        shipmentFrom(
+          body,
+          clientFrom({ addressId: 1, phoneNumber: '0' }),
+          clientFrom({ addressId: 2, phoneNumber: '0' }),
+        ),
+      );
+    },
+  });
+  return mock;
+}
+
+function build(mock: ReturnType<typeof createMockTransport>) {
+  const retry = { sleep: async () => undefined };
+  const base = { transport: mock.transport, retry };
+  const ecom = createUkrposhtaContractClient({ ...base, bearer: 'ecom', counterpartyToken: 'cp' })
+    .use(new AddressesService())
+    .use(new ClientsService())
+    .use(new ShipmentsService())
+    .use(new PricingService())
+    .use(new ShipmentGroupsService())
+    .use(new LabelsService());
+  const tracking = createUkrposhtaTrackingClient({ ...base, bearer: 'tracking' });
+  const classifier = createUkrposhtaClassifierClient({ ...base, bearer: 'ecom' });
+  return { ecom, tracking, classifier, adapter: createUkrposhtaAdapter({ ecom, tracking, classifier }) };
+}
+
 describe('capabilities follow the clients that are given', () => {
   it('declares only what it can serve', () => {
-    expect([...setup(['tracking']).adapter.capabilities]).toEqual(['tracking']);
-    expect([...setup(['classifier']).adapter.capabilities]).toEqual(['locations', 'addressValidation']);
-    expect([...setup(['ecom']).adapter.capabilities].sort()).toEqual(
-      ['cancel', 'labels', 'manifest', 'rates', 'shipments'].sort(),
-    );
-    expect(setup().adapter.capabilities.size).toBe(8);
+    const mock = createMockTransport();
+    const { ecom, tracking, classifier } = build(mock);
+    expect([...createUkrposhtaAdapter({ tracking }).capabilities]).toEqual(['tracking']);
+    expect([...createUkrposhtaAdapter({ classifier }).capabilities]).toEqual(['locations', 'addressValidation']);
+    expect([...createUkrposhtaAdapter({ ecom }).capabilities].sort()).toEqual([
+      'cancel',
+      'labels',
+      'manifest',
+      'rates',
+      'shipments',
+    ]);
+    expect(createUkrposhtaAdapter({ ecom, tracking, classifier }).capabilities.size).toBe(8);
   });
 });
 
 describe('tracking', () => {
+  function trackingMock(found: Record<string, ReturnType<typeof statusEvent>[]>) {
+    const mock = createMockTransport();
+    mock.on({
+      method: 'POST',
+      path: `${TRACKING}/statuses/with-not-found`,
+      respond: call => {
+        const barcodes = bodyOf<string[]>(call);
+        return ok({
+          found: Object.fromEntries(barcodes.filter(b => found[b]).map(b => [b, found[b]])),
+          notFound: barcodes.filter(b => !found[b]),
+        });
+      },
+    });
+    return { mock, ...build(mock) };
+  }
+
   it('normalizes statuses and keeps raw codes, oldest first', async () => {
-    const { world, adapter } = setup();
-    world.tracking.seed('B1', [10100, 21700, { event: 41000, eventReason_id: 2 }]);
+    const { adapter } = trackingMock({
+      B1: [
+        statusEvent('B1', 41000, { date: '2026-01-12T10:00:00', eventReason_id: 2 }),
+        statusEvent('B1', 10100, { date: '2026-01-10T10:00:00' }),
+        statusEvent('B1', 21700, { date: '2026-01-11T10:00:00' }),
+      ],
+    });
     const [result] = await adapter.track(['B1']);
     expect(result).toMatchObject({ trackingNumber: 'B1', carrier: 'ukrposhta', status: 'delivered', found: true });
     expect(result!.events.map(e => [e.rawCode, e.status])).toEqual([
@@ -95,16 +151,16 @@ describe('tracking', () => {
   });
 
   it('recognises a return to the sender (41000 + reason 10)', async () => {
-    const { world, adapter } = setup();
-    world.tracking.seed('B1', [10100, { event: '41000', eventReason_id: 10 }]);
+    const { adapter } = trackingMock({
+      B1: [statusEvent('B1', 10100), statusEvent('B1', '41000', { date: '2026-01-12T10:00:00', eventReason_id: 10 })],
+    });
     const [result] = await adapter.track(['B1']);
     expect(result!.status).toBe('returned');
     expect(result!.events.at(-1)!.rawCode).toBe('41010');
   });
 
   it('reports unknown numbers as not found without failing the rest', async () => {
-    const { world, adapter } = setup();
-    world.tracking.seed('B1', [10100]);
+    const { adapter } = trackingMock({ B1: [statusEvent('B1', 10100)] });
     const results = await adapter.track(['B1', 'GONE', 'B1']);
     expect(results.map(r => [r.trackingNumber, r.found])).toEqual([
       ['B1', true],
@@ -113,20 +169,22 @@ describe('tracking', () => {
     ]);
   });
 
-  it('chunks more than 50 numbers', async () => {
-    const { world, adapter } = setup();
+  it('chunks more than 50 numbers and asks once per number', async () => {
     const numbers = Array.from({ length: 120 }, (_, i) => `B${i}`);
-    numbers.forEach(n => world.tracking.seed(n, [10100]));
+    const { mock, adapter } = trackingMock(Object.fromEntries(numbers.map(n => [n, [statusEvent(n, 10100)]])));
     expect(await adapter.track(numbers)).toHaveLength(120);
-    expect(world.tracking.callsTo('getStatusesBatchWithNotFound')).toHaveLength(3);
+    expect(mock.callsTo('POST', `${TRACKING}/statuses/with-not-found`).map(c => (c.body as string[]).length)).toEqual([
+      50, 50, 20,
+    ]);
   });
 
   it('puts event times on the Kyiv offset', async () => {
-    const { world, adapter } = setup();
-    world.tracking.seed('B1', [
-      { event: 10100, date: '2026-07-27T16:33:00' },
-      { event: 41000, date: '2026-01-15T10:00:00' },
-    ]);
+    const { adapter } = trackingMock({
+      B1: [
+        statusEvent('B1', 10100, { date: '2026-07-27T16:33:00' }),
+        statusEvent('B1', 41000, { date: '2026-01-15T10:00:00' }),
+      ],
+    });
     const [result] = await adapter.track(['B1']);
     expect(result!.events.map(e => e.occurredAt)).toEqual(['2026-01-15T10:00:00+02:00', '2026-07-27T16:33:00+03:00']);
   });
@@ -155,96 +213,151 @@ describe('kyivLocalToIso', () => {
 
 describe('createShipment', () => {
   it('creates the addresses, clients and shipment, and maps the answer', async () => {
-    const { world, adapter } = setup();
+    const mock = ecomMock();
+    const { adapter } = build(mock);
     const shipment = await adapter.createShipment(shipmentInput);
-    expect(shipment).toMatchObject({ carrier: 'ukrposhta', status: 'pre_transit' });
+    expect(shipment).toMatchObject({
+      carrier: 'ukrposhta',
+      status: 'pre_transit',
+      price: { amount: '42', currency: 'UAH' },
+    });
     expect(shipment.trackingNumber).toMatch(/^05\d{11}$/);
-    expect(shipment.price).toMatchObject({ currency: 'UAH' });
-    const wire = world.state
-      .collection<{
-        uuid: string;
-        deliveryType: string;
-        type: string;
-        externalId: string;
-        paidByRecipient: boolean;
-        length: number;
-        width: number;
-        height: number;
-        sender: { type: string; tin: string; externalId: string };
-        recipient: { firstName: string; lastName: string; middleName: string; phoneNumber: string };
-      }>('ecom-shipments')
-      .require(shipment.id);
-    expect(wire).toMatchObject({
+
+    expect(mock.callsTo('POST', `${ECOM}/addresses`).map(c => c.body)).toEqual([
+      { postcode: '04071', city: 'Київ', street: 'Хорива', houseNumber: '40' },
+      { postcode: '79000', city: 'Львів', street: 'Городоцька', houseNumber: '1' },
+    ]);
+    const [senderBody, recipientBody] = mock.callsTo('POST', `${ECOM}/clients`).map(c => c.body);
+    expect(senderBody).toMatchObject({
+      type: 'PRIVATE_ENTREPRENEUR',
+      firstName: 'Петро',
+      lastName: 'Петренко',
+      tin: '4201030327',
+      externalId: 'shop-1',
+      phoneNumber: '+380672802273',
+    });
+    expect(recipientBody).toMatchObject({
+      type: 'INDIVIDUAL',
+      lastName: 'Іванов',
+      firstName: 'Іван',
+      middleName: 'Іванович',
+      email: 'ivan@example.com',
+    });
+    expect(bodyOf(mock.last())).toMatchObject({
       deliveryType: 'D2D',
       type: 'EXPRESS',
       externalId: 'order-1',
       paidByRecipient: false,
       // The longest side goes to `length`.
-      length: 30,
-      width: 20,
-      height: 10,
-      sender: { type: 'PRIVATE_ENTREPRENEUR', tin: '4201030327', externalId: 'shop-1' },
-      recipient: { lastName: 'Іванов', firstName: 'Іван', middleName: 'Іванович', phoneNumber: '+380982004113' },
+      parcels: [{ weight: 1200, length: 30, width: 20, height: 10, declaredPrice: 500 }],
     });
   });
 
-  it('reuses a client by external id and an address already on the client', async () => {
-    const { world, adapter } = setup();
+  it('reuses a client found by external id and the address already on it', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Хорива', houseNumber: '40' });
+    const existing = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0672802273',
+        externalId: 'shop-1',
+        type: 'PRIVATE_ENTREPRENEUR',
+        firstName: 'Петро',
+        lastName: 'Петренко',
+        tin: '4201030327',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
+    const { adapter } = build(mock);
     await adapter.createShipment(shipmentInput);
-    await adapter.createShipment(shipmentInput);
-    // The sender has an external id and is reused; the recipient has none and is created each time.
-    expect(world.ecom.callsTo('CreateClientsUsingPOST')).toHaveLength(3);
-    expect(world.ecom.callsTo('GetClientByExternalIdUsingGET')).toHaveLength(2);
-    expect(world.ecom.callsTo('CreateAddressUsingPOST')).toHaveLength(3);
+    // Only the recipient is created: no client POST for the sender, no address POST for the known address.
+    expect(mock.callsTo('POST', `${ECOM}/clients`)).toHaveLength(1);
+    expect(mock.callsTo('POST', `${ECOM}/addresses`)).toHaveLength(1);
+    expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)).toHaveLength(0);
+    expect(bodyOf(mock.last())).toMatchObject({ sender: { uuid: existing.uuid }, senderAddressId: address.id });
   });
 
   it('attaches a new address to a reused client', async () => {
-    const { adapter } = setup();
+    const mock = ecomMock();
+    const old = addressFrom({ postcode: '04071', street: 'Хорива', houseNumber: '39' });
+    const existing = clientFrom(
+      {
+        addressId: old.id,
+        phoneNumber: '0672802273',
+        externalId: 'shop-1',
+        type: 'PRIVATE_ENTREPRENEUR',
+        firstName: 'Петро',
+        lastName: 'Петренко',
+        tin: '4201030327',
+      },
+      old,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
+    mock.on({
+      method: 'PUT',
+      path: `${ECOM}/clients/{uuid}`,
+      respond: call => {
+        const added = bodyOf<{ addresses: Array<{ addressId: number }> }>(call).addresses[0]!.addressId;
+        const created = mock.callsTo('POST', `${ECOM}/addresses`).length;
+        expect(created).toBeGreaterThan(0);
+        return ok({
+          ...existing,
+          addresses: [
+            ...existing.addresses,
+            { uuid: 'a2', addressId: added, address: old, type: 'PHYSICAL', main: false },
+          ],
+        });
+      },
+    });
+    const { adapter } = build(mock);
     await adapter.createShipment(shipmentInput);
-    const moved: CreateShipmentInput = {
-      ...shipmentInput,
-      sender: { ...sender, point: { type: 'door', address: { ...senderAddress, building: '41' } } },
-    };
-    const shipment = await adapter.createShipment(moved);
-    expect(shipment.id).toBeDefined();
+    const [put] = mock.callsTo('PUT', `${ECOM}/clients/{uuid}`);
+    expect(put!.path).toBe(`${ECOM}/clients/${existing.uuid}`);
+    expect(put!.body).toMatchObject({ addresses: [{ addressId: expect.any(Number) }] });
   });
 
-  it('uses carrierRefs of a known client and address', async () => {
-    const { world, adapter } = setup();
-    const first = await adapter.createShipment(shipmentInput);
-    const raw = first.raw as { sender: { uuid: string; addressId: number } };
-    const known: Party = {
+  it('uses carrierRefs of a known client and address without any lookup', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071' });
+    const known = clientFrom({ addressId: address.id, phoneNumber: '0672802273' }, address);
+    mock.on({ method: 'GET', path: `${ECOM}/clients/{uuid}`, respond: ok(known) });
+    const { adapter } = build(mock);
+    const party: Party = {
       ...sender,
       point: {
         type: 'door',
         address: {
           ...senderAddress,
-          carrierRefs: { ukrposhta: { clientUuid: raw.sender.uuid, addressId: String(raw.sender.addressId) } },
+          carrierRefs: { ukrposhta: { clientUuid: known.uuid, addressId: String(address.id) } },
         },
       },
     };
-    const lookups = world.ecom.callsTo('GetClientByExternalIdUsingGET').length;
-    await adapter.createShipment({ ...shipmentInput, sender: known });
-    expect(world.ecom.callsTo('GetClientByExternalIdUsingGET')).toHaveLength(lookups);
-    expect(world.ecom.callsTo('GetClientUsingGET')).toHaveLength(1);
+    await adapter.createShipment({ ...shipmentInput, sender: party });
+    expect(mock.callsTo('GET', `${ECOM}/clients/external-id/{id}`)).toHaveLength(0);
+    expect(mock.callsTo('GET', `${ECOM}/clients/{uuid}`)).toHaveLength(1);
+    expect(bodyOf(mock.last())).toMatchObject({ sender: { uuid: known.uuid }, senderAddressId: address.id });
   });
 
   it('delivers to a post office with W2W', async () => {
-    const { world, adapter } = setup();
-    const toOffice: CreateShipmentInput = {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await adapter.createShipment({
       ...shipmentInput,
       sender: { ...sender, point: { type: 'location', locationId: '04071' } },
       recipient: { ...recipient, point: { type: 'location', locationId: '79000' } },
-    };
-    const shipment = await adapter.createShipment(toOffice);
-    expect(world.state.collection<{ deliveryType: string }>('ecom-shipments').require(shipment.id).deliveryType).toBe(
-      'W2W',
-    );
+    });
+    expect(bodyOf(mock.last())).toMatchObject({ deliveryType: 'W2W' });
+    expect(mock.callsTo('POST', `${ECOM}/addresses`).map(c => c.body)).toEqual([
+      { postcode: '04071' },
+      { postcode: '79000' },
+    ]);
   });
 
   it('maps cash on delivery, payer and service', async () => {
-    const { world, adapter } = setup();
-    const shipment = await adapter.createShipment({
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await adapter.createShipment({
       ...shipmentInput,
       parcels: [{ weight: { value: 800, unit: 'g' } }],
       options: {
@@ -254,29 +367,37 @@ describe('createShipment', () => {
       },
       sender: { ...sender, contact: { company: 'ТОВ Лімон', phone: '0671231234' }, taxId: '40145721' },
     });
-    const wire = world.state
-      .collection<{
-        type: string;
-        paidByRecipient: boolean;
-        postPay: number;
-        postPayPaidByRecipient: boolean;
-        declaredPrice: number;
-        transferPostPayToBankAccount: boolean;
-      }>('ecom-shipments')
-      .require(shipment.id);
-    expect(wire).toMatchObject({
+    expect(bodyOf(mock.last())).toMatchObject({
       type: 'STANDARD',
       paidByRecipient: true,
       postPay: 300,
       postPayPaidByRecipient: false,
       // No declared value was given, so the COD amount is declared.
-      declaredPrice: 300,
+      parcels: [{ weight: 800, length: 1, declaredPrice: 300 }],
+      // A company receives cash on delivery on its bank account.
       transferPostPayToBankAccount: true,
+    });
+    expect(mock.callsTo('POST', `${ECOM}/clients`)[0]!.body).toMatchObject({
+      type: 'COMPANY',
+      name: 'ТОВ Лімон',
+      edrpou: '40145721',
     });
   });
 
-  it('creates several parcels', async () => {
-    const { adapter } = setup();
+  it('raises the declared price only as far as the cash on delivery needs', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await adapter.createShipment({
+      ...shipmentInput,
+      parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(100, 'UAH') }],
+      options: { cashOnDelivery: { amount: money(300, 'UAH') } },
+    });
+    expect(bodyOf<{ parcels: Array<{ declaredPrice: number }> }>(mock.last()).parcels[0]!.declaredPrice).toBe(300);
+  });
+
+  it('sends several parcels and returns their numbers', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
     const shipment = await adapter.createShipment({
       ...shipmentInput,
       parcels: [
@@ -321,194 +442,355 @@ describe('createShipment', () => {
       },
       'recipient.point',
     ],
-  ])('rejects %s before sending anything', async (_name, input, field) => {
-    const { world, adapter } = setup();
+  ])('rejects %s before creating the shipment', async (_name, input, field) => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
     await expect(adapter.createShipment(input as CreateShipmentInput)).rejects.toMatchObject({
       carrier: 'ukrposhta',
       category: CarrierErrorCategory.Validation,
       field,
     });
-    expect(world.ecom.callsTo('CreateShipmentsUsingPOST')).toHaveLength(0);
+    expect(mock.callsTo('POST', `${ECOM}/shipments`)).toHaveLength(0);
   });
 
   it('turns a carrier rejection into a CarrierError', async () => {
-    const { adapter } = setup();
-    await expect(
-      adapter.createShipment({ ...shipmentInput, parcels: [{ weight: { value: 31, unit: 'kg' } }] }),
-    ).rejects.toMatchObject({ code: 'UPE01002', category: CarrierErrorCategory.Validation });
+    const mock = ecomMock();
+    mock.on({
+      method: 'POST',
+      path: `${ECOM}/shipments`,
+      respond: { status: 400, data: { code: 'UPE01002', message: 'A parcel weighs at most 30 kg', field: 'weight' } },
+    });
+    const { adapter } = build(mock);
+    await expect(adapter.createShipment(shipmentInput)).rejects.toMatchObject({
+      code: 'UPE01002',
+      category: CarrierErrorCategory.Validation,
+      field: 'weight',
+    });
   });
 });
 
 describe('getShipment', () => {
   it('reads a shipment back with its status', async () => {
-    const { world, adapter } = setup();
-    const created = await adapter.createShipment(shipmentInput);
-    world.advance(created.id, 'DELIVERED');
-    expect(await adapter.getShipment(created.id)).toMatchObject({ id: created.id, status: 'delivered' });
+    const mock = ecomMock();
+    const raw = shipmentFrom({
+      ...({} as never),
+      deliveryType: 'W2W',
+      parcels: [{ weight: 1000, length: 10 }],
+      sender: { uuid: 's' },
+      recipient: { uuid: 'r' },
+    });
+    mock.on({
+      method: 'GET',
+      path: `${ECOM}/shipments/{uuid}`,
+      respond: ok({ ...raw, lifecycle: { status: 'DELIVERED', statusDate: '2026-01-02T10:00:00' } }),
+    });
+    const { adapter } = build(mock);
+    expect(await adapter.getShipment(raw.uuid)).toMatchObject({ id: raw.uuid, status: 'delivered' });
   });
 });
 
 describe('getRates', () => {
   const request = { sender, recipient, parcels: shipmentInput.parcels };
 
+  function pricingMock() {
+    const mock = ecomMock();
+    mock.on({
+      method: 'POST',
+      path: `${ECOM}/domestic/delivery-price`,
+      respond: call => {
+        const type = bodyOf<{ type: string }>(call).type;
+        return ok(
+          type === 'EXPRESS'
+            ? { deliveryPrice: 90, rawDeliveryPrice: 100, calculationDescription: 'x' }
+            : { deliveryPrice: 60, rawDeliveryPrice: 60, calculationDescription: 'y' },
+        );
+      },
+    });
+    return mock;
+  }
+
   it('prices Express and Standard', async () => {
-    const { adapter } = setup();
+    const mock = pricingMock();
+    const { adapter } = build(mock);
     const rates = await adapter.getRates(request);
-    expect(rates.map(r => r.service)).toEqual(['EXPRESS', 'STANDARD']);
-    expect(rates[0]).toMatchObject({ carrier: 'ukrposhta', serviceName: 'Ukrposhta Express' });
-    expect(rates[0]!.total.currency).toBe('UAH');
-    expect(Number(rates[1]!.total.amount)).toBeLessThan(Number(rates[0]!.total.amount));
+    expect(rates.map(r => [r.service, r.serviceName, r.total])).toEqual([
+      ['EXPRESS', 'Ukrposhta Express', { amount: '90', currency: 'UAH' }],
+      ['STANDARD', 'Ukrposhta Standard', { amount: '60', currency: 'UAH' }],
+    ]);
+    expect(bodyOf(mock.callsTo('POST', `${ECOM}/domestic/delivery-price`)[0]!)).toMatchObject({
+      addressFrom: { postcode: '04071' },
+      addressTo: { postcode: '79000' },
+      deliveryType: 'D2D',
+      parcels: [{ weight: 1200, length: 30, width: 20, height: 10, declaredPrice: 500 }],
+    });
+  });
+
+  it('shows the discount as a negative charge', async () => {
+    const { adapter } = build(pricingMock());
+    const [express, standard] = await adapter.getRates(request);
+    expect(express!.charges).toEqual([
+      { type: 'delivery', amount: { amount: '100', currency: 'UAH' } },
+      { type: 'discount', amount: { amount: '-10', currency: 'UAH' } },
+    ]);
+    expect(standard!.charges).toHaveLength(1);
   });
 
   it('prices one requested service', async () => {
-    const { adapter } = setup();
-    const rates = await adapter.getRates({ ...request, options: { service: 'EXPRESS' } });
-    expect(rates).toHaveLength(1);
+    const mock = pricingMock();
+    const { adapter } = build(mock);
+    expect(await adapter.getRates({ ...request, options: { service: 'EXPRESS' } })).toHaveLength(1);
+    expect(mock.callsTo('POST', `${ECOM}/domestic/delivery-price`)).toHaveLength(1);
   });
 
   it('works from postcodes alone, without contacts or a phone', async () => {
-    const { adapter } = setup();
+    const mock = pricingMock();
+    const { adapter } = build(mock);
     const rates = await adapter.getRates({
       sender: { contact: {}, point: { type: 'location', locationId: '04071' } },
       recipient: { contact: {}, point: { type: 'location', locationId: '79000' } },
       parcels: [{ weight: { value: 2, unit: 'kg' } }],
     });
     expect(rates.length).toBeGreaterThan(0);
-  });
-
-  it('reports the discount as a charge when the API gives one', async () => {
-    const { adapter } = setup();
-    const [rate] = await adapter.getRates({ ...request, options: { service: 'EXPRESS' } });
-    expect(rate!.charges![0]).toMatchObject({ type: 'delivery' });
+    expect(bodyOf(mock.last())).toMatchObject({ deliveryType: 'W2W' });
   });
 
   it('keeps the rates that worked when one service fails, and throws when all fail', async () => {
-    const { world, adapter } = setup();
-    world.ecom.fail({
-      operation: 'Calculatedeliverypriceusingpost2',
-      status: 400,
-      body: { code: 'UPE01002', message: 'bad' },
+    const mock = pricingMock();
+    let failures = 1;
+    mock.on({
+      method: 'POST',
+      path: `${ECOM}/domestic/delivery-price`,
+      respond: call =>
+        failures-- > 0
+          ? fail(400, 'UPE01002', 'bad')
+          : ok({
+              deliveryPrice: 60,
+              rawDeliveryPrice: 60,
+              calculationDescription: bodyOf<{ type: string }>(call).type,
+            }),
     });
+    const { adapter } = build(mock);
     expect(await adapter.getRates(request)).toHaveLength(1);
-    world.ecom.fail({
-      operation: 'Calculatedeliverypriceusingpost2',
-      status: 400,
-      times: 2,
-      body: { code: 'UPE01002', message: 'bad' },
-    });
+    mock.on({ method: 'POST', path: `${ECOM}/domestic/delivery-price`, respond: fail(400, 'UPE01002', 'bad') });
     await expect(adapter.getRates(request)).rejects.toMatchObject({ code: 'UPE01002' });
+  });
+
+  it('adds the cash on delivery fee basis to the request', async () => {
+    const mock = pricingMock();
+    const { adapter } = build(mock);
+    await adapter.getRates({
+      ...request,
+      options: { service: 'EXPRESS', cashOnDelivery: { amount: money(700, 'UAH') } },
+    });
+    expect(bodyOf(mock.last())).toMatchObject({ postPay: 700, parcels: [{ declaredPrice: 700 }] });
   });
 });
 
 describe('getLabel', () => {
-  it('prints a PDF sticker, in the requested size', async () => {
-    const { world, adapter } = setup();
-    const shipment = await adapter.createShipment(shipmentInput);
-    const label = await adapter.getLabel({ shipmentId: shipment.id, size: 'A4' });
-    expect(label).toMatchObject({ format: 'PDF', encoding: 'binary', size: 'A4' });
-    expect(label.encoding === 'binary' && isPdf(label.data)).toBe(true);
-    expect(world.ecom.callsTo('getShipmentStickerUsingGET_2').at(-1)!.query).toMatchObject({ size: 'SIZE_A4' });
-    await adapter.getLabel({ shipmentId: shipment.id, size: '100x100' });
-    expect(world.ecom.callsTo('getShipmentStickerUsingGET_2').at(-1)!.query).not.toHaveProperty('size');
+  function labelMock() {
+    const mock = ecomMock();
+    mock.on({
+      method: 'GET',
+      path: `${FORMS}/shipments/{id}/sticker`,
+      respond: ok({ contentType: 'application/pdf', data: PDF }),
+    });
+    return mock;
+  }
+
+  it('prints a PDF sticker from the forms host, in the requested size', async () => {
+    const mock = labelMock();
+    const { adapter } = build(mock);
+    const label = await adapter.getLabel({ shipmentId: 'abc', size: 'A4' });
+    expect(label).toMatchObject({ format: 'PDF', encoding: 'binary', contentType: 'application/pdf', size: 'A4' });
+    expect(label.encoding === 'binary' && label.data).toEqual(PDF);
+    expect(mock.last()).toMatchObject({
+      path: `${FORMS}/shipments/abc/sticker`,
+      query: { size: 'SIZE_A4', token: 'cp' },
+    });
+    await adapter.getLabel({ shipmentId: 'abc', size: '100x100' });
+    expect(mock.last().query.size).toBeUndefined();
+    await adapter.getLabel({ shipmentId: 'abc', size: 'a5' });
+    expect(mock.last().query).toMatchObject({ size: 'SIZE_A5' });
   });
 
   it('refuses other formats and sizes', async () => {
-    const { adapter } = setup();
-    const shipment = await adapter.createShipment(shipmentInput);
-    await expect(adapter.getLabel({ shipmentId: shipment.id, format: 'ZPL' })).rejects.toMatchObject({
-      field: 'format',
-    });
-    await expect(adapter.getLabel({ shipmentId: shipment.id, size: 'A3' })).rejects.toMatchObject({ field: 'size' });
+    const { adapter } = build(labelMock());
+    await expect(adapter.getLabel({ shipmentId: 'abc', format: 'ZPL' })).rejects.toMatchObject({ field: 'format' });
+    await expect(adapter.getLabel({ shipmentId: 'abc', size: 'A3' })).rejects.toMatchObject({ field: 'size' });
   });
 });
 
 describe('cancelShipment', () => {
-  it('deletes a fresh shipment', async () => {
-    const { adapter } = setup();
-    const shipment = await adapter.createShipment(shipmentInput);
-    await adapter.cancelShipment(shipment.id);
-    await expect(adapter.getShipment(shipment.id)).rejects.toMatchObject({ category: CarrierErrorCategory.NotFound });
+  function lifecycleMock(status: string) {
+    const mock = ecomMock();
+    mock.on({
+      method: 'GET',
+      path: `${ECOM}/shipments/{id}/lifecycle`,
+      respond: ok({ shipmentUuid: 's', shipmentBarcode: 'B', status, statusDate: '2026-01-01T09:00:00' }),
+    });
+    mock.on({ method: 'DELETE', path: `${ECOM}/shipments/{id}`, respond: ok({}) });
+    return mock;
+  }
+
+  it('deletes a shipment that is still CREATED', async () => {
+    const mock = lifecycleMock('CREATED');
+    const { adapter } = build(mock);
+    await adapter.cancelShipment('s1');
+    expect(mock.callsTo('DELETE', `${ECOM}/shipments/s1`)).toHaveLength(1);
+    // The status check needs no counterparty token.
+    expect(mock.callsTo('GET', `${ECOM}/shipments/{id}/lifecycle`)[0]!.query).not.toHaveProperty('token');
   });
 
-  it('says plainly that a registered shipment cannot be cancelled', async () => {
-    const { world, adapter } = setup();
-    const shipment = await adapter.createShipment(shipmentInput);
-    world.advance(shipment.id, 'REGISTERED');
-    await expect(adapter.cancelShipment(shipment.id)).rejects.toMatchObject({
-      code: 'NOT_CANCELLABLE',
-      category: CarrierErrorCategory.BusinessLogic,
-    });
-    expect((await adapter.getShipment(shipment.id)).status).toBe('in_transit');
-  });
+  it.each(['REGISTERED', 'DELIVERING', 'DELIVERED'])(
+    'says plainly that a %s shipment cannot be cancelled',
+    async status => {
+      const mock = lifecycleMock(status);
+      const { adapter } = build(mock);
+      await expect(adapter.cancelShipment('s1')).rejects.toMatchObject({
+        code: 'NOT_CANCELLABLE',
+        category: CarrierErrorCategory.BusinessLogic,
+      });
+      expect(mock.callsTo('DELETE', `${ECOM}/shipments/s1`)).toHaveLength(0);
+    },
+  );
 });
 
 describe('createManifest', () => {
+  function manifestMock(shipments: Array<ReturnType<typeof shipmentFrom>>, addResults?: unknown) {
+    const mock = ecomMock();
+    for (const shipment of shipments) {
+      mock.on({ method: 'GET', path: `${ECOM}/shipments/${shipment.uuid}`, respond: ok(shipment) });
+    }
+    mock.on({
+      method: 'POST',
+      path: `${ECOM}/shipment-groups`,
+      respond: call => ok({ uuid: 'g1', ...bodyOf<object>(call) }),
+    });
+    mock.on({
+      method: 'PUT',
+      path: `${ECOM}/shipment-groups/{uuid}/shipments`,
+      respond: call =>
+        ok(addResults ?? bodyOf<string[]>(call).map(id => ({ targetUuid: id, httpStatus: 200, message: 'ok' }))),
+    });
+    mock.on({
+      method: 'GET',
+      path: `${FORMS}/shipment-groups/{uuid}/form103a`,
+      respond: ok({ contentType: 'application/pdf', data: PDF }),
+    });
+    return mock;
+  }
+
+  const make = (sender: string, type: 'EXPRESS' | 'STANDARD' = 'EXPRESS') =>
+    shipmentFrom(
+      {
+        sender: { uuid: sender },
+        recipient: { uuid: 'r' },
+        deliveryType: 'W2W',
+        type,
+        parcels: [{ weight: 1000, length: 10 }],
+      },
+      { ...clientFrom({ addressId: 1, phoneNumber: '0' }), uuid: sender },
+    );
+
   it('groups the shipments and prints form 103a', async () => {
-    const { adapter, world } = setup();
-    const a = await adapter.createShipment(shipmentInput);
-    const b = await adapter.createShipment({ ...shipmentInput, reference: 'order-2' });
-    const manifest = await adapter.createManifest([a.id, b.id]);
-    expect(manifest).toMatchObject({ carrier: 'ukrposhta', shipmentIds: [a.id, b.id] });
-    expect(manifest.document?.encoding === 'binary' && isPdf(manifest.document.data)).toBe(true);
-    expect(
-      (await world.ecom.callsTo('AddShipmentToShipmentGroupUsingPOST')).length +
-        world.ecom.callsTo('AssignMultipleShipmentsToShipmentGroupUsingPUT').length,
-    ).toBe(1);
+    const a = make('sender-1');
+    const b = make('sender-1');
+    const mock = manifestMock([a, b]);
+    const { adapter } = build(mock);
+    const manifest = await adapter.createManifest([a.uuid, b.uuid]);
+    expect(manifest).toMatchObject({ id: 'g1', carrier: 'ukrposhta', shipmentIds: [a.uuid, b.uuid] });
+    expect(manifest.document).toMatchObject({ format: 'PDF', encoding: 'binary', data: PDF });
+    expect(mock.callsTo('POST', `${ECOM}/shipment-groups`)[0]!.body).toMatchObject({
+      clientUuid: 'sender-1',
+      type: 'EXPRESS',
+    });
+    expect(mock.callsTo('PUT', `${ECOM}/shipment-groups/g1/shipments`)[0]!.body).toEqual([a.uuid, b.uuid]);
   });
 
-  it('refuses shipments of different senders or types, and failed additions', async () => {
-    const { adapter, world } = setup();
-    const a = await adapter.createShipment(shipmentInput);
-    const other = await adapter.createShipment({ ...shipmentInput, sender: { ...sender, externalId: 'shop-2' } });
-    await expect(adapter.createManifest([a.id, other.id])).rejects.toMatchObject({ field: 'shipmentIds' });
-    const standard = await adapter.createShipment({ ...shipmentInput, options: { service: 'STANDARD' } });
-    await expect(adapter.createManifest([a.id, standard.id])).rejects.toMatchObject({ field: 'shipmentIds' });
+  it('refuses shipments of different senders or types, and none at all', async () => {
+    const a = make('sender-1');
+    const other = make('sender-2');
+    const standard = make('sender-1', 'STANDARD');
+    const { adapter } = build(manifestMock([a, other, standard]));
+    await expect(adapter.createManifest([a.uuid, other.uuid])).rejects.toMatchObject({ field: 'shipmentIds' });
+    await expect(adapter.createManifest([a.uuid, standard.uuid])).rejects.toMatchObject({ field: 'shipmentIds' });
     await expect(adapter.createManifest([])).rejects.toMatchObject({ field: 'shipmentIds' });
-    world.advance(a.id, 'REGISTERED');
-    await expect(adapter.createManifest([a.id])).rejects.toMatchObject({ code: 'MANIFEST_FAILED' });
+  });
+
+  it('reports the shipments the carrier would not add', async () => {
+    const a = make('sender-1');
+    const mock = manifestMock([a], [{ targetUuid: a.uuid, httpStatus: 400, message: 'already registered' }]);
+    const { adapter } = build(mock);
+    await expect(adapter.createManifest([a.uuid])).rejects.toMatchObject({
+      code: 'MANIFEST_FAILED',
+      message: expect.stringContaining('already registered'),
+    });
+    expect(mock.callsTo('GET', `${FORMS}/shipment-groups/{uuid}/form103a`)).toHaveLength(0);
   });
 });
 
 describe('locations and address validation', () => {
-  function seeded() {
-    const ctx = setup();
-    ctx.world.classifier.seedPostOffice({
-      ID: '2700',
-      POSTINDEX: '01001',
-      POSTCODE: '01001',
-      PO_SHORT: 'Київ 1',
-      PO_LONG: 'Відділення № 1',
-      CITY_UA: 'Київ',
-      REGION_UA: 'Київ',
-      POCITY_ID: '29713',
-      LATTITUDE: '50.449855',
-      LONGITUDE: '30.523063',
-      ADDRESS: 'вул. Хрещатик, 22',
+  const office = {
+    ID: '2700',
+    POSTINDEX: '01001',
+    POSTCODE: '01001',
+    PO_SHORT: 'Київ 1',
+    PO_LONG: 'Відділення № 1',
+    CITY_UA: 'Київ',
+    REGION_UA: 'Київ',
+    LATTITUDE: '50.449855',
+    LONGITUDE: '30.523063',
+  };
+  const entries = (...rows: Array<Record<string, string>>) =>
+    ok(rows.length === 0 ? {} : { Entries: { Entry: rows.length === 1 ? rows[0] : rows } });
+
+  function classifierMock() {
+    const mock = createMockTransport();
+    mock.on({
+      method: 'GET',
+      path: `${CLASSIFIER}/get_postoffices_by_postindex`,
+      respond: call =>
+        entries(
+          ...(call.query.pi === '01001' || call.query.pc === '01001' || call.query.poCityId === '29713'
+            ? [office]
+            : []),
+        ),
     });
-    ctx.world.classifier.seedPostOffice({
-      ID: '9',
-      POSTINDEX: '79000',
-      POSTCODE: '79000',
-      PO_SHORT: 'Львів 0',
-      CITY_UA: 'Львів',
-      POCITY_ID: '5',
-      LATTITUDE: '49.84',
-      LONGITUDE: '24.03',
+    mock.on({
+      method: 'GET',
+      path: `${CLASSIFIER}/get_city_by_region_id_and_district_id_and_city_ua`,
+      respond: entries({ CITY_ID: '29713', CITY_UA: 'Київ' }),
     });
-    ctx.world.classifier.seedCity({
-      CITY_ID: '29713',
-      REGION_ID: '286',
-      DISTRICT_ID: '412',
-      CITY_UA: 'Київ',
-      REGION_UA: 'Київ',
-      DISTRICT_UA: 'Київ',
-      POSTCODE: '01001',
+    mock.on({
+      method: 'GET',
+      path: `${CLASSIFIER}/get_postoffices_by_geolocation`,
+      respond: entries({
+        ID: '2700',
+        POSTINDEX: '01001',
+        POSTCODE: '01001',
+        POSTFILIALNAME: 'Київ 1',
+        CITYNAME: 'Київ',
+        ADDRESS: 'вул. Хрещатик, 22',
+        DISTANCE: '0',
+        LATITUDE: '50.449855',
+        LONGITUDE: '30.523063',
+      }),
     });
-    return ctx;
+    mock.on({
+      method: 'GET',
+      path: `${CLASSIFIER}/get_city_details_by_postcode`,
+      respond: call =>
+        entries(
+          ...(call.query.postcode === '01001'
+            ? [{ POSTCODE: '01001', REGION_NAME: 'Київ', DISTRICT_NAME: 'Київ', CITY_NAME: 'Київ' }]
+            : []),
+        ),
+    });
+    return { mock, ...build(mock) };
   }
 
   it('finds post offices by postcode, locality and distance', async () => {
-    const { adapter } = seeded();
+    const { mock, adapter } = classifierMock();
     const [byCode] = await adapter.findLocations({ postalCode: '01001' });
     expect(byCode).toMatchObject({
       id: '01001',
@@ -523,18 +805,21 @@ describe('locations and address validation', () => {
       city: 'Київ',
       geo: { lat: 50.449855, lng: 30.523063 },
     });
-    expect(await adapter.findLocations({ cityId: '5' })).toHaveLength(1);
+    // The same office came back by index and by code: listed once.
+    expect(await adapter.findLocations({ postalCode: '01001' })).toHaveLength(1);
+    expect(await adapter.findLocations({ cityId: '29713' })).toHaveLength(1);
+    expect(mock.last().query).toEqual({ poCityId: '29713' });
     expect(await adapter.findLocations({ city: 'Київ' })).toHaveLength(1);
     const near = await adapter.findLocations({ near: { lat: 50.45, lng: 30.52, radiusKm: 3 } });
-    expect(near.map(l => l.id)).toEqual(['01001']);
-    expect(near[0]!.name).toBe('Київ 1');
+    expect(near[0]).toMatchObject({ id: '01001', name: 'Київ 1' });
+    expect(mock.last().query).toEqual({ lat: 50.45, long: 30.52, maxdistance: 3 });
     expect(await adapter.findLocations({ postalCode: '01001', type: 'locker' })).toEqual([]);
-    expect(await adapter.findLocations({ near: { lat: 50.45, lng: 30.52, radiusKm: 1000 }, limit: 1 })).toHaveLength(1);
+    expect(await adapter.findLocations({ postalCode: '01001', limit: 0 })).toEqual([]);
     await expect(adapter.findLocations({})).rejects.toMatchObject({ field: 'query' });
   });
 
   it('validates an address against the classifier', async () => {
-    const { adapter } = seeded();
+    const { mock, adapter } = classifierMock();
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Київ' })).toMatchObject({
       valid: true,
       normalized: { region: 'Київ', district: 'Київ', city: 'Київ' },
@@ -544,46 +829,9 @@ describe('locations and address validation', () => {
       messages: [expect.stringContaining('belongs to Київ')],
     });
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '99999' })).toMatchObject({ valid: false });
+    const before = mock.calls.length;
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '12' })).toMatchObject({ valid: false });
     expect(await adapter.validateAddress({ country: 'UA' })).toMatchObject({ valid: false });
+    expect(mock.calls).toHaveLength(before);
   });
-});
-
-runAdapterConformance('Ukrposhta', () => {
-  const { world, adapter } = setup();
-  world.classifier.seedPostOffice({
-    ID: '2700',
-    POSTINDEX: '01001',
-    POSTCODE: '01001',
-    PO_SHORT: 'Київ 1',
-    CITY_UA: 'Київ',
-  });
-  const wire = (shipment: { id: string }) => {
-    const row = world.state
-      .collection<{ weight: number; senderAddressId: number; recipientAddressId: number }>('ecom-shipments')
-      .require(shipment.id);
-    const address = (id: number) =>
-      world.state
-        .collection<{ country: string; postcode: string; city?: string }>('ecom-addresses')
-        .require(String(id));
-    const from = address(row.senderAddressId);
-    const to = address(row.recipientAddressId);
-    return {
-      weightKg: row.weight / 1000,
-      sender: { country: from.country, postalCode: from.postcode, city: from.city },
-      recipient: { country: to.country, postalCode: to.postcode, city: to.city },
-    };
-  };
-  return {
-    adapter,
-    scenario: {
-      shipment: shipmentInput,
-      invalidShipment: { ...shipmentInput, parcels: [{ weight: { value: 31, unit: 'kg' } }] },
-      rateRequest: { sender, recipient, parcels: shipmentInput.parcels },
-      locationQuery: { postalCode: '01001' },
-      unknownTrackingNumber: '0599999999999',
-      deliver: s => void world.advance(s.id, 'DELIVERED'),
-      inspectShipment: wire,
-    },
-  };
 });

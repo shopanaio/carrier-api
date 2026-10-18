@@ -1,7 +1,5 @@
 import type { HttpRequest, HttpTransport } from '@shopana/carrier-core';
 import { CarrierErrorCategory } from '@shopana/carrier-core';
-import type { CreateShipmentInput, Party } from '@shopana/carrier-contracts';
-import { money } from '@shopana/carrier-contracts';
 import {
   AddressesService,
   ClientsService,
@@ -13,44 +11,29 @@ import {
   ShipmentsService,
   createUkrposhtaContractClient,
 } from '../src';
+import type { CourierOrder } from '../src';
 import { courierIntervalOf } from '../src/adapter/shipments';
 import { createUkrposhtaAdapter } from '../src/adapter';
-import { createUkrposhtaSimulator } from '../src/simulator';
+import { addressFrom, clientFrom, shipmentFrom } from './helpers/fixtures';
+import { createMockTransport, fail, ok } from './helpers/mock';
 
-function setup() {
-  const world = createUkrposhtaSimulator();
-  const retry = { sleep: world.clock.sleep, clock: world.clock };
-  const ecom = createUkrposhtaContractClient({
-    transport: world.transport,
-    retry,
+const ECOM = '/ecom/0.0.1';
+
+function build(mock: ReturnType<typeof createMockTransport>, withCourier = true) {
+  const base = createUkrposhtaContractClient({
+    transport: mock.transport,
     bearer: 'ecom',
     counterpartyToken: 'cp',
+    retry: false,
   })
     .use(new AddressesService())
     .use(new ClientsService())
     .use(new ShipmentsService())
     .use(new PricingService())
     .use(new ShipmentGroupsService())
-    .use(new LabelsService())
-    .use(new CourierService());
-  return { world, ecom, adapter: createUkrposhtaAdapter({ ecom }) };
+    .use(new LabelsService());
+  return withCourier ? base.use(new CourierService()) : base;
 }
-
-const sender: Party = {
-  contact: { firstName: 'Петро', lastName: 'Петренко', phone: '+380672802273', email: 'p@example.com' },
-  point: { type: 'door', address: { country: 'UA', postalCode: '04071', city: 'Київ' } },
-  externalId: 'shop-1',
-  taxId: '4201030327',
-};
-const recipient: Party = {
-  contact: { name: 'Іванов Іван', phone: '0982004113' },
-  point: { type: 'door', address: { country: 'UA', postalCode: '79000', city: 'Львів' } },
-};
-const input: CreateShipmentInput = {
-  sender,
-  recipient,
-  parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(100, 'UAH') }],
-};
 
 describe('courierIntervalOf', () => {
   it('maps a window to the interval that contains it', () => {
@@ -67,122 +50,192 @@ describe('courierIntervalOf', () => {
   });
 });
 
+const order: CourierOrder = {
+  uuid: 'o1',
+  orderNumber: 3219085,
+  clientUuid: 'c1',
+  type: 'SINGLE',
+  addressId: 100001,
+  phoneId: 24001,
+  dropDate: '2026-10-20',
+  interval: 'INTERVAL_12_15',
+  shipmentBarcodes: ['0500000000001'],
+  lastStatus: 'ORDERED',
+  lastStatusDate: '2026-10-18T11:31:05',
+};
+
 describe('courier service', () => {
-  async function order() {
-    const { world, ecom, adapter } = setup();
-    const shipment = await adapter.createShipment(input);
-    const raw = shipment.raw as { sender: { uuid: string; addressId: number; phones: Array<{ phoneId: number }> } };
-    return { world, ecom, adapter, shipment, raw };
-  }
-
   it('creates, reads, lists and follows an order', async () => {
-    const { world, ecom, shipment, raw } = await order();
-    const created = await ecom.courier.createOrder({
-      clientUuid: raw.sender.uuid,
-      type: 'SINGLE',
-      addressId: raw.sender.addressId,
-      phoneId: raw.sender.phones[0]!.phoneId,
-      dropDate: '2026-10-20',
-      interval: 'INTERVAL_12_15',
-      shipmentBarcodes: [shipment.trackingNumber],
+    const mock = createMockTransport([
+      { method: 'POST', path: `${ECOM}/courier-service/orders`, respond: ok(order) },
+      { method: 'GET', path: `${ECOM}/courier-service/orders/{id}`, respond: ok(order) },
+      { method: 'GET', path: `${ECOM}/clients/{id}/courier-delivery-orders`, respond: ok([order]) },
+      {
+        method: 'GET',
+        path: `${ECOM}/courier-service/orders/{id}/statuses`,
+        respond: ok([{ uuid: 's1', orderUuid: 'o1', statusDate: '2026-10-18T11:31:05', orderStatus: 'ORDERED' }]),
+      },
+    ]);
+    const client = build(mock);
+    const { lastStatus: _status, lastStatusDate: _date, orderNumber: _number, uuid: _uuid, ...input } = order;
+    expect(await client.courier.createOrder(input)).toMatchObject({ uuid: 'o1', lastStatus: 'ORDERED' });
+    expect(mock.last()).toMatchObject({
+      method: 'POST',
+      path: `${ECOM}/courier-service/orders`,
+      query: { token: 'cp' },
+      body: input,
     });
-    expect(created).toMatchObject({ lastStatus: 'ORDERED', orderNumber: 3219085, interval: 'INTERVAL_12_15' });
-    expect(await ecom.courier.getOrder(created.uuid)).toMatchObject({ uuid: created.uuid });
-    expect((await ecom.courier.listOrders(raw.sender.uuid)).map(o => o.uuid)).toEqual([created.uuid]);
-
-    world.advanceCourierOrder(created.uuid, 'TRANSFERRED_TO_COURIER');
-    expect(await ecom.courier.getOrder(created.uuid)).toMatchObject({
-      courierLastName: 'Іванов',
-      carNumber: 'AA3534AI',
-    });
-    const statuses = await ecom.courier.getStatuses(created.uuid);
-    expect(statuses.map(s => s.orderStatus)).toEqual(['ORDERED', 'TRANSFERRED_TO_COURIER']);
+    expect(await client.courier.getOrder('o1')).toMatchObject({ orderNumber: 3219085 });
+    expect(mock.last().path).toBe(`${ECOM}/courier-service/orders/o1`);
+    expect(await client.courier.listOrders('c1')).toHaveLength(1);
+    expect(mock.last().path).toBe(`${ECOM}/clients/c1/courier-delivery-orders`);
+    expect((await client.courier.getStatuses('o1'))[0]).toMatchObject({ orderStatus: 'ORDERED' });
+    expect(mock.last().path).toBe(`${ECOM}/courier-service/orders/o1/statuses`);
   });
 
-  it('rejects an order the carrier would reject', async () => {
-    const { ecom, shipment, raw } = await order();
-    const base = {
-      clientUuid: raw.sender.uuid,
-      type: 'SINGLE' as const,
-      addressId: raw.sender.addressId,
-      phoneId: raw.sender.phones[0]!.phoneId,
-      dropDate: '2026-10-20',
-      interval: 'INTERVAL_09_12' as const,
-    };
-    await expect(ecom.courier.createOrder({ ...base, shipmentBarcodes: [] })).rejects.toMatchObject({
-      field: 'shipmentBarcodes',
-    });
-    await expect(
-      ecom.courier.createOrder({ ...base, addressId: 1, shipmentBarcodes: [shipment.trackingNumber] }),
-    ).rejects.toMatchObject({ field: 'addressId' });
-    await expect(
-      ecom.courier.createOrder({ ...base, phoneId: 99999, shipmentBarcodes: [shipment.trackingNumber] }),
-    ).rejects.toMatchObject({ field: 'phoneId' });
-    await expect(ecom.courier.createOrder({ ...base, shipmentBarcodes: ['0500000000000'] })).rejects.toMatchObject({
+  it('maps a carrier rejection', async () => {
+    const mock = createMockTransport([
+      { method: 'GET', path: `${ECOM}/courier-service/orders/{id}`, respond: fail(404, 'UPE02001', 'Order not found') },
+    ]);
+    await expect(build(mock).courier.getOrder('nope')).rejects.toMatchObject({
       category: CarrierErrorCategory.NotFound,
     });
-    await expect(ecom.courier.getOrder('nope')).rejects.toMatchObject({ category: CarrierErrorCategory.NotFound });
   });
 });
 
 describe('schedulePickup', () => {
-  it('has the capability only when the courier service is present', () => {
-    const { adapter } = setup();
-    expect(adapter.capabilities.has('pickup')).toBe(true);
-    const world = createUkrposhtaSimulator();
-    const bare = createUkrposhtaContractClient({ transport: world.transport, bearer: 'b', counterpartyToken: 't' })
-      .use(new AddressesService())
-      .use(new ClientsService())
-      .use(new ShipmentsService())
-      .use(new PricingService())
-      .use(new ShipmentGroupsService())
-      .use(new LabelsService());
-    expect(createUkrposhtaAdapter({ ecom: bare }).capabilities.has('pickup')).toBe(false);
+  const address = addressFrom({ postcode: '04071', street: 'Хорива' });
+  const senderClient = {
+    ...clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0672802273',
+        type: 'INDIVIDUAL',
+        firstName: 'Петро',
+        lastName: 'Петренко',
+      },
+      address,
+    ),
+    uuid: 'sender-1',
+  };
+  senderClient.phones = [
+    { uuid: 'p1', phoneId: 111, phoneNumber: '+380501112233', type: 'WORK', main: false },
+    { uuid: 'p2', phoneId: 222, phoneNumber: '+380672802273', type: 'PERSONAL', main: true },
+  ];
+  const makeShipment = (uuid: string, sender = senderClient) => ({
+    ...shipmentFrom(
+      {
+        sender: { uuid: sender.uuid },
+        recipient: { uuid: 'r' },
+        deliveryType: 'W2W',
+        parcels: [{ weight: 1000, length: 10 }],
+        senderAddressId: address.id,
+      },
+      sender,
+    ),
+    uuid,
   });
 
-  it('orders a SINGLE collection for one shipment and a MASS one for several', async () => {
-    const { world, adapter } = setup();
-    const a = await adapter.createShipment(input);
-    const b = await adapter.createShipment({ ...input, reference: 'second' });
-    const single = await adapter.schedulePickup({
-      shipmentIds: [a.id],
-      address: { country: 'UA', postalCode: '04071' },
-      contact: { phone: '0672802273', email: 'p@example.com' },
-      date: '2026-10-20T00:00:00Z',
+  function pickupMock(shipments: Array<ReturnType<typeof makeShipment>>) {
+    const mock = createMockTransport();
+    for (const shipment of shipments) {
+      mock.on({ method: 'GET', path: `${ECOM}/shipments/${shipment.uuid}`, respond: ok(shipment) });
+    }
+    mock.on({
+      method: 'POST',
+      path: `${ECOM}/courier-service/orders`,
+      respond: call =>
+        ok({
+          ...(call.body as object),
+          uuid: 'order-1',
+          orderNumber: 1,
+          lastStatus: 'ORDERED',
+          lastStatusDate: '2026-10-18T11:31:05',
+        }),
+    });
+    return mock;
+  }
+
+  const request = {
+    address: { country: 'UA', postalCode: '04071' },
+    contact: { phone: '0672802273', email: 'p@example.com' },
+    date: '2026-10-20T00:00:00Z',
+  };
+
+  it('has the capability only when the courier service is present', () => {
+    const mock = createMockTransport();
+    expect(createUkrposhtaAdapter({ ecom: build(mock) }).capabilities.has('pickup')).toBe(true);
+    expect(createUkrposhtaAdapter({ ecom: build(mock, false) }).capabilities.has('pickup')).toBe(false);
+  });
+
+  it('orders a SINGLE collection for one shipment, with the phone the contact named', async () => {
+    const a = makeShipment('s1');
+    const mock = pickupMock([a]);
+    const adapter = createUkrposhtaAdapter({ ecom: build(mock) });
+    const pickup = await adapter.schedulePickup({
+      ...request,
+      shipmentIds: ['s1'],
+      contact: { phone: '050 111 22 33', email: 'p@example.com' },
       window: { from: '15:00', to: '18:00' },
     });
-    expect(single).toMatchObject({ carrier: 'ukrposhta', date: '2026-10-20', status: 'ORDERED' });
-    expect(world.ecom.callsTo('createCourierDeliveryOrderUsingPOST').at(-1)!.body).toMatchObject({
+    expect(pickup).toMatchObject({ id: 'order-1', carrier: 'ukrposhta', date: '2026-10-20', status: 'ORDERED' });
+    expect(mock.last().body).toMatchObject({
+      clientUuid: 'sender-1',
       type: 'SINGLE',
-      interval: 'INTERVAL_15_18',
+      addressId: address.id,
+      // The contact's phone matched the sender's work phone.
+      phoneId: 111,
       dropDate: '2026-10-20',
-      shipmentBarcodes: [a.trackingNumber],
+      interval: 'INTERVAL_15_18',
+      shipmentBarcodes: [a.barcode],
       email: 'p@example.com',
     });
+  });
+
+  it('orders a MASS collection for several shipments, with the main phone by default', async () => {
+    const a = makeShipment('s1');
+    const b = makeShipment('s2');
+    const mock = pickupMock([a, b]);
+    const adapter = createUkrposhtaAdapter({ ecom: build(mock) });
     await adapter.schedulePickup({
-      shipmentIds: [a.id, b.id],
+      shipmentIds: ['s1', 's2'],
       address: { country: 'UA' },
       contact: {},
       date: '2026-10-21',
     });
-    expect(world.ecom.callsTo('createCourierDeliveryOrderUsingPOST').at(-1)!.body).toMatchObject({ type: 'MASS' });
+    expect(mock.last().body).toMatchObject({
+      type: 'MASS',
+      phoneId: 222,
+      interval: 'INTERVAL_09_12',
+      shipmentBarcodes: [a.barcode, b.barcode],
+    });
   });
 
-  it('rejects other senders, other addresses and empty requests', async () => {
-    const { adapter } = setup();
-    const a = await adapter.createShipment(input);
-    const other = await adapter.createShipment({ ...input, sender: { ...sender, externalId: 'shop-2' } });
+  it('rejects other senders, other addresses, bad windows and empty requests before ordering', async () => {
+    const a = makeShipment('s1');
+    const other = makeShipment('s2', { ...senderClient, uuid: 'sender-2' });
+    const mock = pickupMock([a, other]);
+    const adapter = createUkrposhtaAdapter({ ecom: build(mock) });
     const base = { address: { country: 'UA' }, contact: {}, date: '2026-10-20' };
-    await expect(adapter.schedulePickup({ ...base, shipmentIds: [a.id, other.id] })).rejects.toMatchObject({
+    await expect(adapter.schedulePickup({ ...base, shipmentIds: ['s1', 's2'] })).rejects.toMatchObject({
       field: 'shipmentIds',
     });
     await expect(adapter.schedulePickup({ ...base, shipmentIds: [] })).rejects.toMatchObject({ field: 'shipmentIds' });
     await expect(
-      adapter.schedulePickup({ ...base, shipmentIds: [a.id], address: { country: 'UA', postalCode: '79000' } }),
+      adapter.schedulePickup({ ...base, shipmentIds: ['s1'], address: { country: 'UA', postalCode: '79000' } }),
     ).rejects.toMatchObject({ field: 'address' });
     await expect(
-      adapter.schedulePickup({ ...base, shipmentIds: [a.id], window: { from: '11:00', to: '13:00' } }),
+      adapter.schedulePickup({ ...base, shipmentIds: ['s1'], window: { from: '11:00', to: '13:00' } }),
     ).rejects.toMatchObject({ field: 'window' });
+    expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(0);
+  });
+
+  it('needs a phone on the sender', async () => {
+    const a = makeShipment('s1', { ...senderClient, phones: [] });
+    const adapter = createUkrposhtaAdapter({ ecom: build(pickupMock([a])) });
+    await expect(adapter.schedulePickup({ ...request, shipmentIds: ['s1'], contact: {} })).rejects.toMatchObject({
+      field: 'contact.phone',
+    });
   });
 });
 
