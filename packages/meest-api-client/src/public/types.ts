@@ -108,6 +108,11 @@ export interface MeestLocality {
   is_delivery_in_city: boolean;
 }
 
+/** The register wraps every locality in `data`. */
+export interface MeestLocalityItem {
+  data: MeestLocality;
+}
+
 export interface MeestStreet {
   ua: string;
   ru: string;
@@ -158,12 +163,4 @@ export interface NearestFilter {
 export interface Coordinates {
   lat: number;
   lng: number;
-}
-
-/** Client-side filter over the short branch register (fields present in every item of it). */
-export interface BranchQuery {
-  cityId?: string;
-  typeId?: string;
-  /** Keeps branches whose `parcel_max_kg` is 0 (no limit) or at least this value. */
-  minParcelMaxKg?: number;
 }

@@ -1,11 +1,14 @@
 // code and comments in English
 import type {
   BannersResult,
+  CheckPhoneOnParcelResult,
+  ContractClientInfoResult,
   ContractValidationCheckRequestBody,
+  ContractValidationCheckResult,
   ParcelReturnNewRequestBody,
+  ParcelReturnNewResult,
   ParcelReturnReasonsResult,
 } from '../types/generated';
-import type { ContractClientInfo, ContractValidation, ParcelReturnResult, PhoneCheckResult } from '../types/extra';
 import { ContractService } from './base';
 import type { RequestOptions } from './base';
 
@@ -14,7 +17,7 @@ export class MiscService extends ContractService {
   readonly namespace = 'misc' as const;
 
   /** Sender refuses a parcel with a reason from `returnReasons()`; the parcel travels back. */
-  returnParcel(body: ParcelReturnNewRequestBody, options?: RequestOptions): Promise<ParcelReturnResult> {
+  returnParcel(body: ParcelReturnNewRequestBody, options?: RequestOptions): Promise<ParcelReturnNewResult> {
     return this.httpPost({ signal: options?.signal, path: '/parcelReturn_new', json: body });
   }
 
@@ -22,7 +25,7 @@ export class MiscService extends ContractService {
     return this.httpGet({ signal: options?.signal, path: '/parcelReturnReasons' });
   }
 
-  contractInfo(contractId: string, options?: RequestOptions): Promise<ContractClientInfo> {
+  contractInfo(contractId: string, options?: RequestOptions): Promise<ContractClientInfoResult> {
     return this.httpGet({
       signal: options?.signal,
       path: '/contractClientInfo/{contractID}',
@@ -31,7 +34,7 @@ export class MiscService extends ContractService {
   }
 
   /** Whether `phone` is the recipient's number of the parcel. */
-  checkPhone(barCode: string, phone: string, options?: RequestOptions): Promise<PhoneCheckResult> {
+  checkPhone(barCode: string, phone: string, options?: RequestOptions): Promise<CheckPhoneOnParcelResult> {
     return this.httpGet({
       signal: options?.signal,
       path: '/CheckPhoneOnParcel/{barCode}/{phoneCheck}',
@@ -43,7 +46,7 @@ export class MiscService extends ContractService {
   async validateContract(
     body: ContractValidationCheckRequestBody,
     options?: RequestOptions,
-  ): Promise<ContractValidation> {
+  ): Promise<ContractValidationCheckResult> {
     return this.httpPost({ signal: options?.signal, path: '/contract_validation_check', json: body, idempotent: true });
   }
 

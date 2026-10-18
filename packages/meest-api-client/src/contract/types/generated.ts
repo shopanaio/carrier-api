@@ -55,7 +55,14 @@ export interface CheckPhoneOnParcelPathParams {
   barCode: string;
   phoneCheck: string;
 }
-export type CheckPhoneOnParcelResponse = MeestResponse<void>;
+/** Result payload */
+export type CheckPhoneOnParcelResult = {
+  PhoneCorrespondsParcel?: boolean;
+  phone?: string;
+  /** parcel */
+  parcel?: string;
+};
+export type CheckPhoneOnParcelResponse = CheckPhoneOnParcelResult;
 export interface CheckPhoneOnParcelRequest {
   path: CheckPhoneOnParcelPathParams;
 }
@@ -64,7 +71,66 @@ export interface CheckPhoneOnParcelRequest {
 export interface ContractClientInfoPathParams {
   contractID: string;
 }
-export type ContractClientInfoResponse = MeestResponse<void>;
+/** Result payload */
+export type ContractClientInfoResult = {
+  contractID: string;
+  contract: string;
+  number: string;
+  edrpou: string;
+  allowedCOD: boolean;
+  date: string;
+  dateTo: string;
+  deleted: boolean;
+  client: string;
+  clientID: string;
+  clientFullName: string;
+  /** phone */
+  phone: string;
+  /** eMail */
+  eMail: string;
+  /** client_code */
+  client_code: string;
+  /** client_country */
+  client_country: string;
+  /** client_countryID */
+  client_countryID: string;
+  /** client_region */
+  client_region: string;
+  /** client_regionID */
+  client_regionID: string;
+  /** client_area */
+  client_area: string;
+  /** client_areaID */
+  client_areaID: string;
+  /** client_street */
+  client_street: string;
+  /** client_streetID */
+  client_streetID: string;
+  /** client_cityID */
+  client_cityID: string;
+  /** client_city */
+  client_city: string;
+  /** client_building */
+  client_building: string;
+  /** client_flat */
+  client_flat: string;
+  /** client_postalCode */
+  client_postalCode: string;
+  /** client_mainCounterparty */
+  client_mainCounterparty: string;
+  /** client_mainCounterpartyID */
+  client_mainCounterpartyID: string;
+  /** client_mainCounterparty_edrpou */
+  client_mainCounterparty_edrpou: string;
+  client_mainCounterpartySel?: string;
+  client_mainCounterpartySelID?: string;
+  contract_term: string;
+  ContractSupportManager?: string;
+  ContractSupportManagerID?: string;
+  ContractAttractionManager?: string;
+  ContractAttractionManagerID?: string;
+};
+export type ContractClientInfoResponse = ContractClientInfoResult;
 export interface ContractClientInfoRequest {
   path: ContractClientInfoPathParams;
 }
@@ -76,10 +142,17 @@ export type ContractValidationCheckRequestBody = {
 };
 /** Result payload */
 export type ContractValidationCheckResult = {
-  status?: string;
-  text?: string;
+  info?: {
+    fieldName?: string;
+    message?: string;
+    messageDetails?: string;
+  };
+  result?: {
+    status?: string;
+    text?: string;
+  };
 };
-export type ContractValidationCheckResponse = MeestResponse<ContractValidationCheckResult>;
+export type ContractValidationCheckResponse = ContractValidationCheckResult;
 export interface ContractValidationCheckRequest {
   body?: ContractValidationCheckRequestBody;
 }
@@ -89,7 +162,13 @@ export type ParcelReturnNewRequestBody = {
   parcelID?: string;
   reasonID?: string;
 };
-export type ParcelReturnNewResponse = MeestResponse<void>;
+/** Result payload */
+export type ParcelReturnNewResult = {
+  'do\u0441ID'?: string;
+  'do\u0441IDref'?: string;
+  'do\u0441Number'?: string;
+};
+export type ParcelReturnNewResponse = ParcelReturnNewResult;
 export interface ParcelReturnNewRequest {
   body?: ParcelReturnNewRequestBody;
 }
@@ -354,7 +433,7 @@ export type LockParcelRequestBody = {
 };
 /** Result payload */
 export type LockParcelResult = unknown;
-export type LockParcelResponse = MeestResponse<LockParcelResult>;
+export type LockParcelResponse = LockParcelResult;
 export interface LockParcelRequest {
   body?: LockParcelRequestBody;
 }
@@ -704,7 +783,7 @@ export type ParcelStatusResult = Array<{
   statusCode?: string;
   date?: string;
 }>;
-export type ParcelStatusResponse = MeestResponse<ParcelStatusResult>;
+export type ParcelStatusResponse = ParcelStatusResult;
 export interface ParcelStatusRequest {
   path: ParcelStatusPathParams;
 }
@@ -757,7 +836,7 @@ export type UnlockParcelRequestBody = {
 };
 /** Result payload */
 export type UnlockParcelResult = unknown;
-export type UnlockParcelResponse = MeestResponse<UnlockParcelResult>;
+export type UnlockParcelResponse = UnlockParcelResult;
 export interface UnlockParcelRequest {
   body?: UnlockParcelRequestBody;
 }
@@ -769,7 +848,7 @@ export interface Cn23FormPathParams {
 }
 /** Result payload */
 export type Cn23FormResult = unknown;
-export type Cn23FormResponse = MeestResponse<Cn23FormResult>;
+export type Cn23FormResponse = Cn23FormResult;
 export interface Cn23FormRequest {
   path: Cn23FormPathParams;
 }
@@ -782,7 +861,7 @@ export interface DeclarationFormPathParams {
 }
 /** Result payload */
 export type DeclarationFormResult = unknown;
-export type DeclarationFormResponse = MeestResponse<DeclarationFormResult>;
+export type DeclarationFormResponse = DeclarationFormResult;
 export interface DeclarationFormRequest {
   path: DeclarationFormPathParams;
 }
@@ -794,7 +873,7 @@ export interface RegisterPathParams {
 }
 /** Result payload */
 export type RegisterResult = unknown;
-export type RegisterResponse = MeestResponse<RegisterResult>;
+export type RegisterResponse = RegisterResult;
 export interface RegisterRequest {
   path: RegisterPathParams;
 }
@@ -809,7 +888,7 @@ export interface Sticker100PathParams {
 }
 /** Result payload */
 export type Sticker100Result = unknown;
-export type Sticker100Response = MeestResponse<Sticker100Result>;
+export type Sticker100Response = Sticker100Result;
 export interface Sticker100Request {
   path: Sticker100PathParams;
   query?: Sticker100QueryParams;
@@ -824,7 +903,7 @@ export interface Sticker100A4PathParams {
 }
 /** Result payload */
 export type Sticker100A4Result = unknown;
-export type Sticker100A4Response = MeestResponse<Sticker100A4Result>;
+export type Sticker100A4Response = Sticker100A4Result;
 export interface Sticker100A4Request {
   path: Sticker100A4PathParams;
   query?: Sticker100A4QueryParams;

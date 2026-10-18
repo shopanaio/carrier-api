@@ -32,7 +32,6 @@ export { SearchService } from './services/searchService';
 export { TrackingService } from './services/trackingService';
 export type { MeestInfo, MeestResponse } from './types/envelope';
 export * from './types/generated';
-export * from './types/extra';
 
 /**
  * Client for the Meest contract API (openAPI v3.0). Logs in with `username`/`password`, keeps the token

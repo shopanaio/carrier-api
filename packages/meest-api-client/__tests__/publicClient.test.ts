@@ -31,9 +31,14 @@ describe('geo', () => {
     expect(calls[1]).toMatchObject({ path: '/geo_districts', query: { region_id: 'r1' } });
   });
 
-  it('returns [] for a "not found" answer and rethrows other errors', async () => {
+  it('reports a "not found" answer as an error instead of an empty list', async () => {
     const { client } = make(() => fail(10401, 'Could not find region'));
-    expect(await client.geo.regions({ searchFull: 'Atlantis' })).toEqual([]);
+    expect(await rejection(client.geo.regions({ searchFull: 'Atlantis' }))).toMatchObject({
+      carrier: 'meest',
+      code: '10401',
+      category: CarrierErrorCategory.NotFound,
+      httpStatus: 200,
+    });
     const broken = make(() => fail(10999, 'Boom'));
     expect(await rejection(broken.client.geo.regions())).toMatchObject({
       code: '10999',
@@ -41,16 +46,15 @@ describe('geo', () => {
     });
   });
 
-  it('unwraps { data } of localities and passes district_id', async () => {
+  it('returns localities exactly as the API does, each item wrapped in data', async () => {
     const locality = { n_ua: 'Mriya', city_id: 'c1', is_delivery_in_city: true };
     const { client, calls } = make(() => ok([{ data: locality }]));
-    expect(await client.geo.localities({ districtId: 'd1' })).toEqual([locality]);
+    expect(await client.geo.localities({ districtId: 'd1' })).toEqual([{ data: locality }]);
     expect(calls[0]!.query).toMatchObject({ district_id: 'd1' });
   });
 
-  it('requires a city for streets', async () => {
+  it('sends the street filters and the mandatory city', async () => {
     const { client, calls } = make(() => ok([{ street_id: 's1' }]));
-    expect(() => client.geo.streets({ cityId: '' })).toThrow(TypeError);
     await client.geo.streets({ cityId: 'c1', searchBeginning: 'My' });
     expect(calls[0]).toMatchObject({ path: '/geo_streets', query: { city_id: 'c1', search_beginning: 'My' } });
   });
@@ -73,28 +77,23 @@ describe('branches', () => {
     });
   });
 
-  it('returns [] when no branch matches', async () => {
-    expect(await make(() => fail(10111, 'Could not find branch')).client.branches.list({ city: 'Mriya' })).toEqual([]);
+  it('passes the provider error for an empty register answer', async () => {
+    const { client } = make(() => fail(10111, 'Could not find branch'));
+    expect(await rejection(client.branches.list({ city: 'Mriya' }))).toMatchObject({
+      code: '10111',
+      category: CarrierErrorCategory.NotFound,
+    });
   });
 
-  it('gets one branch by number or id and throws not_found otherwise', async () => {
+  it('gets one branch as the list the API returns, and surfaces an unknown branch as not_found', async () => {
     const { client, calls } = make(call =>
       call.path.endsWith('/0') ? fail(10111, 'Could not find branch') : ok([branches[0]]),
     );
-    expect(await client.branches.get(8382, { lang: 'ua' })).toMatchObject({ br_id: 'b1' });
+    expect(await client.branches.get(8382, { lang: 'ua' })).toEqual([branches[0]]);
     expect(calls[0]).toMatchObject({ path: '/branches/8382', query: { lang: 'ua' } });
     expect(await rejection(client.branches.get(0))).toMatchObject({
       carrier: 'meest',
       code: '10111',
-      category: CarrierErrorCategory.NotFound,
-      httpStatus: 200,
-    });
-  });
-
-  it('throws not_found when the API answers with an empty list for one branch', async () => {
-    const { client } = make(() => ok([]));
-    expect(await rejection(client.branches.get(1))).toMatchObject({
-      code: 'EMPTY_RESULT',
       category: CarrierErrorCategory.NotFound,
     });
   });
@@ -106,13 +105,6 @@ describe('branches', () => {
     await client.branches.nearestByAddress('Przemy\u015bl, ul. Mickiewicza 2/1');
     expect(decodeURIComponent(calls[1]!.path)).toBe('/locator/Przemy\u015bl, ul. Mickiewicza 2/1');
     expect(calls[1]!.path).toContain('%2F');
-  });
-
-  it('filters the register on the client; parcel_max_kg 0 means no limit', async () => {
-    const { client } = make(() => ok(branches));
-    expect(await client.branches.find({ cityId: 'c1' })).toHaveLength(3);
-    expect((await client.branches.find({ cityId: 'c1', minParcelMaxKg: 100 })).map(b => b.br_id)).toEqual(['b2', 'b3']);
-    expect((await client.branches.find({ typeId: 't2' })).map(b => b.br_id)).toEqual(['b2', 'b3', 'b4']);
   });
 });
 

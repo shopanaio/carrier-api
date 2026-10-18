@@ -2,7 +2,6 @@
 import type { ClientContext } from '@shopana/carrier-core';
 import type { RequestOptions } from '../../shared';
 import type { MeestPublicContextConfig } from '../config';
-import { isMeestNotFound } from '../errors';
 
 export type PublicContext = ClientContext<MeestPublicContextConfig>;
 
@@ -28,21 +27,6 @@ export abstract class PublicService {
     });
   }
 
-  /** "Nothing found" is an error in the API, but an empty list for callers. */
-  protected async listJson<T>(
-    path: string,
-    query?: Record<string, string | number | undefined>,
-    pathParams?: Record<string, string>,
-    options?: RequestOptions,
-  ): Promise<T[]> {
-    try {
-      return (await this.getJson<T[] | null>(path, query, pathParams, options)) ?? [];
-    } catch (error) {
-      if (isMeestNotFound(error)) return [];
-      throw error;
-    }
-  }
-
   /** Reads through the optional ReferenceCache; arrays are stored as returned. */
   protected async cached<T>(key: string, load: () => Promise<T>): Promise<T> {
     const { cache, cacheTtlSec } = this.ctx.config;
@@ -55,6 +39,7 @@ export abstract class PublicService {
   }
 }
 
+/** Several values of one filter go to Meest as a comma separated list. */
 export function joinFilter(value: string | readonly string[] | undefined): string | undefined {
   if (value === undefined) return undefined;
   return typeof value === 'string' ? value : value.join(',');

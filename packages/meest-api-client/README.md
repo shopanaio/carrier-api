@@ -24,9 +24,9 @@ const streets = await meest.geo.streets({ cityId: '80f55c6a-749b-11df-b112-00215
 
 Things worth knowing:
 
-- Failures come as HTTP 200 with `status: 0` and `msg.code`. "Nothing found" lists return `[]`; `branches.get` throws a `CarrierError` with `category: 'not_found'`.
-- The registers are big and not paginated (localities about 6 MB, branches about 2.3 MB). Pass a `ReferenceCache` (get/set with TTL) and refresh once a day; `branches.find()` filters the cached register on the client.
-- `geo.localities()` items are unwrapped from `{ data }`. `is_delivery_in_city: true` means address delivery is **not** available.
+- Responses are returned as the API sends them: `branches.get` is a list, `geo.localities` items stay wrapped in `data`. Failures come as HTTP 200 with `status: 0` and `msg.code` and are thrown as a `CarrierError` ("not found" codes get `category: 'not_found'`); nothing is turned into an empty list.
+- The registers are big and not paginated (localities about 6 MB, branches about 2.3 MB). Pass a `ReferenceCache` (get/set with TTL) and refresh once a day.
+- `is_delivery_in_city: true` means address delivery is **not** available. `parcel_max_kg: 0` means no limit.
 - Limits keep the API's spelling (`receiving_phone_reqired`, `cash_pay_unavailible`).
 - The locator returns up to 10 branches in the full form, sorted by `distance` (km).
 

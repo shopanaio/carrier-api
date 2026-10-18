@@ -90,7 +90,9 @@ function renderOperation(operation) {
   }
 
   const responseSchema = (operation.responses['200'] && operation.responses['200'].schema) || null;
-  const resultSchema = responseSchema && responseSchema.properties ? responseSchema.properties.result : responseSchema;
+  // Most responses use the { status, info, result } envelope; a few are documented as the bare payload.
+  const isEnvelope = Boolean(responseSchema && responseSchema.properties && responseSchema.properties.status);
+  const resultSchema = isEnvelope ? responseSchema.properties.result : responseSchema;
   let resultTypeName = 'void';
 
   if (resultSchema) {
@@ -98,7 +100,11 @@ function renderOperation(operation) {
     resultTypeName = `${baseName}Result`;
   }
 
-  section.push(`export type ${baseName}Response = MeestResponse<${resultTypeName}>;`);
+  section.push(
+    isEnvelope || !resultSchema
+      ? `export type ${baseName}Response = MeestResponse<${resultTypeName}>;`
+      : `export type ${baseName}Response = ${resultTypeName};`,
+  );
 
   const requestInterface = [];
   requestInterface.push(`export interface ${baseName}Request {`);
