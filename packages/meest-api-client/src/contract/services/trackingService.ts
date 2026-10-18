@@ -11,8 +11,6 @@ import type {
 import { ContractService } from './base';
 import type { RequestOptions } from './base';
 
-const MAX_PERIOD_MS = 2 * 3_600_000;
-
 export class TrackingService extends ContractService {
   readonly namespace = 'tracking' as const;
 
@@ -38,13 +36,8 @@ export class TrackingService extends ContractService {
     });
   }
 
-  /** Events in a window of at most two hours from `dateFrom` (checked here when both bounds are `Date`s). */
+  /** Events in a window of at most two hours from `dateFrom` (enforced by Meest). */
   byPeriod(dateFrom: DateInput, dateTo: DateInput, options?: RequestOptions): Promise<TrackingByPeriodResult> {
-    if (dateFrom instanceof Date && dateTo instanceof Date) {
-      const span = dateTo.getTime() - dateFrom.getTime();
-      if (span < 0 || span > MAX_PERIOD_MS)
-        throw new RangeError('tracking.byPeriod accepts a window of at most two hours');
-    }
     return this.httpGet({
       signal: options?.signal,
       path: '/trackingByPeriod/{dateFrom}/{dateTo}',
@@ -67,19 +60,5 @@ export class TrackingService extends ContractService {
       path: '/trackingDelivered/{dateFrom}/{dateTo}/{page}',
       pathParams: { dateFrom: formatDateTime(dateFrom), dateTo: formatDateTime(dateTo), page },
     });
-  }
-
-  /** Walks `delivered` page by page until an empty page. */
-  async *iterateDelivered(
-    dateFrom: DateInput,
-    dateTo: DateInput,
-    options?: RequestOptions,
-  ): AsyncGenerator<TrackingDeliveredResult[number]> {
-    for (let page = 1; ; page += 1) {
-      const items = await this.delivered(dateFrom, dateTo, page, options);
-      if (items.length === 0) return;
-      yield* items;
-      if (items.length < 150) return;
-    }
   }
 }

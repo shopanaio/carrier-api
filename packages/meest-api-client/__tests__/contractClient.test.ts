@@ -182,16 +182,6 @@ describe('requests', () => {
     ]);
   });
 
-  it('iterates delivered pages until a short one', async () => {
-    const page = (n: number) => Array.from({ length: n }, (_, i) => ({ parcelNumber: `P${i}` }));
-    const { client, apiCalls } = makeContract({ handler: call => ok(call.path.endsWith('/1') ? page(150) : page(3)) });
-    const seen: string[] = [];
-    for await (const item of client.tracking.iterateDelivered('2026-01-01 00:00:00', '2026-01-02 00:00:00'))
-      seen.push(item.parcelNumber!);
-    expect(seen).toHaveLength(153);
-    expect(apiCalls()).toHaveLength(2);
-  });
-
   it('registers and misc', async () => {
     const { client, apiCalls } = makeContract({ handler: () => ok({}) });
     await client.registers.createBranch({ parcelsItems: [{ parcelID: 'p1' }] } as never);
@@ -384,15 +374,6 @@ describe('review fixes', () => {
       category: CarrierErrorCategory.Authentication,
       field: 'token',
     });
-  });
-
-  it('rejects a tracking window longer than two hours before sending anything', async () => {
-    const { client, apiCalls } = makeContract();
-    const from = new Date('2026-01-01T10:00:00Z');
-    expect(() => client.tracking.byPeriod(from, new Date('2026-01-01T12:00:01Z'))).toThrow(RangeError);
-    expect(() => client.tracking.byPeriod(from, new Date('2026-01-01T09:00:00Z'))).toThrow(RangeError);
-    await client.tracking.byPeriod(from, new Date('2026-01-01T12:00:00Z'));
-    expect(apiCalls()).toHaveLength(1);
   });
 
   it('requires ids for print calls', () => {
