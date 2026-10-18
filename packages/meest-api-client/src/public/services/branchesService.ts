@@ -15,12 +15,22 @@ import { PublicService, joinFilter } from './base';
 export class BranchesService extends PublicService {
   readonly namespace = 'branches' as const;
 
-  /** Register of branches by server-side filters: the short form, or the full form with `viewdata: 'full'`. */
+  /**
+   * Register of branches by server-side filters: the short form, or the full form with `viewdata: 'full'`.
+   * A filter whose `viewdata` is only known at run time (typed `BranchesFilter`) may return either form.
+   */
   list(
     filter: BranchesFilter & { viewdata: 'full' },
     options?: RequestOptions,
   ): Promise<MeestPublicEnvelope<MeestBranchFull[]>>;
-  list(filter?: BranchesFilter, options?: RequestOptions): Promise<MeestPublicEnvelope<MeestBranchShort[]>>;
+  list(
+    filter?: BranchesFilter & { viewdata?: undefined },
+    options?: RequestOptions,
+  ): Promise<MeestPublicEnvelope<MeestBranchShort[]>>;
+  list(
+    filter: BranchesFilter,
+    options?: RequestOptions,
+  ): Promise<MeestPublicEnvelope<Array<MeestBranchShort | MeestBranchFull>>>;
   list(filter: BranchesFilter = {}, options?: RequestOptions): Promise<MeestPublicEnvelope<unknown>> {
     return this.getJson(
       '/branches',
