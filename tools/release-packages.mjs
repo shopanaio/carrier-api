@@ -1,36 +1,33 @@
 import { execFile } from 'node:child_process';
-import { readFile } from 'node:fs/promises';
+import { readdir, readFile } from 'node:fs/promises';
 import { promisify } from 'node:util';
 
 const execFileAsync = promisify(execFile);
 
-export const publicPackageJsonPaths = [
-  'packages/novaposhta-api-client/package.json',
-  'packages/novaposhta-transport-fetch/package.json',
-  'packages/novaposhta-mcp-server/package.json',
-];
-
+// Every non-private workspace package under packages/, so new carrier packages are checked
+// without editing this list (same rule as tools/validate-changesets.mjs).
 export async function readPublicPackages() {
-  return Promise.all(
-    publicPackageJsonPaths.map(async (packageJsonPath) => ({
-      packageJsonPath,
-      packageJson: JSON.parse(
-        await readFile(
-          new URL(`../${packageJsonPath}`, import.meta.url),
-          'utf8',
-        ),
-      ),
-    })),
+  const packagesDir = new URL('../packages/', import.meta.url);
+  const entries = await readdir(packagesDir, { withFileTypes: true });
+  const packages = await Promise.all(
+    entries
+      .filter(entry => entry.isDirectory())
+      .map(async entry => {
+        const packageJsonPath = `packages/${entry.name}/package.json`;
+        try {
+          const packageJson = JSON.parse(await readFile(new URL(`../${packageJsonPath}`, import.meta.url), 'utf8'));
+          return { packageJsonPath, packageJson };
+        } catch {
+          return undefined;
+        }
+      }),
   );
+  return packages.filter(entry => entry !== undefined && entry.packageJson.private !== true);
 }
 
 export async function isVersionPublished(name, version) {
   try {
-    await execFileAsync(
-      'npm',
-      ['view', `${name}@${version}`, 'version', '--json'],
-      { windowsHide: true },
-    );
+    await execFileAsync('npm', ['view', `${name}@${version}`, 'version', '--json'], { windowsHide: true });
     return true;
   } catch {
     return false;

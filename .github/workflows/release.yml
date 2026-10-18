@@ -11,8 +11,10 @@ on:
       - 'packages/**/scripts/**'
       - 'packages/**/build.js'
       - 'packages/**/rollup.config.js'
+      - 'packages/**/rollup.config.mjs'
       - 'packages/**/tsup.config.ts'
       - 'packages/**/tsconfig.json'
+      - 'tools/rollup-package.mjs'
   workflow_dispatch:
 
 permissions:
@@ -71,7 +73,12 @@ jobs:
           has_package_manifest=false
           has_changeset=false
 
-          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/((src|scripts)/|build\.js$|rollup\.config\.js$|tsup\.config\.ts$|tsconfig\.json$)'; then
+          if printf '%s\n' "$changed_files" | grep -Eq '^packages/[^/]+/((src|scripts)/|build\.js$|rollup\.config\.m?js$|tsup\.config\.ts$|tsconfig\.json$)'; then
+            has_package_source=true
+          fi
+
+          # The shared rollup config changes the build output of every package that uses it.
+          if printf '%s\n' "$changed_files" | grep -qx 'tools/rollup-package.mjs'; then
             has_package_source=true
           fi
 

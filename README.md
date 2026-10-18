@@ -238,18 +238,20 @@ yarn dev                  # Watch mode for API client
 yarn dev:mcp:stdio        # Run MCP server in stdio mode
 yarn dev:mcp:http         # Run MCP server in HTTP mode
 
-# Building
-yarn build                # Build API client
+# Building (every packages/* package, dependencies first)
+yarn build                # Build all packages
 yarn build:mcp            # Build MCP server
+yarn pack:dry-run         # npm pack --dry-run for every publishable package
 
 # Testing
-yarn test                 # Run all tests
-yarn test:watch           # Run tests in watch mode
-yarn test:coverage        # Generate coverage report
+yarn test                 # Unit tests of every package
+yarn test:coverage        # Unit tests with coverage thresholds (what CI runs)
+yarn test:tools           # Scaffolder drift and package discovery tests
 yarn test:mcp             # Run MCP server tests
+yarn test:e2e             # Live Nova Poshta API tests (e2e/, run only on purpose)
 
 # Code Quality
-yarn lint                 # Lint TypeScript files
+yarn lint                 # Lint TypeScript files (root config + MCP server config)
 yarn lint:fix             # Fix linting issues
 yarn format               # Format code with Prettier
 yarn format:check         # Check code formatting

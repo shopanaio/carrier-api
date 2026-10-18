@@ -8,7 +8,7 @@
     "e2e"
   ],
   "scripts": {
-    "build": "yarn build:novaposhta-api-client && yarn build:novaposhta-transport-fetch && yarn build:mcp",
+    "build": "node tools/workspace-packages.mjs run build",
     "build:novaposhta-api-client": "yarn workspace @shopana/novaposhta-api-client build",
     "build:novaposhta-transport-fetch": "yarn workspace @shopana/novaposhta-transport-fetch build",
     "dev": "yarn workspace @shopana/novaposhta-api-client dev",
@@ -18,19 +18,22 @@
     "start:mcp:http": "yarn workspace @shopana/novaposhta-mcp-server start:http",
     "start:mcp:stdio": "yarn workspace @shopana/novaposhta-mcp-server start:stdio",
     "test:mcp": "yarn workspace @shopana/novaposhta-mcp-server test",
-    "test": "yarn workspace @shopana/tests test",
-    "test:watch": "yarn workspace @shopana/tests test:watch",
-    "test:coverage": "yarn workspace @shopana/tests test:coverage",
-    "pack:dry-run": "npm pack --dry-run --workspace=@shopana/novaposhta-api-client && npm pack --dry-run --workspace=@shopana/novaposhta-transport-fetch && npm pack --dry-run --workspace=@shopana/novaposhta-mcp-server",
+    "test": "node tools/workspace-packages.mjs run test",
+    "test:coverage": "node tools/workspace-packages.mjs run test:coverage --fallback test",
+    "test:tools": "node --test tools/__tests__/create-carrier.test.mjs tools/__tests__/workspace-packages.test.mjs",
+    "test:e2e": "yarn workspace @shopana/tests test",
+    "test:e2e:watch": "yarn workspace @shopana/tests test:watch",
+    "pack:dry-run": "node tools/workspace-packages.mjs pack",
+    "create:carrier": "node tools/create-carrier.mjs",
     "changeset": "changeset",
     "changeset:check": "node tools/validate-changesets.mjs",
     "version:packages": "changeset version",
     "release:stable": "yarn build && yarn pack:dry-run && node tools/assert-stable-release.mjs && changeset publish --tag latest",
-    "lint": "eslint packages/novaposhta-api-client/src/**/*.ts",
-    "lint:fix": "eslint packages/novaposhta-api-client/src/**/*.ts --fix",
+    "lint": "eslint \"packages/*/src/**/*.ts\" && yarn workspace @shopana/novaposhta-mcp-server lint",
+    "lint:fix": "eslint \"packages/*/src/**/*.ts\" --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "type-check": "yarn workspaces foreach run type-check"
+    "type-check": "node tools/workspace-packages.mjs run type-check"
   },
   "keywords": [
     "nova-poshta",
@@ -66,6 +69,7 @@
   "homepage": "https://github.com/shopanaio/carrier-api#readme",
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
+    "@eslint/js": "9.39.1",
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",

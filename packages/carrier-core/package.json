@@ -1,0 +1,59 @@
+{
+  "name": "@shopana/carrier-core",
+  "version": "0.0.1",
+  "description": "Carrier-agnostic HTTP core for Shopana carrier API clients: transport, auth strategies with token cache, retry, rate limiting and CarrierError",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "carrier",
+    "carrier-api",
+    "shipping",
+    "logistics",
+    "typescript",
+    "http-client",
+    "retry",
+    "rate-limit",
+    "oauth2",
+    "token-cache"
+  ],
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/carrier-core"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/carrier-core#readme",
+  "dependencies": {},
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

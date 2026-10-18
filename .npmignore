@@ -8,7 +8,7 @@ __tests__/
 rollup.config.js
 tsconfig.json
 jest.config.js
-.eslintrc.js
+eslint.config.mjs
 .prettierrc.js
 
 # Development files
@@ -27,7 +27,7 @@ yarn.lock
 .git/
 .gitignore
 .prettierrc.js
-.eslintrc.js
+eslint.config.mjs
 
 # IDE files
 .vscode/
