@@ -1,6 +1,6 @@
 {
   "name": "@shopana/carrier-core",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Carrier-agnostic HTTP core for Shopana carrier API clients: transport, auth strategies with token cache, retry, rate limiting and CarrierError",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
