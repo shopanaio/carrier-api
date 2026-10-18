@@ -385,18 +385,9 @@ export type ParcelRequestBody = {
   weight?: number;
   sendingDate?: string;
   info4Sticker?: boolean;
-  pudoID?: string;
-  pudoPointType?: string;
-  pudoDescription?: string;
   AgentID?: string;
   orderNumber?: string;
   barcode?: string;
-  barcode_myMeest?: string;
-  /** BAG_ID_IN */
-  bagNumber?: string;
-  /** AWB */
-  awbNumber?: string;
-  delivery_payment_payer?: string;
   promocode?: string;
   expectedPickUpDate?: {
     date?: string;
@@ -449,6 +440,7 @@ export type ParcelRequestBody = {
     placeVolume: number;
     volume?: number;
     insurance?: number;
+    packID?: string;
     length?: number;
     width?: number;
     height?: number;
@@ -487,28 +479,10 @@ export type ParcelRequestBody = {
     width?: number;
     height?: number;
   }>;
-  deliveryOptions?: {
-    minAmountGoods?: number;
-    amountDeliveryShortageGoods?: number;
-  };
   cardForCOD?: {
     number: string;
     ownername?: string;
     ownermobile: string;
-  };
-  branchForCOD?: {
-    branchID: string;
-    receiver?: {
-      firstname: string;
-      middlename: string;
-      lastname: string;
-    };
-    payer?: {
-      firstname: string;
-      middlename: string;
-      lastname: string;
-      phone?: string;
-    };
   };
 };
 /** Result payload */
@@ -587,18 +561,10 @@ export type ParcelPutRequestBody = {
   weight?: number;
   sendingDate?: string;
   info4Sticker?: boolean;
-  pudoID?: string;
-  pudoPointType?: string;
-  pudoDescription?: string;
   AgentID?: string;
   orderNumber?: string;
   barcode?: string;
-  barcode_myMeest?: string;
-  /** BAG_ID_IN */
-  bagNumber?: string;
-  /** AWB */
-  awbNumber?: string;
-  delivery_payment_payer?: string;
+  promocode?: string;
   expectedPickUpDate?: {
     date?: string;
     timeFrom?: string;
@@ -627,7 +593,7 @@ export type ParcelPutRequestBody = {
   receiver?: {
     name: string;
     phone: string;
-    zipCode: string;
+    zipCode?: string;
     branchID: string;
     addressID: string;
     building: string;
@@ -645,7 +611,9 @@ export type ParcelPutRequestBody = {
   };
   placesItems?: Array<{
     quantity: number;
-    weight: number;
+    placeWeight: number;
+    weight?: number;
+    placeVolume: number;
     volume?: number;
     insurance?: number;
     packID?: string;
@@ -687,14 +655,10 @@ export type ParcelPutRequestBody = {
     width?: number;
     height?: number;
   }>;
-  deliveryOptions?: {
-    minAmountGoods?: number;
-    amountDeliveryShortageGoods?: number;
-  };
   cardForCOD?: {
     number: string;
     ownername?: string;
-    ownermobile?: string;
+    ownermobile: string;
   };
 };
 export interface ParcelPutPathParams {
@@ -853,7 +817,7 @@ export interface Sticker100Request {
 
 // print :: GET /print/sticker100A4/{printValue}
 export interface Sticker100A4QueryParams {
-  position: string;
+  position?: string;
 }
 export interface Sticker100A4PathParams {
   printValue: string;
@@ -863,7 +827,7 @@ export type Sticker100A4Result = unknown;
 export type Sticker100A4Response = MeestResponse<Sticker100A4Result>;
 export interface Sticker100A4Request {
   path: Sticker100A4PathParams;
-  query: Sticker100A4QueryParams;
+  query?: Sticker100A4QueryParams;
 }
 
 // registers :: GET /availableTimeSlots
@@ -952,6 +916,7 @@ export type RegisterPickupRequestBody = {
   contractID?: string;
   payType: string;
   receiverPay?: boolean;
+  multiParcelPickup?: boolean;
   expectedPickUpDate?: {
     date: string;
     timeFrom: string;
@@ -974,6 +939,10 @@ export type RegisterPickupResult = {
   registerID?: string;
   registerNumber?: string;
   pickUpDate?: string;
+  multiParcelPickup?: boolean;
+  multiParcelPickupCost?: number;
+  parcelsWithPostedMultiPickup?: Array<string>;
+  parcelsWithPostedPickup?: Array<string>;
 };
 export type RegisterPickupResponse = MeestResponse<RegisterPickupResult>;
 export interface RegisterPickupRequest {
@@ -997,6 +966,7 @@ export interface RegisterPickupDeleteRequest {
 export type RegisterPickupPutRequestBody = {
   notation?: string;
   contractID?: string;
+  Edit?: boolean;
   payType: string;
   receiverPay: boolean;
   expectedPickUpDate?: {
@@ -1114,6 +1084,7 @@ export interface AddressSearchByCoordRequest {
 export type BranchSearchRequestBody = {
   filters?: {
     branchID?: string;
+    branchNumber?: string;
     branchNo?: number;
     branchTypeID?: string;
     branchDescr?: string;
@@ -1127,14 +1098,9 @@ export type BranchSearchRequestBody = {
     networkPartner?: string;
     networkPartnerCode?: string;
     addressMoreInformation?: string;
-    CheckoutEPS?: boolean;
   };
   getCobranding?: boolean;
   '\u0441obrandingCode'?: string;
-  in?: boolean;
-  test?: boolean;
-  includeInboundRestriction?: boolean;
-  BranchLoadSchedule?: boolean;
 };
 /** Result payload */
 export type BranchSearchResult = Array<{
@@ -1164,6 +1130,14 @@ export type BranchSearchResult = Array<{
     descrSearchUA?: string;
     descrSearchLoc?: string;
   };
+  ManagerReg?: string;
+  PhoneManagerReg?: string;
+  EMailManagerReg?: string;
+  ManagerTer?: string;
+  PhoneManagerTer?: string;
+  EMailManagerTer?: string;
+  ManagerRegDetail?: string;
+  ManagerTerDetail?: string;
   addressID?: string;
   addressDescr?: {
     descrUA?: string;
@@ -1555,6 +1529,7 @@ export type RegionSearchRequestBody = {
 export type RegionSearchResult = Array<{
   regionID?: string;
   regionKATUU?: string;
+  displayExport?: boolean;
   regionDescr?: {
     descrUA?: string;
     descrRU?: string;
@@ -1631,17 +1606,30 @@ export type ParcelInfoTrackingResult = Array<{
     name?: string;
     phone?: string;
     cityUA?: string;
+    paymentMethods?: Array<{
+      uid?: string;
+      nameUkr?: string;
+    }>;
   };
   receiver?: {
     name?: string;
     phone?: string;
     cityUA?: string;
+    paymentMethods?: Array<{
+      uid?: string;
+      nameUkr?: string;
+    }>;
   };
   DetailingParcelItems?: Array<{
     formatName?: string;
     weight?: number;
     insurance?: number;
   }>;
+  OSM_ID?: string;
+  InboundRestriction?: boolean;
+  InboundRestrictionStartDate?: string;
+  InboundRestrictionEndDate?: string;
+  FactDeliveryDate?: string;
 }>;
 export type ParcelInfoTrackingResponse = MeestResponse<ParcelInfoTrackingResult>;
 export interface ParcelInfoTrackingRequest {

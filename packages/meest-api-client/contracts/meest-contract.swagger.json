@@ -517,7 +517,7 @@
                     },
                     "regionKATUU": {
                       "type": "string",
-                      "example": "4600000000"
+                      "example": "4610136600"
                     },
                     "regionDescr": {
                       "type": "string"
@@ -581,6 +581,10 @@
                       "regionKATUU": {
                         "type": "string",
                         "example": "4600000000"
+                      },
+                      "displayExport": {
+                        "type": "boolean",
+                        "example": true
                       },
                       "regionDescr": {
                         "type": "object",
@@ -1622,38 +1626,41 @@
                   "properties": {
                     "branchID": {
                       "type": "string",
-                      "example": "e9bcee91-6bde-11e4-81a4-003048d2b473"
+                      "example": "0d161467-ffac-11e8-80d9-1c98ec135261"
+                    },
+                    "branchNumber": {
+                      "type": "string",
+                      "example": "01"
                     },
                     "branchNo": {
                       "type": "integer",
                       "format": "int32",
-                      "example": 465
+                      "example": 5158
                     },
                     "branchTypeID": {
                       "type": "string",
-                      "example": "23c4f6c1-b1bb-49f7-ad96-9b014206fe8e"
+                      "example": "ac82815e-10fe-4eb7-809a-c34be4553213"
                     },
                     "branchDescr": {
-                      "type": "string",
-                      "example": ""
+                      "type": "string"
                     },
                     "cityID": {
                       "type": "string",
-                      "example": "5cb61671-749b-11df-b112-00215aee3ebe"
+                      "example": "62c3d54a-749b-11df-b112-00215aee3ebe"
                     },
                     "cityDescr": {
                       "type": "string"
                     },
                     "districtID": {
                       "type": "string",
-                      "example": "e672324c-4237-11e3-9df6-003048d2b473"
+                      "example": "992ee172-14c9-11ee-80bd-000c2961d091"
                     },
                     "districtDescr": {
                       "type": "string"
                     },
                     "regionID": {
                       "type": "string",
-                      "example": "d15e3021-60b0-11de-be1e-0030485903e8"
+                      "example": "d15e3024-60b0-11de-be1e-0030485903e8"
                     },
                     "regionDescr": {
                       "type": "string"
@@ -1667,14 +1674,10 @@
                     },
                     "networkPartnerCode": {
                       "type": "string",
-                      "example": "201"
+                      "example": "146"
                     },
                     "addressMoreInformation": {
                       "type": "string"
-                    },
-                    "CheckoutEPS": {
-                      "type": "boolean",
-                      "example": true
                     }
                   }
                 },
@@ -1684,23 +1687,7 @@
                 },
                 "\u0441obrandingCode": {
                   "type": "string",
-                  "example": "201"
-                },
-                "in": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "test": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "includeInboundRestriction": {
-                  "type": "boolean",
-                  "example": true
-                },
-                "BranchLoadSchedule": {
-                  "type": "boolean",
-                  "example": true
+                  "example": "91"
                 }
               },
               "xml": {
@@ -1764,16 +1751,18 @@
                       },
                       "branchNumber": {
                         "type": "string",
-                        "example": "465"
+                        "example": "01"
                       },
                       "branchType": {
                         "type": "string"
                       },
                       "isBranchOpen": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "isBranchClosed": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "branchTypeID": {
                         "type": "string",
@@ -1804,10 +1793,12 @@
                         "type": "string"
                       },
                       "cash": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "networkDepartment": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "networkPartner": {
                         "type": "string"
@@ -1832,6 +1823,36 @@
                             "type": "string"
                           }
                         }
+                      },
+                      "ManagerReg": {
+                        "type": "string"
+                      },
+                      "PhoneManagerReg": {
+                        "type": "string",
+                        "example": "380671112233"
+                      },
+                      "EMailManagerReg": {
+                        "type": "string",
+                        "example": "example@domain.com."
+                      },
+                      "ManagerTer": {
+                        "type": "string"
+                      },
+                      "PhoneManagerTer": {
+                        "type": "string",
+                        "example": "380671112233"
+                      },
+                      "EMailManagerTer": {
+                        "type": "string",
+                        "example": "example@domain.com."
+                      },
+                      "ManagerRegDetail": {
+                        "type": "string",
+                        "example": ""
+                      },
+                      "ManagerTerDetail": {
+                        "type": "string",
+                        "example": ""
                       },
                       "addressID": {
                         "type": "string",
@@ -2052,22 +2073,28 @@
                             }
                           },
                           "formatLimit": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           },
                           "cashPayUnavailible": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           },
                           "sendingOnly": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           },
                           "receivingOnly": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           },
                           "receiverCellPhoneRequired": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           },
                           "terminalCash": {
-                            "type": "boolean"
+                            "type": "boolean",
+                            "example": true
                           }
                         }
                       },
@@ -2076,19 +2103,24 @@
                         "example": "UA"
                       },
                       "CheckoutEPS": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "overloaded": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "favourite": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "reserve": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "InboundRestriction": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": true
                       },
                       "InboundRestrictionStartDate": {
                         "type": "string",
@@ -2178,7 +2210,8 @@
                               "type": "string"
                             },
                             "\u043aeflectMAP": {
-                              "type": "boolean"
+                              "type": "boolean",
+                              "example": true
                             }
                           },
                           "xml": {
@@ -2854,7 +2887,7 @@
           {
             "name": "position",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string"
           }
         ],
@@ -3606,26 +3639,26 @@
               "properties": {
                 "parcelNumber": {
                   "type": "string",
-                  "example": "TST-2550636"
+                  "example": "TEST-12345"
                 },
                 "subAgent": {
                   "type": "string",
-                  "example": "546234532"
+                  "example": "123456789"
                 },
                 "notation": {
-                  "type": "string",
-                  "example": "notation"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
                 },
                 "payType": {
                   "type": "string",
                   "example": "cash"
                 },
                 "receiverPay": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "COD": {
                   "type": "number",
@@ -3635,56 +3668,27 @@
                 "weight": {
                   "type": "number",
                   "format": "float",
-                  "example": 30.123
+                  "example": 12.6
                 },
                 "sendingDate": {
                   "type": "string",
-                  "example": "19.03.2019"
+                  "example": "25.12.2025"
                 },
                 "info4Sticker": {
-                  "type": "boolean"
-                },
-                "pudoID": {
-                  "type": "string",
-                  "example": "S08757"
-                },
-                "pudoPointType": {
-                  "type": "string",
-                  "example": "HERMESUK"
-                },
-                "pudoDescription": {
-                  "type": "string",
-                  "example": "SPAR NEWTOWN SERVICES"
+                  "type": "boolean",
+                  "example": true
                 },
                 "AgentID": {
                   "type": "string",
-                  "example": "c4be55b2-80d2-4b25-b956-53547d06ad01"
+                  "example": "a1bc23d4-56e7-8f90-g123-45678h90ij12"
                 },
                 "orderNumber": {
                   "type": "string",
-                  "example": "1234567890123456789012345"
+                  "example": "123456789012345"
                 },
                 "barcode": {
                   "type": "string",
-                  "example": "CR145057135EE"
-                },
-                "barcode_myMeest": {
-                  "type": "string",
-                  "example": "CR145057135EE"
-                },
-                "bagNumber": {
-                  "type": "string",
-                  "description": "BAG_ID_IN",
-                  "example": "1234567890"
-                },
-                "awbNumber": {
-                  "type": "string",
-                  "description": "AWB",
-                  "example": "1234567890"
-                },
-                "delivery_payment_payer": {
-                  "type": "string",
-                  "example": "2"
+                  "example": "123-4567890"
                 },
                 "promocode": {
                   "type": "string",
@@ -3695,7 +3699,7 @@
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "26.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -3712,7 +3716,7 @@
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "16.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -3728,32 +3732,31 @@
                   "type": "object",
                   "properties": {
                     "name": {
-                      "type": "string",
-                      "example": "Dawn Lyons"
+                      "type": "string"
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+1-202-555-0171"
+                      "example": "+380671112233"
                     },
                     "zipCode": {
                       "type": "string",
-                      "example": "12601"
+                      "example": "79035"
                     },
                     "branchID": {
                       "type": "string",
-                      "example": "328a79e5-8452-11e8-80d4-1c98ec135262"
+                      "example": "0d161467-ffac-11e8-80d9-1c98ec135261"
                     },
                     "addressID": {
                       "type": "string",
-                      "example": "da9108ea-e0d3-11df-9b37-00215aee3eb1"
+                      "example": "da9108ea-e0d3-11df-9b37-00215aee3ebe"
                     },
                     "building": {
                       "type": "string",
-                      "example": "3"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "454"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "integer",
@@ -3765,14 +3768,14 @@
                     },
                     "service": {
                       "type": "string",
-                      "example": "Door"
+                      "example": "Branch"
                     },
                     "notation": {
                       "type": "string"
                     },
                     "countryId": {
                       "type": "string",
-                      "example": "073a1984-2ce7-12e3-9df6-003048d4b473"
+                      "example": "c35b6195-4ea3-11de-8591-001d600938f8"
                     },
                     "cityDescr": {
                       "type": "string"
@@ -3795,32 +3798,32 @@
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+380920639860"
+                      "example": "+380671112233"
                     },
                     "zipCode": {
                       "type": "string",
-                      "example": "98891"
+                      "example": "79035"
                     },
                     "branchID": {
                       "type": "string",
-                      "example": "f652c0c9-8b60-11e8-80d4-1c98ec135261"
+                      "example": "0d161467-ffac-11e8-80d9-1c98ec135261"
                     },
                     "addressID": {
                       "type": "string",
-                      "example": "6e23d513-e0d2-11df-9b37-00215aee3eb1"
+                      "example": "da9108ea-e0d3-11df-9b37-00215aee3ebe"
                     },
                     "building": {
                       "type": "string",
-                      "example": "50"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "112"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "integer",
                       "format": "int32",
-                      "example": 8
+                      "example": 4
                     },
                     "corps": {
                       "type": "string"
@@ -3831,7 +3834,7 @@
                     },
                     "countryId": {
                       "type": "string",
-                      "example": "073a1984-2ce7-12e3-9df6-003048d4b473"
+                      "example": "c35b6195-4ea3-11de-8591-001d600938f8"
                     },
                     "regionDescr": {
                       "type": "string"
@@ -3849,7 +3852,8 @@
                       "type": "string"
                     },
                     "branchIdExternal": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "1ab2cde3-f4g5-67h8-9i0j-1234567890kl"
                     }
                   },
                   "required": [
@@ -3873,32 +3877,36 @@
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 1
+                        "example": 3
                       },
                       "placeWeight": {
                         "type": "number",
                         "format": "float",
-                        "example": 0
+                        "example": 4.2
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 0.589
+                        "example": 12.6
                       },
                       "placeVolume": {
                         "type": "number",
                         "format": "float",
-                        "example": 0
+                        "example": 0.03
                       },
                       "volume": {
                         "type": "number",
                         "format": "float",
-                        "example": 0.12
+                        "example": 0.09
                       },
                       "insurance": {
                         "type": "number",
                         "format": "float",
                         "example": 200
+                      },
+                      "packID": {
+                        "type": "string",
+                        "example": "c26956ba-a2ce-11e4-b90b-003048d2b473"
                       },
                       "length": {
                         "type": "integer",
@@ -3916,7 +3924,8 @@
                         "example": 10
                       },
                       "pallet": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": false
                       },
                       "wheels": {
                         "type": "string",
@@ -3924,7 +3933,7 @@
                       },
                       "size": {
                         "type": "string",
-                        "example": "xs, s, m, l, xl"
+                        "example": "S"
                       },
                       "formatID": {
                         "type": "string",
@@ -3952,7 +3961,7 @@
                     "properties": {
                       "conditionID": {
                         "type": "string",
-                        "example": "9c6c4d1e-b2cc-11e0-a658-003048d2b473"
+                        "example": "15987417-183d-11ea-80e7-1c98ec135261"
                       }
                     },
                     "xml": {
@@ -3970,45 +3979,46 @@
                     "type": "object",
                     "properties": {
                       "contentName": {
-                        "type": "string",
-                        "example": "trouses"
+                        "type": "string"
                       },
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 1
+                        "example": 3
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 22.785
+                        "example": 12.6
                       },
                       "value": {
                         "type": "number",
                         "format": "float",
-                        "example": 100.12
+                        "example": 150
                       },
                       "customsCode": {
                         "type": "string",
-                        "example": "200"
+                        "example": "6403190000"
                       },
                       "country": {
                         "type": "string",
-                        "example": "DE"
+                        "example": "UA"
                       },
                       "size": {
                         "type": "string",
-                        "example": "x"
+                        "example": "S"
                       },
                       "ean13": {
                         "type": "string",
-                        "example": "2150000000017"
+                        "example": "1234567890123"
                       },
                       "gender": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "male"
                       },
                       "valueReceiverCurrency": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "200"
                       }
                     },
                     "required": [
@@ -4033,12 +4043,12 @@
                     "properties": {
                       "agentId": {
                         "type": "string",
-                        "example": "546234532"
+                        "example": "123456789"
                       },
                       "cod": {
                         "type": "number",
                         "format": "float",
-                        "example": 1200
+                        "example": 600
                       }
                     },
                     "required": [
@@ -4061,44 +4071,44 @@
                     "properties": {
                       "article": {
                         "type": "string",
-                        "example": "651-24523"
+                        "example": "1234567890123"
                       },
                       "name": {
                         "type": "string"
                       },
                       "serialNumber": {
                         "type": "string",
-                        "example": "SN34943516546546"
+                        "example": "AB12345678"
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 12
+                        "example": 4.2
                       },
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 2
+                        "example": 3
                       },
                       "price": {
                         "type": "number",
                         "format": "float",
-                        "example": 8700
+                        "example": 200
                       },
                       "length": {
                         "type": "number",
                         "format": "float",
-                        "example": 130
+                        "example": 20
                       },
                       "width": {
                         "type": "number",
                         "format": "float",
-                        "example": 25
+                        "example": 30
                       },
                       "height": {
                         "type": "number",
                         "format": "float",
-                        "example": 75
+                        "example": 10
                       }
                     },
                     "required": [
@@ -4113,21 +4123,6 @@
                     }
                   }
                 },
-                "deliveryOptions": {
-                  "type": "object",
-                  "properties": {
-                    "minAmountGoods": {
-                      "type": "number",
-                      "format": "float",
-                      "example": 500
-                    },
-                    "amountDeliveryShortageGoods": {
-                      "type": "number",
-                      "format": "float",
-                      "example": 67.8
-                    }
-                  }
-                },
                 "cardForCOD": {
                   "type": "object",
                   "properties": {
@@ -4137,7 +4132,7 @@
                     },
                     "ownername": {
                       "type": "string",
-                      "example": "Ivanov Ivan Ivanovich"
+                      "example": "Khmelnytskyi Bohdan Mykhailovych"
                     },
                     "ownermobile": {
                       "type": "string",
@@ -4147,60 +4142,6 @@
                   "required": [
                     "number",
                     "ownermobile"
-                  ]
-                },
-                "branchForCOD": {
-                  "type": "object",
-                  "properties": {
-                    "branchID": {
-                      "type": "string",
-                      "example": "a72c6bd7-d51e-11e7-80cc-1c98ec135261"
-                    },
-                    "receiver": {
-                      "type": "object",
-                      "properties": {
-                        "firstname": {
-                          "type": "string"
-                        },
-                        "middlename": {
-                          "type": "string"
-                        },
-                        "lastname": {
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "firstname",
-                        "middlename",
-                        "lastname"
-                      ]
-                    },
-                    "payer": {
-                      "type": "object",
-                      "properties": {
-                        "firstname": {
-                          "type": "string"
-                        },
-                        "middlename": {
-                          "type": "string"
-                        },
-                        "lastname": {
-                          "type": "string"
-                        },
-                        "phone": {
-                          "type": "string",
-                          "example": "380501234567"
-                        }
-                      },
-                      "required": [
-                        "firstname",
-                        "middlename",
-                        "lastname"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "branchID"
                   ]
                 }
               },
@@ -4415,26 +4356,26 @@
               "properties": {
                 "parcelNumber": {
                   "type": "string",
-                  "example": "TST-2550636"
+                  "example": "TEST-12345"
                 },
                 "subAgent": {
                   "type": "string",
-                  "example": "546234532"
+                  "example": "123456789"
                 },
                 "notation": {
-                  "type": "string",
-                  "example": "notation"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
                 },
                 "payType": {
                   "type": "string",
                   "example": "cash"
                 },
                 "receiverPay": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "COD": {
                   "type": "number",
@@ -4444,64 +4385,38 @@
                 "weight": {
                   "type": "number",
                   "format": "float",
-                  "example": 30.123
+                  "example": 12.6
                 },
                 "sendingDate": {
                   "type": "string",
-                  "example": "19.03.2019"
+                  "example": "25.12.2025"
                 },
                 "info4Sticker": {
                   "type": "boolean",
-                  "description": " "
-                },
-                "pudoID": {
-                  "type": "string",
-                  "example": "S08757"
-                },
-                "pudoPointType": {
-                  "type": "string",
-                  "example": "HERMESUK"
-                },
-                "pudoDescription": {
-                  "type": "string",
-                  "example": "SPAR NEWTOWN SERVICES"
+                  "example": true
                 },
                 "AgentID": {
                   "type": "string",
-                  "example": "c4be55b2-80d2-4b25-b956-53547d06ad01"
+                  "example": "a1bc23d4-56e7-8f90-g123-45678h90ij12"
                 },
                 "orderNumber": {
                   "type": "string",
-                  "example": "1234567890123456789012345"
+                  "example": "123456789012345"
                 },
                 "barcode": {
                   "type": "string",
-                  "example": "CR145057135EE"
+                  "example": "123-4567890"
                 },
-                "barcode_myMeest": {
+                "promocode": {
                   "type": "string",
-                  "example": "CR145057135EE"
-                },
-                "bagNumber": {
-                  "type": "string",
-                  "description": "BAG_ID_IN",
-                  "example": "1234567890"
-                },
-                "awbNumber": {
-                  "type": "string",
-                  "description": "AWB",
-                  "example": "1234567890"
-                },
-                "delivery_payment_payer": {
-                  "type": "string",
-                  "example": "2"
+                  "example": "WE789R"
                 },
                 "expectedPickUpDate": {
                   "type": "object",
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "26.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -4518,7 +4433,7 @@
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "16.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -4534,20 +4449,19 @@
                   "type": "object",
                   "properties": {
                     "name": {
-                      "type": "string",
-                      "example": "Dawn Lyons"
+                      "type": "string"
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+1-202-555-0171"
+                      "example": "+380671112233"
                     },
                     "zipCode": {
                       "type": "string",
-                      "example": "12601"
+                      "example": "79035"
                     },
                     "branchID": {
                       "type": "string",
-                      "example": "328a79e5-8452-11e8-80d4-1c98ec135261"
+                      "example": "0d161467-ffac-11e8-80d9-1c98ec135261"
                     },
                     "addressID": {
                       "type": "string",
@@ -4555,11 +4469,11 @@
                     },
                     "building": {
                       "type": "string",
-                      "example": "3"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "454"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "integer",
@@ -4571,14 +4485,14 @@
                     },
                     "service": {
                       "type": "string",
-                      "example": "Door"
+                      "example": "Branch"
                     },
                     "notation": {
                       "type": "string"
                     },
                     "countryId": {
                       "type": "string",
-                      "example": "073a1984-2ce7-12e3-9df6-003048d4b473"
+                      "example": "c35b6195-4ea3-11de-8591-001d600938f8"
                     },
                     "cityDescr": {
                       "type": "string"
@@ -4601,32 +4515,32 @@
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+380920639860"
+                      "example": "+380671112233"
                     },
                     "zipCode": {
                       "type": "string",
-                      "example": "98891"
+                      "example": "79035"
                     },
                     "branchID": {
                       "type": "string",
-                      "example": "f652c0c9-8b60-11e8-80d4-1c98ec135261"
+                      "example": "0d161467-ffac-11e8-80d9-1c98ec135261"
                     },
                     "addressID": {
                       "type": "string",
-                      "example": "6e23d513-e0d2-11df-9b37-00215aee3ebe"
+                      "example": "da9108ea-e0d3-11df-9b37-00215aee3ebe"
                     },
                     "building": {
                       "type": "string",
-                      "example": "50"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "112"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "integer",
                       "format": "int32",
-                      "example": 8
+                      "example": 4
                     },
                     "corps": {
                       "type": "string"
@@ -4637,7 +4551,7 @@
                     },
                     "countryId": {
                       "type": "string",
-                      "example": "073a1984-2ce7-12e3-9df6-003048d4b473"
+                      "example": "c35b6195-4ea3-11de-8591-001d600938f8"
                     },
                     "regionDescr": {
                       "type": "string"
@@ -4655,13 +4569,13 @@
                       "type": "string"
                     },
                     "branchIdExternal": {
-                      "type": "string"
+                      "type": "string",
+                      "example": "1ab2cde3-f4g5-67h8-9i0j-1234567890kl"
                     }
                   },
                   "required": [
                     "name",
                     "phone",
-                    "zipCode",
                     "branchID",
                     "addressID",
                     "building",
@@ -4680,17 +4594,27 @@
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 1
+                        "example": 3
+                      },
+                      "placeWeight": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.2
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 0.589
+                        "example": 12.6
+                      },
+                      "placeVolume": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.03
                       },
                       "volume": {
                         "type": "number",
                         "format": "float",
-                        "example": 5.121
+                        "example": 0.09
                       },
                       "insurance": {
                         "type": "number",
@@ -4717,24 +4641,26 @@
                         "example": 10
                       },
                       "pallet": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "example": false
                       },
                       "wheels": {
                         "type": "string",
-                        "example": "r13"
+                        "example": "R13"
                       },
                       "size": {
                         "type": "string",
-                        "example": "xs, s, m, l, xl"
+                        "example": "S"
                       },
                       "formatID": {
                         "type": "string",
-                        "example": "XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX"
+                        "example": "c29bb3cf-4954-11df-9fc4-0030485903e8"
                       }
                     },
                     "required": [
                       "quantity",
-                      "weight"
+                      "placeWeight",
+                      "placeVolume"
                     ],
                     "xml": {
                       "name": "item"
@@ -4752,7 +4678,7 @@
                     "properties": {
                       "conditionID": {
                         "type": "string",
-                        "example": "9c6c4d1e-b2cc-11e0-a658-003048d2b473"
+                        "example": "15987417-183d-11ea-80e7-1c98ec135261"
                       }
                     },
                     "xml": {
@@ -4770,45 +4696,46 @@
                     "type": "object",
                     "properties": {
                       "contentName": {
-                        "type": "string",
-                        "example": "trouses"
+                        "type": "string"
                       },
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 1
+                        "example": 3
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 22.785
+                        "example": 12.6
                       },
                       "value": {
                         "type": "number",
                         "format": "float",
-                        "example": 100.12
+                        "example": 150
                       },
                       "customsCode": {
                         "type": "string",
-                        "example": "200"
+                        "example": "6403190000"
                       },
                       "country": {
                         "type": "string",
-                        "example": "DE"
+                        "example": "UA"
                       },
                       "size": {
                         "type": "string",
-                        "example": "x"
+                        "example": "S"
                       },
                       "ean13": {
                         "type": "string",
-                        "example": "2150000000017"
+                        "example": "1234567890123"
                       },
                       "gender": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "male"
                       },
                       "valueReceiverCurrency": {
-                        "type": "string"
+                        "type": "string",
+                        "example": "200"
                       }
                     },
                     "required": [
@@ -4833,12 +4760,12 @@
                     "properties": {
                       "agentId": {
                         "type": "string",
-                        "example": "546234532"
+                        "example": "123456789"
                       },
                       "cod": {
                         "type": "number",
                         "format": "float",
-                        "example": 1200
+                        "example": 600
                       }
                     },
                     "required": [
@@ -4861,44 +4788,44 @@
                     "properties": {
                       "article": {
                         "type": "string",
-                        "example": "651-24523"
+                        "example": "1234567890123"
                       },
                       "name": {
                         "type": "string"
                       },
                       "serialNumber": {
                         "type": "string",
-                        "example": "SN34943516546546"
+                        "example": "AB12345678"
                       },
                       "weight": {
                         "type": "number",
                         "format": "float",
-                        "example": 12
+                        "example": 4.2
                       },
                       "quantity": {
                         "type": "integer",
                         "format": "int32",
-                        "example": 2
+                        "example": 3
                       },
                       "price": {
                         "type": "number",
                         "format": "float",
-                        "example": 8700
+                        "example": 200
                       },
                       "length": {
                         "type": "number",
                         "format": "float",
-                        "example": 130
+                        "example": 20
                       },
                       "width": {
                         "type": "number",
                         "format": "float",
-                        "example": 25
+                        "example": 30
                       },
                       "height": {
                         "type": "number",
                         "format": "float",
-                        "example": 75
+                        "example": 10
                       }
                     },
                     "required": [
@@ -4913,21 +4840,6 @@
                     }
                   }
                 },
-                "deliveryOptions": {
-                  "type": "object",
-                  "properties": {
-                    "minAmountGoods": {
-                      "type": "number",
-                      "format": "float",
-                      "example": 500
-                    },
-                    "amountDeliveryShortageGoods": {
-                      "type": "number",
-                      "format": "float",
-                      "example": 67.8
-                    }
-                  }
-                },
                 "cardForCOD": {
                   "type": "object",
                   "properties": {
@@ -4937,7 +4849,7 @@
                     },
                     "ownername": {
                       "type": "string",
-                      "example": "Ivanov Ivan Ivanovich"
+                      "example": "Khmelnytskyi Bohdan Mykhailovych"
                     },
                     "ownermobile": {
                       "type": "string",
@@ -4945,7 +4857,8 @@
                     }
                   },
                   "required": [
-                    "number"
+                    "number",
+                    "ownermobile"
                   ]
                 }
               },
@@ -6328,6 +6241,28 @@
                           },
                           "cityUA": {
                             "type": "string"
+                          },
+                          "paymentMethods": {
+                            "type": "array",
+                            "xml": {
+                              "name": "paymentMethods",
+                              "wrapped": true
+                            },
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "uid": {
+                                  "type": "string",
+                                  "example": "609d0b87-1768-11ef-80c5-000c2961d091"
+                                },
+                                "nameUkr": {
+                                  "type": "string"
+                                }
+                              },
+                              "xml": {
+                                "name": "..."
+                              }
+                            }
                           }
                         }
                       },
@@ -6343,6 +6278,28 @@
                           },
                           "cityUA": {
                             "type": "string"
+                          },
+                          "paymentMethods": {
+                            "type": "array",
+                            "xml": {
+                              "name": "paymentMethods",
+                              "wrapped": true
+                            },
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "uid": {
+                                  "type": "string",
+                                  "example": "609d0b87-1768-11ef-80c5-000c2961d091"
+                                },
+                                "nameUkr": {
+                                  "type": "string"
+                                }
+                              },
+                              "xml": {
+                                "name": "..."
+                              }
+                            }
                           }
                         }
                       },
@@ -6373,6 +6330,26 @@
                             "name": "..."
                           }
                         }
+                      },
+                      "OSM_ID": {
+                        "type": "string",
+                        "example": "RAR01M"
+                      },
+                      "InboundRestriction": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "InboundRestrictionStartDate": {
+                        "type": "string",
+                        "example": "2025-12-25T10:00:00"
+                      },
+                      "InboundRestrictionEndDate": {
+                        "type": "string",
+                        "example": "2025-12-30T10:00:00"
+                      },
+                      "FactDeliveryDate": {
+                        "type": "string",
+                        "example": "25.12.2025"
                       }
                     },
                     "xml": {
@@ -6715,12 +6692,11 @@
               "type": "object",
               "properties": {
                 "notation": {
-                  "type": "string",
-                  "example": "notation"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
                 },
                 "parcelsItems": {
                   "type": "array",
@@ -6733,7 +6709,7 @@
                     "properties": {
                       "parcelID": {
                         "type": "string",
-                        "example": "890994b0-82bd-11e9-80e0-1c98ec135261"
+                        "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
                       }
                     },
                     "required": [
@@ -6742,15 +6718,9 @@
                     "xml": {
                       "name": "item"
                     }
-                  },
-                  "required": [
-                    "parcelID"
-                  ]
+                  }
                 }
               },
-              "required": [
-                "parcelID"
-              ],
               "xml": {
                 "name": "data"
               }
@@ -6851,12 +6821,11 @@
               "type": "object",
               "properties": {
                 "notation": {
-                  "type": "string",
-                  "example": "notation"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
                 },
                 "parcelsItems": {
                   "type": "array",
@@ -6869,7 +6838,7 @@
                     "properties": {
                       "parcelID": {
                         "type": "string",
-                        "example": "890994b0-82bd-11e9-80e0-1c98ec135261"
+                        "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
                       }
                     },
                     "required": [
@@ -6878,15 +6847,9 @@
                     "xml": {
                       "name": "item"
                     }
-                  },
-                  "required": [
-                    "parcelID"
-                  ]
+                  }
                 }
               },
-              "required": [
-                "parcelID"
-              ],
               "xml": {
                 "name": "data"
               }
@@ -7043,26 +7006,30 @@
               "type": "object",
               "properties": {
                 "notation": {
-                  "type": "string",
-                  "example": "Comment"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
                 },
                 "payType": {
                   "type": "string",
                   "example": "cash"
                 },
                 "receiverPay": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
+                },
+                "multiParcelPickup": {
+                  "type": "boolean",
+                  "example": true
                 },
                 "expectedPickUpDate": {
                   "type": "object",
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "26.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -7083,12 +7050,11 @@
                   "type": "object",
                   "properties": {
                     "name": {
-                      "type": "string",
-                      "example": "Dawn Lyons"
+                      "type": "string"
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+1-202-555-0171"
+                      "example": "+380671112233"
                     },
                     "addressID": {
                       "type": "string",
@@ -7096,11 +7062,11 @@
                     },
                     "building": {
                       "type": "string",
-                      "example": "50"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "112"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "string",
@@ -7125,7 +7091,7 @@
                     "properties": {
                       "parcelID": {
                         "type": "string",
-                        "example": "890994b0-82bd-11e9-80e0-1c98ec135261"
+                        "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
                       }
                     },
                     "required": [
@@ -7187,6 +7153,33 @@
                     "pickUpDate": {
                       "type": "string",
                       "example": "20.06.2019"
+                    },
+                    "multiParcelPickup": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "multiParcelPickupCost": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 200
+                    },
+                    "parcelsWithPostedMultiPickup": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "722-8272412"
+                      ]
+                    },
+                    "parcelsWithPostedPickup": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      },
+                      "example": [
+                        "722-8272414"
+                      ]
                     }
                   }
                 }
@@ -7234,26 +7227,30 @@
               "type": "object",
               "properties": {
                 "notation": {
-                  "type": "string",
-                  "example": "Comment"
+                  "type": "string"
                 },
                 "contractID": {
                   "type": "string",
-                  "example": "4a430ffd-6b7d-11e2-a79e-003048d2b473"
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
+                },
+                "Edit": {
+                  "type": "boolean",
+                  "example": true
                 },
                 "payType": {
                   "type": "string",
                   "example": "cash"
                 },
                 "receiverPay": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "expectedPickUpDate": {
                   "type": "object",
                   "properties": {
                     "date": {
                       "type": "string",
-                      "example": "26.03.2019"
+                      "example": "25.12.2025"
                     },
                     "timeFrom": {
                       "type": "string",
@@ -7274,12 +7271,11 @@
                   "type": "object",
                   "properties": {
                     "name": {
-                      "type": "string",
-                      "example": "Dawn Lyons"
+                      "type": "string"
                     },
                     "phone": {
                       "type": "string",
-                      "example": "+1-202-555-0171"
+                      "example": "+380671112233"
                     },
                     "addressID": {
                       "type": "string",
@@ -7287,11 +7283,11 @@
                     },
                     "building": {
                       "type": "string",
-                      "example": "50"
+                      "example": "147"
                     },
                     "flat": {
                       "type": "string",
-                      "example": "112"
+                      "example": "91"
                     },
                     "floor": {
                       "type": "string",
@@ -7316,7 +7312,7 @@
                     "properties": {
                       "parcelID": {
                         "type": "string",
-                        "example": "890994b0-82bd-11e9-80e0-1c98ec135261"
+                        "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
                       }
                     },
                     "required": [
@@ -7765,7 +7761,8 @@
                   "example": "12345678"
                 },
                 "allowedCOD": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "date": {
                   "type": "string",
@@ -7776,7 +7773,8 @@
                   "example": "01.02.2024"
                 },
                 "deleted": {
-                  "type": "boolean"
+                  "type": "boolean",
+                  "example": true
                 },
                 "client": {
                   "type": "string"
@@ -7887,6 +7885,20 @@
                 "contract_term": {
                   "type": "string",
                   "example": "01.02.2024"
+                },
+                "ContractSupportManager": {
+                  "type": "string"
+                },
+                "ContractSupportManagerID": {
+                  "type": "string",
+                  "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
+                },
+                "ContractAttractionManager": {
+                  "type": "string"
+                },
+                "ContractAttractionManagerID": {
+                  "type": "string",
+                  "example": "2b3cd456-7890-12e3-45f6-789g0123h456"
                 }
               },
               "required": [

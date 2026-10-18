@@ -13,7 +13,7 @@
   "scripts": {
     "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
     "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit -p tsconfig.json",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc -p tsconfig.typetests.json",
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "test:e2e": "jest -c jest.e2e.config.js",
