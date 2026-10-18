@@ -13,6 +13,7 @@
   "scripts": {
     "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
     "clean": "rm -rf dist",
+    "dev": "rollup -c rollup.config.mjs --watch",
     "type-check": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
     "test:coverage": "jest --coverage"
