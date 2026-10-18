@@ -16,7 +16,9 @@
     "clean": "rm -rf dist",
     "type-check": "tsc --noEmit -p tsconfig.json",
     "test": "jest",
-    "test:coverage": "jest --coverage"
+    "test:coverage": "jest --coverage",
+    "gen:spec": "node scripts/gen-ecom-spec.mjs",
+    "gen:spec:check": "node scripts/gen-ecom-spec.mjs --check"
   },
   "keywords": [
     "carrier",

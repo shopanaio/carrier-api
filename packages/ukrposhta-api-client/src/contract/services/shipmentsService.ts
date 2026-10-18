@@ -1,5 +1,6 @@
 // code and comments in English
 import type { CallOptions } from '../types/common';
+import type { PostPayDivideShare } from '../types/reference';
 import type {
   ParcelInput,
   Shipment,
@@ -9,7 +10,7 @@ import type {
   ShipmentPatch,
 } from '../types/shipment';
 import type { UkrposhtaContractContext } from './base';
-import { WITH_TOKEN } from './base';
+import { WITHOUT_TOKEN, WITH_TOKEN } from './base';
 
 /** Shipments (`/shipments`). */
 export class ShipmentsService {
@@ -99,11 +100,33 @@ export class ShipmentsService {
     });
   }
 
-  /** `GET /shipments/{uuidOrBarcode}/lifecycle`: the delivery status. */
+  /** `GET /shipments/{uuidOrBarcode}/lifecycle`: the delivery status. This endpoint takes no counterparty token. */
   getLifecycle(uuidOrBarcode: string, options: CallOptions = {}): Promise<ShipmentLifecycleInfo> {
     return this.ctx.http.request<ShipmentLifecycleInfo>({
       method: 'GET',
       path: '/shipments/{uuidOrBarcode}/lifecycle',
+      pathParams: { uuidOrBarcode },
+      meta: WITHOUT_TOKEN,
+      signal: options.signal,
+    });
+  }
+
+  /** `GET /shipments?senderUuid=`: every shipment of a sender. */
+  listBySender(senderUuid: string, options: CallOptions = {}): Promise<Shipment[]> {
+    return this.ctx.http.request<Shipment[]>({
+      method: 'GET',
+      path: '/shipments',
+      query: { senderUuid },
+      meta: WITH_TOKEN,
+      signal: options.signal,
+    });
+  }
+
+  /** `GET /shipments/{uuidOrBarcode}/postPayDivide`: how the cash on delivery is split between recipients. */
+  getPostPayDivide(uuidOrBarcode: string, options: CallOptions = {}): Promise<PostPayDivideShare[]> {
+    return this.ctx.http.request<PostPayDivideShare[]>({
+      method: 'GET',
+      path: '/shipments/{uuidOrBarcode}/postPayDivide',
       pathParams: { uuidOrBarcode },
       meta: WITH_TOKEN,
       signal: options.signal,

@@ -37,6 +37,17 @@ export class ShipmentGroupsService {
     });
   }
 
+  /** `GET /shipment-groups/{uuid}`. */
+  get(uuid: string, options: CallOptions = {}): Promise<ShipmentGroup> {
+    return this.ctx.http.request<ShipmentGroup>({
+      method: 'GET',
+      path: '/shipment-groups/{uuid}',
+      pathParams: { uuid },
+      meta: WITH_TOKEN,
+      signal: options.signal,
+    });
+  }
+
   /** `PUT /shipment-groups/{uuid}`: renames the group. */
   rename(uuid: string, name: string, options: CallOptions = {}): Promise<ShipmentGroup> {
     return this.ctx.http.request<ShipmentGroup>({

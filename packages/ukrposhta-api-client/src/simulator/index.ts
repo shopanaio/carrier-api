@@ -5,10 +5,13 @@ import type { SimContext } from '@shopana/carrier-testing';
 import { ukrposhtaBaseUrls } from '../config';
 import type { UkrposhtaStatusEvent } from '../public/types/tracking';
 import { ukrposhtaClassifierContract } from './classifierContract';
+import { createUkrposhtaEcomSimulator } from './ecom';
 import { ukrposhtaTrackingContract } from './trackingContract';
 
 export { ukrposhtaTrackingContract } from './trackingContract';
 export { ukrposhtaClassifierContract } from './classifierContract';
+export { ukrposhtaEcomContract } from './ecomContract';
+export { createUkrposhtaEcomSimulator, shipmentLifecycle } from './ecom';
 
 export interface UkrposhtaSimulatorOptions {
   clock?: SimClock;
@@ -184,11 +187,33 @@ export function createUkrposhtaClassifierSimulator(options: UkrposhtaSimulatorOp
   });
 }
 
-/** Both public simulators behind one transport, sharing a store and clock. */
+/** Tracking and classifier simulators behind one transport, sharing a store and clock. */
 export function createUkrposhtaPublicSimulator(options: UkrposhtaSimulatorOptions = {}) {
   const clock = options.clock ?? new SimClock();
   const state = options.state ?? new SimStore();
   const tracking = createUkrposhtaTrackingSimulator({ clock, state });
   const classifier = createUkrposhtaClassifierSimulator({ clock, state });
   return { clock, state, tracking, classifier, transport: combineSimulators(tracking, classifier) };
+}
+
+/**
+ * The whole Ukrposhta API behind one transport: eCom and forms, status tracking, address classifier.
+ * They share one store and clock, so `advance` on a shipment shows up in status tracking.
+ */
+export function createUkrposhtaSimulator(options: UkrposhtaSimulatorOptions = {}) {
+  const clock = options.clock ?? new SimClock();
+  const state = options.state ?? new SimStore();
+  const tracking = createUkrposhtaTrackingSimulator({ clock, state });
+  const classifier = createUkrposhtaClassifierSimulator({ clock, state });
+  const ecom = createUkrposhtaEcomSimulator({ clock, state });
+  return {
+    clock,
+    state,
+    ecom,
+    tracking,
+    classifier,
+    transport: combineSimulators(ecom, tracking, classifier),
+    /** Moves a shipment (uuid or barcode) through its lifecycle, one tracking event per step. */
+    advance: ecom.advance,
+  };
 }

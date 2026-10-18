@@ -10,7 +10,7 @@ module.exports = {
     // Platform packages are tested from source, so no build is needed before `jest`.
     '^@shopana/(carrier-core|carrier-contracts|carrier-testing)$': '<rootDir>/../$1/src',
   },
-  collectCoverageFrom: ['src/**/*.ts', '!src/**/index.ts'],
+  collectCoverageFrom: ['src/**/*.ts', '!src/**/index.ts', '!src/**/generated/**'],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],
   coverageThreshold: {

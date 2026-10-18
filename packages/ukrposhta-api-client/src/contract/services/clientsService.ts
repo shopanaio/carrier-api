@@ -84,15 +84,19 @@ export class ClientsService {
     });
   }
 
-  /** `GET /clients/phone`. */
-  getByPhone(phoneNumber: string, countryISO3166 = 'UA', options: CallOptions = {}): Promise<Client> {
-    return this.ctx.http.request<Client>({
+  /**
+   * `GET /clients/phone`. The Swagger declares a list, the documentation a single client: both are accepted
+   * and the result is always a list.
+   */
+  async getByPhone(phoneNumber: string, countryISO3166 = 'UA', options: CallOptions = {}): Promise<Client[]> {
+    const answer = await this.ctx.http.request<Client | Client[]>({
       method: 'GET',
       path: '/clients/phone',
       query: { countryISO3166, phoneNumber },
       meta: WITH_TOKEN,
       signal: options.signal,
     });
+    return Array.isArray(answer) ? answer : [answer];
   }
 
   /** `GET /client-addresses?clientUuid=`. */

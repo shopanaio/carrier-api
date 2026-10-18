@@ -2,11 +2,14 @@ import type { HttpRequest, HttpResponse, HttpTransport } from '@shopana/carrier-
 import { CarrierErrorCategory, isCarrierError } from '@shopana/carrier-core';
 import {
   AddressesService,
+  BarcodesService,
   ClientsService,
   LabelsService,
   PricingService,
+  ReferenceService,
   ShipmentGroupsService,
   ShipmentsService,
+  TransfersService,
   createUkrposhtaContractClient,
 } from '../src';
 
@@ -431,5 +434,64 @@ describe('errors', () => {
     expect(events.length).toBeGreaterThan(0);
     expect(events.join('')).not.toContain('secret-bearer');
     expect(events.join('')).not.toContain('secret-token');
+  });
+});
+
+describe('reference data, barcodes and transfers', () => {
+  it('reads banks, error codes, barcode types and the postpay status', async () => {
+    const requests: HttpRequest[] = [];
+    const transport: HttpTransport = (async (request: HttpRequest) => {
+      requests.push(request);
+      return { status: 200, headers: {}, data: [] };
+    }) as HttpTransport;
+    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false })
+      .use(new ReferenceService())
+      .use(new BarcodesService())
+      .use(new TransfersService())
+      .use(new ShipmentsService())
+      .use(new ShipmentGroupsService());
+    const last = () => {
+      const request = requests[requests.length - 1]!;
+      return { path: new URL(request.url).pathname, query: request.query };
+    };
+
+    await client.reference.listBanks();
+    expect(last().path).toBe('/ecom/0.0.1/banks');
+    await client.reference.getBank('380805');
+    expect(last().path).toBe('/ecom/0.0.1/banks/380805');
+    await client.reference.listErrorCodes();
+    expect(last().path).toBe('/ecom/0.0.1/dictionaries/error-codes');
+    await client.barcodes.get('0500100031143');
+    expect(last()).toEqual({ path: '/ecom/0.0.1/barcodes/0500100031143', query: { token: 't' } });
+    await client.barcodes.getMany(['0500100031143', 'RA067022855UA']);
+    expect(last().path).toBe('/ecom/0.0.1/barcodes/all-of/0500100031143&RA067022855UA');
+    expect(() => client.barcodes.getMany([])).toThrow(/Between 1 and 100/);
+    expect(() => client.barcodes.getMany(Array.from({ length: 101 }, (_, i) => `B${i}`))).toThrow(/Between 1 and 100/);
+    await client.transfers.getPostPayStatus('0500100031143');
+    expect(last().path).toBe('/ecom/0.0.1/transfers/shipment-postpays/0500100031143/with-recipient');
+    await client.shipments.listBySender('s1');
+    expect(last()).toEqual({ path: '/ecom/0.0.1/shipments', query: { senderUuid: 's1', token: 't' } });
+    await client.shipments.getPostPayDivide('B1');
+    expect(last().path).toBe('/ecom/0.0.1/shipments/B1/postPayDivide');
+    await client.shipmentGroups.get('g1');
+    expect(last().path).toBe('/ecom/0.0.1/shipment-groups/g1');
+  });
+
+  it('sends the token to token endpoints only', async () => {
+    const queries: Array<Record<string, unknown> | undefined> = [];
+    const transport: HttpTransport = (async (request: HttpRequest) => {
+      queries.push(request.query);
+      return { status: 200, headers: {}, data: {} };
+    }) as HttpTransport;
+    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false })
+      .use(new ReferenceService())
+      .use(new TransfersService())
+      .use(new ShipmentsService())
+      .use(new BarcodesService());
+    await client.reference.listBanks();
+    await client.transfers.getPostPayStatus('B1');
+    await client.shipments.getLifecycle('B1');
+    await client.barcodes.get('B1');
+    expect(queries.map(q => q?.token)).toEqual([undefined, undefined, undefined, 't']);
   });
 });
