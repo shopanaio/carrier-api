@@ -38,10 +38,33 @@ const key = name =>
 const literal = value =>
   JSON.stringify(value).replace(/[^\x20-\x7e]/g, c => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
 // The snapshot has Cyrillic look-alikes inside English descriptions ("Сreate"); comments stay ASCII-only.
-const LOOKALIKES = { А: 'A', В: 'B', С: 'C', Е: 'E', Н: 'H', І: 'I', К: 'K', М: 'M', О: 'O', Р: 'P', Т: 'T', Х: 'X', а: 'a', с: 'c', е: 'e', і: 'i', о: 'o', р: 'p', х: 'x' };
+const LOOKALIKES = {
+  А: 'A',
+  В: 'B',
+  С: 'C',
+  Е: 'E',
+  Н: 'H',
+  І: 'I',
+  К: 'K',
+  М: 'M',
+  О: 'O',
+  Р: 'P',
+  Т: 'T',
+  Х: 'X',
+  а: 'a',
+  с: 'c',
+  е: 'e',
+  і: 'i',
+  о: 'o',
+  р: 'p',
+  х: 'x',
+};
 const ascii = text => text.replace(/[^\x00-\x7f]/g, c => LOOKALIKES[c] ?? '?');
 const doc = (text, indent = '') => {
-  const clean = ascii(text ?? '').replace(/\s+/g, ' ').replace(/\*\//g, '* /').trim();
+  const clean = ascii(text ?? '')
+    .replace(/\s+/g, ' ')
+    .replace(/\*\//g, '* /')
+    .trim();
   return clean ? `${indent}/** ${clean} */\n` : '';
 };
 
