@@ -3,8 +3,8 @@ import { createClient, createFetchTransport, createHttpClient, tokenAuth } from 
 import type { HttpTransport, RateLimitOptions, RateLimiter } from '@shopana/carrier-core';
 import { MEEST_CONTRACT_BASE_URL, MEEST_DEFAULT_RATE_LIMIT } from './config';
 import type { MeestContractConfig } from './config';
-import { MEEST_CARRIER, mapError, unwrap } from './errors';
-import { AuthService, toTokens } from './services/authService';
+import { MEEST_CARRIER, isEnvelope, isOk, mapError, toMeestError } from './errors';
+import { AuthService } from './services/authService';
 import type { ContractContext, MeestAuthApi } from './services/base';
 import { MiscService } from './services/miscService';
 import { ParcelsService } from './services/parcelsService';
@@ -13,10 +13,11 @@ import { PrintService } from './services/printService';
 import { RegistersService } from './services/registersService';
 import { SearchService } from './services/searchService';
 import { TrackingService } from './services/trackingService';
-import type { AuthResult } from './types/generated';
+import type { AuthResponse, RefreshTokenResponse } from './types/generated';
 
 export * from './config';
 export * from './dates';
+export { unwrapMeestResponse } from './errors';
 export { MEEST_CARRIER, toMeestError } from './errors';
 export * from './services/base';
 export { AuthService } from './services/authService';
@@ -53,28 +54,23 @@ export function createMeestContractClient(config: MeestContractConfig) {
     retry: false,
     ...(config.timeoutMs ? { timeoutMs: config.timeoutMs } : {}),
     ...(config.logger ? { logger: config.logger } : {}),
-    unwrap,
     mapError,
   });
   const authApi: MeestAuthApi = {
     login: async signal =>
-      toTokens(
-        await authHttp.request<AuthResult>({
-          method: 'POST',
-          path: '/auth',
-          json: { username: await resolve(config.username), password: await resolve(config.password) },
-          ...(signal ? { signal } : {}),
-        }),
-      ),
+      authHttp.request<AuthResponse>({
+        method: 'POST',
+        path: '/auth',
+        json: { username: await resolve(config.username), password: await resolve(config.password) },
+        ...(signal ? { signal } : {}),
+      }),
     refresh: async (refreshToken, signal) =>
-      toTokens(
-        await authHttp.request<AuthResult>({
-          method: 'POST',
-          path: '/refreshToken',
-          json: { refreshToken },
-          ...(signal ? { signal } : {}),
-        }),
-      ),
+      authHttp.request<RefreshTokenResponse>({
+        method: 'POST',
+        path: '/refreshToken',
+        json: { refreshToken },
+        ...(signal ? { signal } : {}),
+      }),
   };
 
   const auth = tokenAuth({
@@ -85,14 +81,8 @@ export function createMeestContractClient(config: MeestContractConfig) {
     ...(config.refreshSkewSec !== undefined ? { refreshSkewMs: config.refreshSkewSec * 1000 } : {}),
     ...(config.loginTimeoutMs !== undefined ? { loginTimeoutMs: config.loginTimeoutMs } : {}),
     ...(config.clock ? { clock: config.clock } : {}),
-    login: async ({ signal }) => {
-      const t = await authApi.login(signal);
-      return { accessToken: t.token, refreshToken: t.refreshToken, expiresInSec: t.expiresIn };
-    },
-    refresh: async (refreshToken, { signal }) => {
-      const t = await authApi.refresh(refreshToken, signal);
-      return { accessToken: t.token, refreshToken: t.refreshToken, expiresInSec: t.expiresIn };
-    },
+    login: async ({ signal }) => toGrant(await authApi.login(signal)),
+    refresh: async (refreshToken, { signal }) => toGrant(await authApi.refresh(refreshToken, signal)),
   });
 
   const http = createHttpClient({
@@ -110,7 +100,6 @@ export function createMeestContractClient(config: MeestContractConfig) {
       : { rateLimit: withTime(config.rateLimit ?? MEEST_DEFAULT_RATE_LIMIT, config) }),
     ...(config.timeoutMs ? { timeoutMs: config.timeoutMs } : {}),
     ...(config.logger ? { logger: config.logger } : {}),
-    unwrap,
     mapError,
   });
 
@@ -146,4 +135,20 @@ function withTime(limit: RateLimiter | RateLimitOptions, config: MeestContractCo
 async function accountHash(username: string): Promise<string> {
   const digest = await globalThis.crypto.subtle.digest('SHA-256', new TextEncoder().encode(username));
   return Array.from(new Uint8Array(digest).slice(0, 8), b => b.toString(16).padStart(2, '0')).join('');
+}
+
+/**
+ * Internal only: reads the token out of an auth answer for the token cache. The public `auth` service returns the
+ * answer unchanged. A missing token is reported as the provider's error.
+ */
+function toGrant(response: AuthResponse | RefreshTokenResponse) {
+  const result = isEnvelope(response) && isOk(response) ? response.result : undefined;
+  const token = result?.token;
+  const refreshToken = result?.refresh_token;
+  if (!token) throw toMeestError(200, response);
+  return {
+    accessToken: token,
+    ...(refreshToken ? { refreshToken } : {}),
+    ...(result?.expiresIn !== undefined ? { expiresInSec: result.expiresIn } : {}),
+  };
 }

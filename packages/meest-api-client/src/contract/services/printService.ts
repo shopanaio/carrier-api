@@ -37,7 +37,7 @@ export class PrintService extends ContractService {
   ): Promise<BinaryData | string> {
     return this.httpGet({
       signal: options.signal,
-      path: `/print/declarationForm/${encodeIds(ids)}/${encodeURIComponent(requirePhone(phone))}/{contentType}`,
+      path: `/print/declarationForm/${encodeIds(ids)}/${encodeURIComponent(phone)}/{contentType}`,
       pathParams: { contentType: format },
       responseType: format === 'pdf' ? 'binary' : 'text',
     });
@@ -47,7 +47,7 @@ export class PrintService extends ContractService {
   cn23(ids: Ids, phone: string, options: RequestOptions = {}): Promise<BinaryData> {
     return this.httpGet({
       signal: options.signal,
-      path: `/print/cn23Form/${encodeIds(ids)}/${encodeURIComponent(requirePhone(phone))}`,
+      path: `/print/cn23Form/${encodeIds(ids)}/${encodeURIComponent(phone)}`,
       responseType: 'binary',
     });
   }
@@ -86,9 +86,4 @@ export class PrintService extends ContractService {
       responseType: 'binary',
     });
   }
-}
-
-function requirePhone(phone: string): string {
-  if (!phone) throw new TypeError('A phone number is required by the Meest form endpoints');
-  return phone;
 }

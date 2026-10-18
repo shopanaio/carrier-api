@@ -1,9 +1,8 @@
 // code and comments in English
 import type { ClientContext } from '@shopana/carrier-core';
 import type { RequestOptions } from '../../shared';
-import type { MeestPublicContextConfig } from '../config';
 
-export type PublicContext = ClientContext<MeestPublicContextConfig>;
+export type PublicContext = ClientContext<Record<string, never>>;
 
 export abstract class PublicService {
   protected ctx!: PublicContext;
@@ -25,17 +24,6 @@ export abstract class PublicService {
       ...(pathParams ? { pathParams } : {}),
       ...(options?.signal ? { signal: options.signal } : {}),
     });
-  }
-
-  /** Reads through the optional ReferenceCache; arrays are stored as returned. */
-  protected async cached<T>(key: string, load: () => Promise<T>): Promise<T> {
-    const { cache, cacheTtlSec } = this.ctx.config;
-    if (!cache) return load();
-    const hit = await cache.get<T>(`meest:public:${key}`);
-    if (hit !== undefined) return hit;
-    const value = await load();
-    await cache.set(`meest:public:${key}`, value, cacheTtlSec);
-    return value;
   }
 }
 

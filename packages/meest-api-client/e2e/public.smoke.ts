@@ -1,29 +1,32 @@
-import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
 import { createMeestPublicClient } from '../src';
 
 const enabled = process.env.MEEST_E2E === '1';
 (enabled ? describe : describe.skip)('Meest public API (live)', () => {
   const meest = createMeestPublicClient();
 
-  it('finds streets, localities and a branch by number', async () => {
-    const [city] = await meest.geo.localities({ searchFull: '\u0422\u0435\u0440\u043d\u043e\u043f\u0456\u043b\u044c' });
-    expect(city?.city_id).toBeDefined();
-    const streets = await meest.geo.streets({ cityId: city!.city_id, searchBeginning: '\u041c\u0438' });
-    expect(streets.length).toBeGreaterThan(0);
+  it('finds a locality and its streets', async () => {
+    const localities = await meest.geo.localities({
+      searchFull: '\u0422\u0435\u0440\u043d\u043e\u043f\u0456\u043b\u044c',
+    });
+    expect(localities.status).toBe(1);
+    const cityId = localities.result![0]!.data.city_id;
+    const streets = await meest.geo.streets({ cityId, searchBeginning: '\u041c\u0438' });
+    expect(streets.result!.length).toBeGreaterThan(0);
   });
 
   it('returns up to 10 nearest lockers sorted by distance', async () => {
-    const hits = await meest.branches.nearestByCoords({ lat: 49.547019, lng: 25.589471 }, { type: 'poshtomat' });
+    const hits = (await meest.branches.nearestByCoords({ lat: 49.547019, lng: 25.589471 }, { type: 'poshtomat' }))
+      .result!;
     expect(hits.length).toBeGreaterThan(0);
     expect(hits.length).toBeLessThanOrEqual(10);
     const distances = hits.map(h => h.distance ?? 0);
     expect(distances).toEqual([...distances].sort((a, b) => a - b));
     // The single-branch endpoint accepts the br_id of a locator result.
-    expect((await meest.branches.get(hits[0]!.br_id)).br_id).toBe(hits[0]!.br_id);
+    expect((await meest.branches.get(hits[0]!.br_id)).result![0]!.br_id).toBe(hits[0]!.br_id);
   });
 
-  it('reports an unknown branch as not_found', async () => {
-    const error = await meest.branches.get('00000000-0000-0000-0000-000000000000').catch(e => e as CarrierError);
-    expect(error).toMatchObject({ category: CarrierErrorCategory.NotFound });
+  it('answers an unknown branch with status 0 and code 10111', async () => {
+    const answer = await meest.branches.get('00000000-0000-0000-0000-000000000000');
+    expect(answer).toMatchObject({ status: 0, result: null, msg: { code: 10111 } });
   });
 });

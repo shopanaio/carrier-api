@@ -63,14 +63,18 @@ export function toMeestError(httpStatus: number, data: unknown): CarrierError {
   });
 }
 
-/** Success envelope -> `result`; `Error` envelope in a 2xx body -> CarrierError; binary and text pass through. */
-export function unwrap(response: HttpResponse<unknown>): unknown {
+/**
+ * Optional helper, not used by the client: turns a Meest response into its `result`, throws a CarrierError for an
+ * `Error` envelope, and passes bare payloads (arrays, binary, text) through.
+ */
+export function unwrapMeestResponse(response: { status: number; data: unknown }): unknown {
   const { data } = response;
   if (!isEnvelope(data)) return data;
   if (!isOk(data)) throw toMeestError(response.status, data);
   return data.result;
 }
 
+/** Non-2xx answers become CarrierErrors (the raw body stays in `raw`). */
 export function mapError(response: HttpResponse<unknown>): CarrierError {
   return toMeestError(response.status, response.data);
 }

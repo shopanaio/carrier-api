@@ -1,20 +1,20 @@
 // code and comments in English
-import { formatDate } from '../dates';
-import type { DateInput } from '../dates';
 import type {
-  AvailableTimeSlotsResult,
+  AvailableTimeSlotsResponse,
+  RegisterBranchDeleteResponse,
   RegisterBranchPutRequestBody,
-  RegisterBranchPutResult,
+  RegisterBranchPutResponse,
   RegisterBranchRequestBody,
-  RegisterBranchResult,
+  RegisterBranchResponse,
+  RegisterPickupDeleteResponse,
   RegisterPickupPutRequestBody,
-  RegisterPickupPutResult,
+  RegisterPickupPutResponse,
   RegisterPickupRequestBody,
-  RegisterPickupResult,
-  RegistersListResult,
+  RegisterPickupResponse,
+  RegistersListResponse,
 } from '../types/generated';
 import { ContractService } from './base';
-import type { RequestOptions } from './base';
+import type { DeleteRequestOptions, RequestOptions } from './base';
 
 /**
  * Registers group parcels for hand-over: `Branch` registers are brought to a Meest branch,
@@ -24,7 +24,7 @@ export class RegistersService extends ContractService {
   readonly namespace = 'registers' as const;
 
   /** `POST /registerBranch`. Parcels that could not be added come back in `Not_added_to_registry`. */
-  createBranch(body: RegisterBranchRequestBody, options?: RequestOptions): Promise<RegisterBranchResult> {
+  createBranch(body: RegisterBranchRequestBody, options?: RequestOptions): Promise<RegisterBranchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/registerBranch', json: body });
   }
 
@@ -32,7 +32,7 @@ export class RegistersService extends ContractService {
     registerId: string,
     body: RegisterBranchPutRequestBody,
     options?: RequestOptions,
-  ): Promise<RegisterBranchPutResult> {
+  ): Promise<RegisterBranchPutResponse> {
     return this.httpPut({
       signal: options?.signal,
       path: '/registerBranch/{registerID}',
@@ -42,16 +42,17 @@ export class RegistersService extends ContractService {
   }
 
   /** Removes the register; its parcels become available for other registers. */
-  deleteBranch(registerId: string, options?: RequestOptions): Promise<unknown> {
+  deleteBranch(registerId: string, options?: DeleteRequestOptions): Promise<RegisterBranchDeleteResponse> {
     return this.httpDelete({
       signal: options?.signal,
+      json: options?.body,
       path: '/registerBranch/{registerID}',
       pathParams: { registerID: registerId },
     });
   }
 
   /** `POST /registerPickup`. Needs `payType`, `expectedPickUpDate`, `sender` and `parcelsItems`. */
-  createPickup(body: RegisterPickupRequestBody, options?: RequestOptions): Promise<RegisterPickupResult> {
+  createPickup(body: RegisterPickupRequestBody, options?: RequestOptions): Promise<RegisterPickupResponse> {
     return this.httpPost({ signal: options?.signal, path: '/registerPickup', json: body });
   }
 
@@ -59,7 +60,7 @@ export class RegistersService extends ContractService {
     registerId: string,
     body: RegisterPickupPutRequestBody,
     options?: RequestOptions,
-  ): Promise<RegisterPickupPutResult> {
+  ): Promise<RegisterPickupPutResponse> {
     return this.httpPut({
       signal: options?.signal,
       path: '/registerPickup/{registerID}',
@@ -68,20 +69,21 @@ export class RegistersService extends ContractService {
     });
   }
 
-  deletePickup(registerId: string, options?: RequestOptions): Promise<unknown> {
+  deletePickup(registerId: string, options?: DeleteRequestOptions): Promise<RegisterPickupDeleteResponse> {
     return this.httpDelete({
       signal: options?.signal,
+      json: options?.body,
       path: '/registerPickup/{registerID}',
       pathParams: { registerID: registerId },
     });
   }
 
   /** Registers created since `dateFrom` (`dd.MM.yyyy`). */
-  list(dateFrom: DateInput, options?: RequestOptions): Promise<RegistersListResult> {
+  list(dateFrom: string, options?: RequestOptions): Promise<RegistersListResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/registersList/{dateFrom}',
-      pathParams: { dateFrom: formatDate(dateFrom) },
+      pathParams: { dateFrom },
     });
   }
 
@@ -89,8 +91,7 @@ export class RegistersService extends ContractService {
    * Courier slots and dates. `type` is `PickUp` (collection from the sender) or `Delivery`; give the street
    * (`streetId`, from `search.addresses`) or the locality (`cityId`, from `search.cities`).
    */
-  availableTimeSlots(query: TimeSlotsQuery, options?: RequestOptions): Promise<AvailableTimeSlotsResult> {
-    if (!query.streetId && !query.cityId) throw new TypeError('availableTimeSlots needs a streetId or a cityId');
+  availableTimeSlots(query: TimeSlotsQuery, options?: RequestOptions): Promise<AvailableTimeSlotsResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/availableTimeSlots',

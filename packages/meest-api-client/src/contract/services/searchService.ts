@@ -1,23 +1,23 @@
 // code and comments in English
 import type {
   AddressSearchByCoordRequestBody,
-  AddressSearchByCoordResult,
+  AddressSearchByCoordResponse,
   AddressSearchRequestBody,
-  AddressSearchResult,
-  BranchSearchGeoResult,
+  AddressSearchResponse,
+  BranchSearchGeoResponse,
   BranchSearchRequestBody,
-  BranchSearchResult,
-  BranchTypesResult,
+  BranchSearchResponse,
+  BranchTypesResponse,
   CitySearchRequestBody,
-  CitySearchResult,
+  CitySearchResponse,
   CountrySearchRequestBody,
-  CountrySearchResult,
+  CountrySearchResponse,
   DistrictSearchRequestBody,
-  DistrictSearchResult,
-  PayTerminalSearchResult,
+  DistrictSearchResponse,
+  PayTerminalSearchResponse,
   RegionSearchRequestBody,
-  RegionSearchResult,
-  ZipCodeSearchResult,
+  RegionSearchResponse,
+  ZipCodeSearchResponse,
 } from '../types/generated';
 import { ContractService } from './base';
 import type { RequestOptions } from './base';
@@ -26,38 +26,38 @@ import type { RequestOptions } from './base';
 export class SearchService extends ContractService {
   readonly namespace = 'search' as const;
 
-  countries(body: CountrySearchRequestBody = {}, options?: RequestOptions): Promise<CountrySearchResult> {
+  countries(body: CountrySearchRequestBody = {}, options?: RequestOptions): Promise<CountrySearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/countrySearch', json: body, idempotent: true });
   }
 
-  regions(body: RegionSearchRequestBody = {}, options?: RequestOptions): Promise<RegionSearchResult> {
+  regions(body: RegionSearchRequestBody = {}, options?: RequestOptions): Promise<RegionSearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/regionSearch', json: body, idempotent: true });
   }
 
-  districts(body: DistrictSearchRequestBody = {}, options?: RequestOptions): Promise<DistrictSearchResult> {
+  districts(body: DistrictSearchRequestBody = {}, options?: RequestOptions): Promise<DistrictSearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/districtSearch', json: body, idempotent: true });
   }
 
-  cities(body: CitySearchRequestBody = {}, options?: RequestOptions): Promise<CitySearchResult> {
+  cities(body: CitySearchRequestBody = {}, options?: RequestOptions): Promise<CitySearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/citySearch', json: body, idempotent: true });
   }
 
-  addresses(body: AddressSearchRequestBody = {}, options?: RequestOptions): Promise<AddressSearchResult> {
+  addresses(body: AddressSearchRequestBody = {}, options?: RequestOptions): Promise<AddressSearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/addressSearch', json: body, idempotent: true });
   }
 
   addressesByCoord(
     body: AddressSearchByCoordRequestBody,
     options?: RequestOptions,
-  ): Promise<AddressSearchByCoordResult> {
+  ): Promise<AddressSearchByCoordResponse> {
     return this.httpPost({ signal: options?.signal, path: '/addressSearchByCoord', json: body, idempotent: true });
   }
 
-  byZipCode(zipCode: string, options?: RequestOptions): Promise<ZipCodeSearchResult> {
+  byZipCode(zipCode: string, options?: RequestOptions): Promise<ZipCodeSearchResponse> {
     return this.httpGet({ signal: options?.signal, path: '/zipCodeSearch/{zipCode}', pathParams: { zipCode } });
   }
 
-  branches(body: BranchSearchRequestBody = {}, options?: RequestOptions): Promise<BranchSearchResult> {
+  branches(body: BranchSearchRequestBody = {}, options?: RequestOptions): Promise<BranchSearchResponse> {
     return this.httpPost({ signal: options?.signal, path: '/branchSearch', json: body, idempotent: true });
   }
 
@@ -67,7 +67,7 @@ export class SearchService extends ContractService {
     longitude: number,
     radius: number,
     options?: RequestOptions,
-  ): Promise<BranchSearchGeoResult> {
+  ): Promise<BranchSearchGeoResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/branchSearchGeo/{latitude}/{longitude}/{radius}',
@@ -75,7 +75,7 @@ export class SearchService extends ContractService {
     });
   }
 
-  branchTypes(options?: RequestOptions): Promise<BranchTypesResult> {
+  branchTypes(options?: RequestOptions): Promise<BranchTypesResponse> {
     return this.httpGet({ signal: options?.signal, path: '/branchTypes' });
   }
 
@@ -85,7 +85,7 @@ export class SearchService extends ContractService {
     longitude: number,
     radius: number,
     options?: RequestOptions,
-  ): Promise<PayTerminalSearchResult> {
+  ): Promise<PayTerminalSearchResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/payTerminalSearch/{latitude}/{longitude}/{radius}',

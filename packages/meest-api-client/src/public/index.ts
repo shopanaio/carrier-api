@@ -1,8 +1,8 @@
 // code and comments in English
 import { createClient, createFetchTransport, createHttpClient, noAuth } from '@shopana/carrier-core';
-import { DEFAULT_CACHE_TTL_SEC, MEEST_PUBLIC_BASE_URL } from './config';
+import { MEEST_PUBLIC_BASE_URL } from './config';
 import type { MeestPublicConfig } from './config';
-import { MEEST_PUBLIC_CARRIER, envelopeError, isEnvelope } from './errors';
+import { MEEST_PUBLIC_CARRIER } from './errors';
 import { BranchesService } from './services/branchesService';
 import { GeoService } from './services/geoService';
 import type { PublicContext } from './services/base';
@@ -10,7 +10,7 @@ import type { PublicContext } from './services/base';
 export * from './types';
 export * from './cache';
 export * from './config';
-export { MEEST_PUBLIC_CARRIER, isMeestNotFound } from './errors';
+export { MEEST_PUBLIC_CARRIER, isMeestNotFound, unwrapMeestPublic } from './errors';
 export { BranchesService } from './services/branchesService';
 export { GeoService } from './services/geoService';
 
@@ -28,19 +28,8 @@ export function createMeestPublicClient(config: Partial<MeestPublicConfig> = {})
     ...(config.rateLimit ? { rateLimit: config.rateLimit } : {}),
     ...(config.timeoutMs ? { timeoutMs: config.timeoutMs } : {}),
     ...(config.logger ? { logger: config.logger } : {}),
-    unwrap: response => {
-      if (!isEnvelope(response.data)) return response.data;
-      if (Number(response.data.status) !== 1) throw envelopeError(response);
-      return response.data.result;
-    },
   });
-  const ctx: PublicContext = {
-    http,
-    config: {
-      ...(config.cache ? { cache: config.cache } : {}),
-      cacheTtlSec: config.cacheTtlSec ?? DEFAULT_CACHE_TTL_SEC,
-    },
-  };
+  const ctx: PublicContext = { http, config: {} };
   return createClient<PublicContext>(ctx).use(new GeoService()).use(new BranchesService());
 }
 

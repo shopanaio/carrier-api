@@ -1,13 +1,13 @@
 // code and comments in English
 import type {
-  BannersResult,
-  CheckPhoneOnParcelResult,
-  ContractClientInfoResult,
+  BannersResponse,
+  CheckPhoneOnParcelResponse,
+  ContractClientInfoResponse,
   ContractValidationCheckRequestBody,
-  ContractValidationCheckResult,
+  ContractValidationCheckResponse,
   ParcelReturnNewRequestBody,
-  ParcelReturnNewResult,
-  ParcelReturnReasonsResult,
+  ParcelReturnNewResponse,
+  ParcelReturnReasonsResponse,
 } from '../types/generated';
 import { ContractService } from './base';
 import type { RequestOptions } from './base';
@@ -17,15 +17,15 @@ export class MiscService extends ContractService {
   readonly namespace = 'misc' as const;
 
   /** Sender refuses a parcel with a reason from `returnReasons()`; the parcel travels back. */
-  returnParcel(body: ParcelReturnNewRequestBody, options?: RequestOptions): Promise<ParcelReturnNewResult> {
+  returnParcel(body: ParcelReturnNewRequestBody, options?: RequestOptions): Promise<ParcelReturnNewResponse> {
     return this.httpPost({ signal: options?.signal, path: '/parcelReturn_new', json: body });
   }
 
-  returnReasons(options?: RequestOptions): Promise<ParcelReturnReasonsResult> {
+  returnReasons(options?: RequestOptions): Promise<ParcelReturnReasonsResponse> {
     return this.httpGet({ signal: options?.signal, path: '/parcelReturnReasons' });
   }
 
-  contractInfo(contractId: string, options?: RequestOptions): Promise<ContractClientInfoResult> {
+  contractInfo(contractId: string, options?: RequestOptions): Promise<ContractClientInfoResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/contractClientInfo/{contractID}',
@@ -34,7 +34,7 @@ export class MiscService extends ContractService {
   }
 
   /** Whether `phone` is the recipient's number of the parcel. */
-  checkPhone(barCode: string, phone: string, options?: RequestOptions): Promise<CheckPhoneOnParcelResult> {
+  checkPhone(barCode: string, phone: string, options?: RequestOptions): Promise<CheckPhoneOnParcelResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/CheckPhoneOnParcel/{barCode}/{phoneCheck}',
@@ -46,11 +46,11 @@ export class MiscService extends ContractService {
   async validateContract(
     body: ContractValidationCheckRequestBody,
     options?: RequestOptions,
-  ): Promise<ContractValidationCheckResult> {
+  ): Promise<ContractValidationCheckResponse> {
     return this.httpPost({ signal: options?.signal, path: '/contract_validation_check', json: body, idempotent: true });
   }
 
-  banners(options?: RequestOptions): Promise<BannersResult> {
+  banners(options?: RequestOptions): Promise<BannersResponse> {
     return this.httpGet({ signal: options?.signal, path: '/banners' });
   }
 }

@@ -1,24 +1,25 @@
 // code and comments in English
-import { formatDate } from '../dates';
-import type { DateInput } from '../dates';
 import type {
   ChangingParcelBySenderRequestBody,
-  ChangingParcelBySenderResult,
-  GetParcelResult,
+  ChangingParcelBySenderResponse,
+  GetParcelResponse,
   LockParcelRequestBody,
+  LockParcelResponse,
   ParcelChangeContractIDRequestBody,
-  ParcelChangeContractIDResult,
+  ParcelChangeContractIDResponse,
+  ParcelDeleteResponse,
   ParcelPutRequestBody,
-  ParcelPutResult,
+  ParcelPutResponse,
   ParcelRequestBody,
-  ParcelResult,
-  ParcelStatusDetailsResult,
-  ParcelStatusResult,
-  ParcelsListResult,
+  ParcelResponse,
+  ParcelStatusDetailsResponse,
+  ParcelStatusResponse,
+  ParcelsListResponse,
   UnlockParcelRequestBody,
+  UnlockParcelResponse,
 } from '../types/generated';
 import { ContractService } from './base';
-import type { RequestOptions } from './base';
+import type { DeleteRequestOptions, RequestOptions } from './base';
 
 export type ParcelSearchBy = 'parcelID' | 'barCode' | 'parcelNumber';
 export type ParcelReturnMode = 'objectData' | 'printCN23' | 'printCP71';
@@ -30,12 +31,12 @@ export class ParcelsService extends ContractService {
    * `POST /parcel`. Never repeated automatically after a 5xx or a lost connection: a second call could create
    * a second parcel. Check `parcels.get(parcelNumber, 'parcelNumber')` before retrying yourself.
    */
-  create(body: ParcelRequestBody, options?: RequestOptions): Promise<ParcelResult> {
+  create(body: ParcelRequestBody, options?: RequestOptions): Promise<ParcelResponse> {
     return this.httpPost({ signal: options?.signal, path: '/parcel', json: body });
   }
 
   /** `PUT /parcel/{parcelID}`; allowed until the parcel is received by Meest. */
-  update(parcelId: string, body: ParcelPutRequestBody, options?: RequestOptions): Promise<ParcelPutResult> {
+  update(parcelId: string, body: ParcelPutRequestBody, options?: RequestOptions): Promise<ParcelPutResponse> {
     return this.httpPut({
       signal: options?.signal,
       path: '/parcel/{parcelID}',
@@ -45,9 +46,10 @@ export class ParcelsService extends ContractService {
   }
 
   /** `DELETE /parcel/{parcelID}/{contractID}`; only until the parcel is received, and only by its owner. */
-  delete(parcelId: string, contractId: string, options?: RequestOptions): Promise<unknown> {
+  delete(parcelId: string, contractId: string, options?: DeleteRequestOptions): Promise<ParcelDeleteResponse> {
     return this.httpDelete({
       signal: options?.signal,
+      json: options?.body,
       path: '/parcel/{parcelID}/{contractID}',
       pathParams: { parcelID: parcelId, contractID: contractId },
     });
@@ -59,7 +61,7 @@ export class ParcelsService extends ContractService {
     searchBy: ParcelSearchBy = 'parcelID',
     returnMode: ParcelReturnMode = 'objectData',
     options?: RequestOptions,
-  ): Promise<GetParcelResult> {
+  ): Promise<GetParcelResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/getParcel/{parcelID}/{searchMode}/{returnMode}',
@@ -68,15 +70,15 @@ export class ParcelsService extends ContractService {
   }
 
   /** Parcels created since `dateFrom`. */
-  list(dateFrom: DateInput, options?: RequestOptions): Promise<ParcelsListResult> {
+  list(dateFrom: string, options?: RequestOptions): Promise<ParcelsListResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/parcelsList/{dateFrom}',
-      pathParams: { dateFrom: formatDate(dateFrom) },
+      pathParams: { dateFrom },
     });
   }
 
-  status(parcelId: string, options?: RequestOptions): Promise<ParcelStatusResult> {
+  status(parcelId: string, options?: RequestOptions): Promise<ParcelStatusResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/parcelStatus/{parcelID}',
@@ -84,7 +86,7 @@ export class ParcelsService extends ContractService {
     });
   }
 
-  statusDetails(parcelId: string, options?: RequestOptions): Promise<ParcelStatusDetailsResult> {
+  statusDetails(parcelId: string, options?: RequestOptions): Promise<ParcelStatusDetailsResponse> {
     return this.httpGet({
       signal: options?.signal,
       path: '/parcelStatusDetails/{parcelID}',
@@ -97,16 +99,16 @@ export class ParcelsService extends ContractService {
     barCode: string,
     body: ParcelChangeContractIDRequestBody,
     options?: RequestOptions,
-  ): Promise<ParcelChangeContractIDResult> {
+  ): Promise<ParcelChangeContractIDResponse> {
     return this.httpPut({ signal: options?.signal, path: '/parcelChangeContractID', query: { barCode }, json: body });
   }
 
   /** Blocks delivery while the parcel is entering Ukraine or in customs. Send `ParcelUID` or `ClientsShipmentRef`. */
-  lock(body: LockParcelRequestBody, options?: RequestOptions): Promise<unknown> {
+  lock(body: LockParcelRequestBody, options?: RequestOptions): Promise<LockParcelResponse> {
     return this.httpPost({ signal: options?.signal, path: '/LockParcel', json: body });
   }
 
-  unlock(body: UnlockParcelRequestBody, options?: RequestOptions): Promise<unknown> {
+  unlock(body: UnlockParcelRequestBody, options?: RequestOptions): Promise<UnlockParcelResponse> {
     return this.httpPost({ signal: options?.signal, path: '/UnlockParcel', json: body });
   }
 
@@ -114,7 +116,7 @@ export class ParcelsService extends ContractService {
   changeBySender(
     body: ChangingParcelBySenderRequestBody,
     options?: RequestOptions,
-  ): Promise<ChangingParcelBySenderResult> {
+  ): Promise<ChangingParcelBySenderResponse> {
     return this.httpPost({ signal: options?.signal, path: '/changingParcelBySender', json: body });
   }
 }

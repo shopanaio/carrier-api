@@ -1,4 +1,5 @@
 // code and comments in English
+import type { HttpResponse, HttpTransport } from '@shopana/carrier-core';
 
 /**
  * Pluggable store for large reference data (the locality register is about 6 MB, branches about 2.3 MB).
@@ -25,5 +26,28 @@ export function createMemoryReferenceCache(now: () => number = Date.now): Refere
     set(key, value, ttlSec) {
       entries.set(key, { value, expiresAt: now() + ttlSec * 1000 });
     },
+  };
+}
+
+export interface ReferenceCacheOptions {
+  cache: ReferenceCache;
+  /** Cache lifetime in seconds. Default 86400 (the registers change at most daily). */
+  ttlSec?: number;
+}
+
+/**
+ * Optional layer, separate from the client: wraps a transport so successful GET answers are served from the
+ * cache until they expire. The client itself never caches.
+ */
+export function withReferenceCache(transport: HttpTransport, options: ReferenceCacheOptions): HttpTransport {
+  const ttlSec = options.ttlSec ?? 86_400;
+  return async <T>(request: Parameters<HttpTransport>[0]) => {
+    if (request.method !== 'GET') return transport<T>(request);
+    const key = `meest:public:${request.url}:${JSON.stringify(request.query ?? {})}`;
+    const hit = await options.cache.get<HttpResponse<T>>(key);
+    if (hit !== undefined) return hit;
+    const response = await transport<T>(request);
+    if (response.status === 200) await options.cache.set(key, response, ttlSec);
+    return response;
   };
 }

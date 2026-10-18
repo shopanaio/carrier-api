@@ -1,148 +1,205 @@
-import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
-import { createMemoryReferenceCache, createMeestPublicClient } from '../src';
+import { CarrierErrorCategory } from '@shopana/carrier-core';
+import {
+  createMemoryReferenceCache,
+  createMeestPublicClient,
+  isMeestNotFound,
+  unwrapMeestPublic,
+  withReferenceCache,
+} from '../src';
 import { mockTransport } from './mock';
 import type { Handler } from './mock';
 
 const BASE = 'https://publicapi.meest.com';
 const ok = (result: unknown) => ({ data: { status: 1, msg: null, result } });
-const fail = (code: number, en: string) => ({ data: { status: 0, msg: { code, ru: en, ua: en, en }, result: null } });
+const fail = (code: number, en: string) => ({
+  data: { status: 0, msg: { code, ru: en, ua: en, en }, result: null },
+});
 
 const make = (handler: Handler, extra: Record<string, unknown> = {}) => {
   const mock = mockTransport(BASE, handler);
   return { ...mock, client: createMeestPublicClient({ transport: mock.transport, retry: false, ...extra }) };
 };
 
-const rejection = async (p: Promise<unknown>) => {
-  try {
-    await p;
-  } catch (e) {
-    return e as CarrierError;
-  }
-  throw new Error('expected rejection');
-};
+describe('answers are returned exactly as Meest sends them', () => {
+  it('keeps the envelope, including error answers and null results', async () => {
+    const regions = [{ ua: 'Lvivska', ru: 'x', en: '', region_id: 'r1', kt: '' }];
+    expect(await make(() => ok(regions)).client.geo.regions()).toEqual({ status: 1, msg: null, result: regions });
 
-describe('geo', () => {
-  it('sends search filters as snake_case query parameters', async () => {
-    const { client, calls } = make(() => ok([{ ua: 'Lvivska', region_id: 'r1' }]));
-    expect(await client.geo.regions({ searchBeginning: 'L' })).toHaveLength(1);
-    expect(calls[0]).toMatchObject({ method: 'GET', path: '/geo_regions', query: { search_beginning: 'L' } });
-
-    await client.geo.districts({ regionId: 'r1' });
-    expect(calls[1]).toMatchObject({ path: '/geo_districts', query: { region_id: 'r1' } });
+    const error = fail(10401, 'Could not find region').data;
+    expect(await make(() => ({ data: error })).client.geo.regions({ searchFull: 'Atlantis' })).toEqual(error);
   });
 
-  it('reports a "not found" answer as an error instead of an empty list', async () => {
-    const { client } = make(() => fail(10401, 'Could not find region'));
-    expect(await rejection(client.geo.regions({ searchFull: 'Atlantis' }))).toMatchObject({
-      carrier: 'meest',
-      code: '10401',
-      category: CarrierErrorCategory.NotFound,
-      httpStatus: 200,
-    });
-    const broken = make(() => fail(10999, 'Boom'));
-    expect(await rejection(broken.client.geo.regions())).toMatchObject({
-      code: '10999',
-      category: CarrierErrorCategory.BusinessLogic,
-    });
-  });
-
-  it('returns localities exactly as the API does, each item wrapped in data', async () => {
+  it('keeps locality items wrapped in data and branch lists as lists', async () => {
     const locality = { n_ua: 'Mriya', city_id: 'c1', is_delivery_in_city: true };
-    const { client, calls } = make(() => ok([{ data: locality }]));
-    expect(await client.geo.localities({ districtId: 'd1' })).toEqual([{ data: locality }]);
-    expect(calls[0]!.query).toMatchObject({ district_id: 'd1' });
+    const localities = make(() => ok([{ data: locality }]));
+    expect((await localities.client.geo.localities({ districtId: 'd1' })).result).toEqual([{ data: locality }]);
+    expect(localities.calls[0]!.query).toMatchObject({ district_id: 'd1' });
+
+    const branches = [{ br_id: 'b1' }, { br_id: 'b2' }];
+    expect((await make(() => ok(branches)).client.branches.get(8382, { lang: 'ua' })).result).toEqual(branches);
   });
 
-  it('sends the street filters and the mandatory city', async () => {
-    const { client, calls } = make(() => ok([{ street_id: 's1' }]));
-    await client.geo.streets({ cityId: 'c1', searchBeginning: 'My' });
-    expect(calls[0]).toMatchObject({ path: '/geo_streets', query: { city_id: 'c1', search_beginning: 'My' } });
+  it('does not inspect the answer: a missing result stays missing', async () => {
+    expect(await make(() => ({ data: { status: 1, msg: null, result: null } })).client.branches.list()).toEqual({
+      status: 1,
+      msg: null,
+      result: null,
+    });
   });
 });
 
-describe('branches', () => {
-  const branches = [
-    { br_id: 'b1', num_showcase: '1', type_id: 't1', city_id: 'c1', parcel_max_kg: '30.00' },
-    { br_id: 'b2', num_showcase: '2', type_id: 't2', city_id: 'c1', parcel_max_kg: '300.00' },
-    { br_id: 'b3', num_showcase: 3, type_id: 't2', city_id: 'c1', parcel_max_kg: '0.00' },
-    { br_id: 'b4', num_showcase: '4', type_id: 't2', city_id: 'c2' },
-  ];
+describe('requests', () => {
+  it('geo: filters become snake_case query parameters', async () => {
+    const { client, calls } = make(() => ok([]));
+    await client.geo.regions({ searchBeginning: 'L', searchFull: 'Lviv' });
+    await client.geo.districts({ regionId: 'r1', searchBeginning: 'K', searchFull: 'Kyiv' });
+    await client.geo.localities({ districtId: 'd1', searchBeginning: 'K', searchFull: 'Kyiv' });
+    await client.geo.streets({ cityId: 'c1', searchBeginning: 'My', searchFull: 'Myru' });
+    expect(calls.map(c => `${c.method} ${c.path}`)).toEqual([
+      'GET /geo_regions',
+      'GET /geo_districts',
+      'GET /geo_localities',
+      'GET /geo_streets',
+    ]);
+    expect(calls.map(c => c.query)).toEqual([
+      { search_beginning: 'L', search_full: 'Lviv' },
+      { region_id: 'r1', search_beginning: 'K', search_full: 'Kyiv' },
+      { district_id: 'd1', search_beginning: 'K', search_full: 'Kyiv' },
+      { city_id: 'c1', search_beginning: 'My', search_full: 'Myru' },
+    ]);
+  });
 
-  it('joins filters, including several types', async () => {
-    const { client, calls } = make(() => ok(branches));
-    await client.branches.list({ city: 'Tern', type: ['poshtomat', 'minibranch'], lang: 'en', viewdata: 'full' });
+  it('sends the streets request even without a city (Meest answers with its own error)', async () => {
+    const { client, calls } = make(() => fail(10432, 'No location for street definition'));
+    const answer = await client.geo.streets({ cityId: '' });
+    expect(answer.msg?.code).toBe(10432);
+    expect(calls).toHaveLength(1);
+  });
+
+  it('branches: every filter, several types joined by commas', async () => {
+    const { client, calls } = make(() => ok([]));
+    await client.branches.list({
+      city: 'Tern',
+      district: 'D',
+      region: 'R',
+      type: ['poshtomat', 'minibranch'],
+      lang: 'en',
+      viewdata: 'full',
+    });
     expect(calls[0]).toMatchObject({
       path: '/branches',
-      query: { city: 'Tern', type: 'poshtomat,minibranch', lang: 'en', viewdata: 'full' },
+      query: { city: 'Tern', district: 'D', region: 'R', type: 'poshtomat,minibranch', lang: 'en', viewdata: 'full' },
     });
   });
 
-  it('passes the provider error for an empty register answer', async () => {
-    const { client } = make(() => fail(10111, 'Could not find branch'));
-    expect(await rejection(client.branches.list({ city: 'Mriya' }))).toMatchObject({
-      code: '10111',
-      category: CarrierErrorCategory.NotFound,
-    });
-  });
-
-  it('gets one branch as the list the API returns, and surfaces an unknown branch as not_found', async () => {
-    const { client, calls } = make(call =>
-      call.path.endsWith('/0') ? fail(10111, 'Could not find branch') : ok([branches[0]]),
-    );
-    expect(await client.branches.get(8382, { lang: 'ua' })).toEqual([branches[0]]);
-    expect(calls[0]).toMatchObject({ path: '/branches/8382', query: { lang: 'ua' } });
-    expect(await rejection(client.branches.get(0))).toMatchObject({
-      carrier: 'meest',
-      code: '10111',
-      category: CarrierErrorCategory.NotFound,
-    });
-  });
-
-  it('calls the locator with coordinates or an encoded address', async () => {
-    const { client, calls } = make(() => ok(branches));
+  it('locator: coordinates and an encoded address', async () => {
+    const { client, calls } = make(() => ok([]));
     await client.branches.nearestByCoords({ lat: 49.5, lng: 25.5 }, { type: 'poshtomat' });
     expect(calls[0]).toMatchObject({ path: '/locator/coord', query: { lat: 49.5, lng: 25.5, type: 'poshtomat' } });
-    await client.branches.nearestByAddress('Przemy\u015bl, ul. Mickiewicza 2/1');
+    await client.branches.nearestByAddress('Przemy\u015bl, ul. Mickiewicza 2/1', {
+      type: ['cargobranch', 'mainbranch'],
+    });
     expect(decodeURIComponent(calls[1]!.path)).toBe('/locator/Przemy\u015bl, ul. Mickiewicza 2/1');
     expect(calls[1]!.path).toContain('%2F');
+    expect(calls[1]!.query).toEqual({ type: 'cargobranch,mainbranch' });
+  });
+
+  it('forwards the abort signal', async () => {
+    const { client, calls } = make(() => ok([]));
+    const { signal } = new AbortController();
+    await client.geo.regions({}, { signal });
+    await client.branches.get(1, { signal });
+    await client.branches.list({}, { signal });
+    expect(calls.every(c => c.signal === signal)).toBe(true);
   });
 });
 
-describe('reference cache', () => {
-  it('serves repeated calls from the cache and refetches after the TTL', async () => {
+describe('optional helpers', () => {
+  it('unwrapMeestPublic returns the result and throws for status 0', () => {
+    expect(unwrapMeestPublic({ status: 1, msg: null, result: [1] })).toEqual([1]);
+    const error = (() => {
+      try {
+        unwrapMeestPublic({
+          status: 0,
+          msg: { code: 10111, ru: '', ua: '', en: 'Could not find branch' },
+          result: null,
+        });
+      } catch (e) {
+        return e;
+      }
+    })();
+    expect(error).toMatchObject({ carrier: 'meest', code: '10111', category: CarrierErrorCategory.NotFound });
+    expect(isMeestNotFound(error)).toBe(true);
+    expect(() => unwrapMeestPublic({ status: 0, msg: { code: 10432, ru: '', ua: '', en: 'x' }, result: null })).toThrow(
+      expect.objectContaining({ category: CarrierErrorCategory.Validation }),
+    );
+    expect(() => unwrapMeestPublic({ status: 0, msg: { code: 1, ru: '', ua: '', en: '' }, result: null })).toThrow(
+      expect.objectContaining({
+        category: CarrierErrorCategory.BusinessLogic,
+        message: 'Meest public API returned an error',
+      }),
+    );
+  });
+
+  it('withReferenceCache serves repeated GETs from the cache until they expire; the client itself never caches', async () => {
     let now = 0;
     const cache = createMemoryReferenceCache(() => now);
-    const { client, calls } = make(() => ok([{ br_id: 'b1' }]), { cache, cacheTtlSec: 10 });
+    const mock = mockTransport(BASE, () => ok([{ br_id: 'b1' }]));
+    const client = createMeestPublicClient({
+      transport: withReferenceCache(mock.transport, { cache, ttlSec: 10 }),
+      retry: false,
+    });
     await client.branches.list({ type: 'poshtomat' });
     await client.branches.list({ type: 'poshtomat' });
     await client.branches.list({ type: 'minibranch' });
-    expect(calls).toHaveLength(2);
+    expect(mock.calls).toHaveLength(2);
     now = 10_001;
     await client.branches.list({ type: 'poshtomat' });
-    expect(calls).toHaveLength(3);
+    expect(mock.calls).toHaveLength(3);
+
+    const plain = make(() => ok([]));
+    await plain.client.geo.regions();
+    await plain.client.geo.regions();
+    expect(plain.calls).toHaveLength(2);
   });
 
-  it('does not cache without a configured cache', async () => {
-    const { client, calls } = make(() => ok([]));
-    await client.geo.regions();
-    await client.geo.regions();
-    expect(calls).toHaveLength(2);
+  it('withReferenceCache does not cache failures or non-GET calls', async () => {
+    const cache = createMemoryReferenceCache();
+    let status = 503;
+    const mock = mockTransport(BASE, () => ({ status, data: 'x' }));
+    const wrapped = withReferenceCache(mock.transport, { cache });
+    const request = { method: 'GET' as const, url: `${BASE}/branches` };
+    await wrapped(request);
+    status = 200;
+    await wrapped(request);
+    await wrapped(request);
+    await wrapped({ ...request, method: 'POST' });
+    await wrapped({ ...request, method: 'POST' });
+    expect(mock.calls.map(c => c.method)).toEqual(['GET', 'GET', 'POST', 'POST']);
+  });
+
+  it('expires memory cache entries after the TTL', () => {
+    let now = 0;
+    const cache = createMemoryReferenceCache(() => now);
+    cache.set('k', 1, 10);
+    expect(cache.get('k')).toBe(1);
+    now = 10_001;
+    expect(cache.get('k')).toBeUndefined();
   });
 });
 
 describe('resilience', () => {
   it('retries a GET after a 503', async () => {
-    const { client, calls } = make(
-      (_, i) => (i === 0 ? { status: 503, data: 'unavailable' } : ok([{ region_id: 'r1' }])),
-      { retry: { baseDelayMs: 1, jitter: 'none', sleep: async () => {} } },
-    );
-    expect(await client.geo.regions()).toHaveLength(1);
+    const { client, calls } = make((_, i) => (i === 0 ? { status: 503, data: 'unavailable' } : ok([])), {
+      retry: { baseDelayMs: 1, jitter: 'none', sleep: async () => {} },
+    });
+    expect((await client.geo.regions()).status).toBe(1);
     expect(calls).toHaveLength(2);
   });
 
-  it('maps gateway failures through the generic status mapping', async () => {
+  it('throws gateway failures as CarrierErrors', async () => {
     const { client } = make(() => ({ status: 502, data: 'Bad gateway' }));
-    expect(await rejection(client.branches.list())).toMatchObject({
+    await expect(client.branches.list()).rejects.toMatchObject({
       category: CarrierErrorCategory.Server,
       httpStatus: 502,
     });

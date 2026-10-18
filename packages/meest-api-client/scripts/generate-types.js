@@ -4,7 +4,9 @@ const path = require('path');
 
 const SPEC_PATH = path.resolve(__dirname, '../contracts/meest-contract.swagger.json');
 const OUTPUT_PATH = path.resolve(__dirname, '../src/contract/types/generated.ts');
+const PINS_PATH = path.resolve(__dirname, '../type-tests/fields.generated.ts');
 const { loadSwagger } = require('./contract-source');
+const pins = [];
 const spec = loadSwagger().swagger;
 
 function main() {
@@ -22,6 +24,95 @@ function main() {
 
   fs.mkdirSync(path.dirname(OUTPUT_PATH), { recursive: true });
   fs.writeFileSync(OUTPUT_PATH, chunks.join('\n'), 'utf8');
+
+  const header = [
+    '// AUTO-GENERATED FILE. DO NOT EDIT DIRECTLY.',
+    '// Pins the exact field set (names and optionality) and primitive types of every request and response type,',
+    '// walking the Swagger snapshot independently of the type renderer. Run `yarn generate:types` to refresh.',
+    "import type * as T from '../src';",
+    '',
+    'type Eq<A, B> = (<X>() => X extends A ? 1 : 2) extends <X>() => X extends B ? 1 : 2 ? true : false;',
+    'type Assert<V extends true> = V;',
+    'type Req<O> = { [K in keyof O]-?: {} extends Pick<O, K> ? never : K }[keyof O];',
+    '',
+  ];
+  fs.mkdirSync(path.dirname(PINS_PATH), { recursive: true });
+  const pinText = [...header, ...pins, '']
+    .join('\n')
+    .replace(/[\u0080-\uffff]/g, c => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+  fs.writeFileSync(PINS_PATH, pinText, 'utf8');
+}
+
+// ---- field pins ----
+
+function quote(value) {
+  return asciiJson(value)
+    .replace(/^"|"$/g, "'")
+    .replace(/\\"/g, '"')
+    .replace(/'/g, "\\'")
+    .replace(/^\\'|\\'$/g, "'");
+}
+
+function keyLiteral(name) {
+  return `'${asciiJson(name).slice(1, -1).replace(/\\"/g, '"').replace(/'/g, "\\'")}'`;
+}
+
+function pinSchema(expr, schema, label) {
+  if (!schema || typeof schema !== 'object') return;
+  const type = schema.type || (schema.properties ? 'object' : undefined);
+  const node = `NonNullable<${expr}>`;
+  if (schema.enum && Array.isArray(schema.enum) && schema.enum.length > 0) {
+    pins.push(
+      `export type Pin${pins.length} = Assert<Eq<${node}, ${schema.enum.map(v => keyLiteral(String(v))).join(' | ')}>>; // ${label}`,
+    );
+    return;
+  }
+  switch (type) {
+    case 'object': {
+      const props = schema.properties || {};
+      const keys = Object.keys(props);
+      if (keys.length === 0) {
+        pins.push(`export type Pin${pins.length} = Assert<Eq<${node}, Record<string, unknown>>>; // ${label}`);
+        return;
+      }
+      const required = keys.filter(k => (schema.required || []).includes(k));
+      pins.push(
+        `export type Pin${pins.length} = Assert<Eq<keyof ${node}, ${keys.map(keyLiteral).join(' | ')}>>; // ${label} keys`,
+      );
+      pins.push(
+        `export type Pin${pins.length} = Assert<Eq<Req<${node}>, ${required.length ? required.map(keyLiteral).join(' | ') : 'never'}>>; // ${label} required`,
+      );
+      for (const key of keys) pinSchema(`${node}[${keyLiteral(key)}]`, props[key], `${label}.${key}`);
+      return;
+    }
+    case 'array':
+      pinSchema(`${node}[number]`, schema.items || { type: 'object' }, `${label}[]`);
+      return;
+    case 'integer':
+    case 'number':
+      pins.push(`export type Pin${pins.length} = Assert<Eq<${node}, number>>; // ${label}`);
+      return;
+    case 'boolean':
+      pins.push(`export type Pin${pins.length} = Assert<Eq<${node}, boolean>>; // ${label}`);
+      return;
+    case 'string':
+      pins.push(`export type Pin${pins.length} = Assert<Eq<${node}, string>>; // ${label}`);
+      return;
+    default:
+  }
+}
+
+function pinParams(typeName, parameters) {
+  const keys = parameters.map(param => param.name);
+  pins.push(
+    `export type Pin${pins.length} = Assert<Eq<keyof T.${typeName}, ${keys.map(keyLiteral).join(' | ')}>>; // ${typeName} keys`,
+  );
+  const required = parameters.filter(param => param.required).map(param => param.name);
+  pins.push(
+    `export type Pin${pins.length} = Assert<Eq<Req<T.${typeName}>, ${required.length ? required.map(keyLiteral).join(' | ') : 'never'}>>; // ${typeName} required`,
+  );
+  for (const param of parameters)
+    pinSchema(`T.${typeName}[${keyLiteral(param.name)}]`, param, `${typeName}.${param.name}`);
 }
 
 function collectOperations(document) {
@@ -79,14 +170,17 @@ function renderOperation(operation) {
 
   if (bodyParam && bodyParam.schema) {
     section.push(renderTypeAlias(`${baseName}RequestBody`, bodyParam.schema, bodyParam.description));
+    pinSchema(`T.${baseName}RequestBody`, bodyParam.schema, `${baseName}RequestBody`);
   }
 
   if (queryParams.length > 0) {
     section.push(renderParamsInterface(`${baseName}QueryParams`, queryParams));
+    pinParams(`${baseName}QueryParams`, queryParams);
   }
 
   if (pathParams.length > 0) {
     section.push(renderParamsInterface(`${baseName}PathParams`, pathParams));
+    pinParams(`${baseName}PathParams`, pathParams);
   }
 
   const responseSchema = (operation.responses['200'] && operation.responses['200'].schema) || null;
@@ -98,6 +192,7 @@ function renderOperation(operation) {
   if (resultSchema) {
     section.push(renderTypeAlias(`${baseName}Result`, resultSchema, 'Result payload'));
     resultTypeName = `${baseName}Result`;
+    pinSchema(`T.${baseName}Result`, resultSchema, `${baseName}Result`);
   }
 
   section.push(

@@ -1,18 +1,12 @@
 // code and comments in English
 import type { BinaryData, ClientContext, QueryParams, ResponseType } from '@shopana/carrier-core';
-import type { RequestOptions } from '../../shared';
+import type { DeleteRequestOptions, RequestOptions } from '../../shared';
+import type { AuthResponse, RefreshTokenResponse } from '../types/generated';
 
 /** Login and refresh calls, made without the token strategy so a 401 there never recurses into login. */
 export interface MeestAuthApi {
-  login(signal?: AbortSignal): Promise<MeestTokens>;
-  refresh(refreshToken: string, signal?: AbortSignal): Promise<MeestTokens>;
-}
-
-export interface MeestTokens {
-  token: string;
-  refreshToken: string;
-  /** Lifetime in seconds as reported by Meest. */
-  expiresIn: number;
+  login(signal?: AbortSignal): Promise<AuthResponse>;
+  refresh(refreshToken: string, signal?: AbortSignal): Promise<RefreshTokenResponse>;
 }
 
 export interface MeestContractContextConfig {
@@ -21,7 +15,7 @@ export interface MeestContractContextConfig {
 
 export type ContractContext = ClientContext<MeestContractContextConfig>;
 
-export type { BinaryData, RequestOptions };
+export type { BinaryData, DeleteRequestOptions, RequestOptions };
 
 interface CallOptions extends RequestOptions {
   path: string;
@@ -63,6 +57,5 @@ export abstract class ContractService {
  */
 export function encodeIds(ids: string | readonly string[]): string {
   const list = typeof ids === 'string' ? [ids] : ids;
-  if (list.length === 0 || list.some(id => id === '')) throw new TypeError('At least one non-empty id is required');
   return list.map(encodeURIComponent).join(',');
 }

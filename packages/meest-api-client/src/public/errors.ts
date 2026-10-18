@@ -1,6 +1,5 @@
 // code and comments in English
 import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
-import type { HttpResponse } from '@shopana/carrier-core';
 import type { MeestPublicEnvelope } from './types';
 
 export const MEEST_PUBLIC_CARRIER = 'meest';
@@ -16,8 +15,8 @@ export function isMeestNotFound(error: unknown): boolean {
   return error instanceof CarrierError && error.category === CarrierErrorCategory.NotFound;
 }
 
-/** Turns a `status: 0` envelope into a CarrierError. The API reports errors with HTTP 200. */
-export function envelopeError(response: HttpResponse<unknown>): CarrierError {
+/** Turns a `status: 0` answer into a CarrierError. */
+export function envelopeError(response: { status: number; data: unknown }): CarrierError {
   const env = response.data as MeestPublicEnvelope<unknown> | null;
   const code = env?.msg?.code;
   const category =
@@ -38,7 +37,11 @@ export function envelopeError(response: HttpResponse<unknown>): CarrierError {
   });
 }
 
-/** Non-2xx answers (gateway errors) fall back to the generic status mapping in carrier-core. */
-export function isEnvelope(data: unknown): data is MeestPublicEnvelope<unknown> {
-  return typeof data === 'object' && data !== null && 'status' in data && 'result' in data;
+/**
+ * Optional helper, not used by the client: returns the `result` of a successful answer and throws a CarrierError
+ * for `status: 0`.
+ */
+export function unwrapMeestPublic<T>(envelope: MeestPublicEnvelope<T>, httpStatus = 200): T {
+  if (Number(envelope.status) !== 1) throw envelopeError({ status: httpStatus, data: envelope });
+  return envelope.result as T;
 }

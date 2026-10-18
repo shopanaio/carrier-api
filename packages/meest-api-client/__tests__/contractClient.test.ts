@@ -1,5 +1,5 @@
 import { CarrierErrorCategory, InMemoryTokenStore } from '@shopana/carrier-core';
-import { createMeestContractClient } from '../src';
+import { createMeestContractClient, formatDate, formatDateTime, formatIsoDate, unwrapMeestResponse } from '../src';
 import { FakeClock, mockTransport } from './mock';
 import { BASE, fail, makeContract, ok, rejection } from './contractHelpers';
 
@@ -13,28 +13,23 @@ describe('authentication', () => {
     expect(apiCalls().map(c => c.headers.token)).toEqual(['tok-1', 'tok-1']);
   });
 
-  it('normalizes the refresh_token spelling of the Swagger example', async () => {
+  it('returns the token answers exactly as Meest sends them', async () => {
     const { client } = makeContract();
-    const tokens = await client.auth.login();
-    expect(tokens).toEqual({ token: 'tok-1', refreshToken: 'ref-1', expiresIn: 86_400 });
-    expect(await client.auth.refresh(tokens.refreshToken)).toMatchObject({ token: 'tok-2' });
+    const login = await client.auth.login();
+    expect(login).toEqual({
+      status: 'OK',
+      info: { fieldName: '', message: '', messageDetails: '' },
+      result: { token: 'tok-1', refresh_token: 'ref-1', expiresIn: 86_400 },
+    });
+    const refreshed = await client.auth.refresh(login.result.refresh_token!);
+    expect(refreshed.result).toEqual({ token: 'tok-2', refresh_token: 'ref-2', expiresIn: 86_400 });
   });
 
-  it('accepts refreshToken as the field name too, and rejects a response without tokens', async () => {
-    const noWait = makeContract();
-    const mock = mockTransport(BASE, call =>
-      call.path === '/auth' ? ok({ token: 't', refreshToken: 'r', expiresIn: 60 }) : ok([]),
-    );
-    const camel = createMeestContractClient({
-      username: 'u',
-      password: 'p',
-      transport: mock.transport,
-      clock: noWait.clock,
-    });
-    expect(await camel.auth.login()).toMatchObject({ refreshToken: 'r' });
-    const empty = mockTransport(BASE, () => ok({}));
-    const bad = createMeestContractClient({ username: 'u', password: 'p', transport: empty.transport });
-    await expect(bad.auth.login()).rejects.toThrow('no token');
+  it('returns an answer without a token unchanged from auth.login, but cannot use it for requests', async () => {
+    const mock = mockTransport(BASE, () => ok({}));
+    const client = createMeestContractClient({ username: 'u', password: 'p', transport: mock.transport });
+    expect((await client.auth.login()).result).toEqual({});
+    await expect(client.pricing.specConditions()).rejects.toMatchObject({ carrier: 'meest' });
   });
 
   it('turns wrong credentials into an authentication error', async () => {
@@ -124,7 +119,7 @@ describe('requests', () => {
       receiver: { branchID: 'b', cityID: 'c', service: 'Branch' },
       placesItems: [{ quantity: 1, weight: 2 }],
     };
-    expect(await client.pricing.calculate(body)).toEqual([{ costServices: '100.00' }]);
+    expect(await client.pricing.calculate(body)).toEqual(ok([{ costServices: '100.00' }]).data);
     await client.pricing.specConditions();
     await client.pricing.orderDateInfo('street-1');
     expect(apiCalls().map(c => `${c.method} ${c.path}`)).toEqual([
@@ -142,7 +137,7 @@ describe('requests', () => {
     await client.parcels.delete('p1', 'k1');
     await client.parcels.get('T-1', 'parcelNumber');
     await client.parcels.get('p1');
-    await client.parcels.list(new Date('2026-01-31T22:30:00Z'));
+    await client.parcels.list(formatDate(new Date('2026-01-31T22:30:00Z')));
     await client.parcels.status('p1');
     await client.parcels.statusDetails('p1');
     await client.parcels.lock({ ClientsShipmentRef: 'T-1' } as never);
@@ -164,15 +159,15 @@ describe('requests', () => {
     expect(apiCalls().at(-1)!.query).toEqual({ barCode: '711-1' });
   });
 
-  it('tracking: formats dates as the endpoints expect, in Kyiv time', async () => {
+  it('tracking: sends date strings as given; the optional helpers format a Date in Kyiv time', async () => {
     const { client, apiCalls } = makeContract();
     const from = new Date('2026-01-01T10:00:00Z');
     const to = new Date('2026-01-01T11:30:00Z');
     await client.tracking.byNumber('711-1');
     await client.tracking.parcelInfo('p1');
-    await client.tracking.byDate(from);
-    await client.tracking.byPeriod(from, to);
-    await client.tracking.delivered('2026-01-01 00:00:00', to, 2);
+    await client.tracking.byDate(formatIsoDate(from));
+    await client.tracking.byPeriod(formatDateTime(from), formatDateTime(to));
+    await client.tracking.delivered('2026-01-01 00:00:00', formatDateTime(to), 2);
     expect(apiCalls().map(c => decodeURIComponent(`${c.method} ${c.path}`))).toEqual([
       'GET /tracking/711-1',
       'GET /parcelInfoTracking/p1',
@@ -241,12 +236,6 @@ describe('print', () => {
     ]);
   });
 
-  it('requires a phone for the form endpoints', () => {
-    const { client } = makeContract({ handler });
-    expect(() => client.print.declaration('p1', '', 'pdf')).toThrow(TypeError);
-    expect(() => client.print.cn23('p1', '')).toThrow(TypeError);
-  });
-
   it('prints stickers with agent, page and position', async () => {
     const { client, apiCalls } = makeContract({ handler });
     await client.print.sticker100(['711-1', '711-2'], { agent: 'k1', page: 1 });
@@ -274,7 +263,6 @@ describe('courier slots and newer operations', () => {
       { streetID: 's1', type: 'PickUp' },
       { cityID: 'c1', type: 'Delivery' },
     ]);
-    expect(() => client.registers.availableTimeSlots({ type: 'PickUp' })).toThrow(TypeError);
   });
 
   it('changes a parcel as the sender and calculates export B2C prices', async () => {
@@ -345,8 +333,8 @@ describe('review fixes', () => {
       tokenStore: store,
       clock,
     });
-    expect(await alice.pricing.specConditions()).toEqual([{ seen: 'token-alice', name: 'alice' }]);
-    expect(await bob.pricing.specConditions()).toEqual([{ seen: 'token-bob', name: 'bob' }]);
+    expect((await alice.pricing.specConditions()).result).toEqual([{ seen: 'token-alice', name: 'alice' }]);
+    expect((await bob.pricing.specConditions()).result).toEqual([{ seen: 'token-bob', name: 'bob' }]);
     expect(tb.callsTo('POST', '/auth')).toHaveLength(1);
   });
 
@@ -364,59 +352,31 @@ describe('review fixes', () => {
     expect(hang.calls[0]!.path).toBe('/auth');
   });
 
-  it('classifies a complaint about the token inside a 200 body as an authentication error', async () => {
-    const { client } = makeContract({
-      handler: () => ({
-        data: { status: 'Error', info: { fieldName: 'token', message: 'Invalid token' }, result: null },
-      }),
-    });
-    expect(await rejection(client.pricing.specConditions())).toMatchObject({
-      category: CarrierErrorCategory.Authentication,
-      field: 'token',
-    });
+  it('returns an Error envelope inside a 200 body unchanged', async () => {
+    const body = { status: 'Error', info: { fieldName: 'x', message: 'Nested' }, result: null };
+    const { client } = makeContract({ handler: () => ({ data: body }) });
+    expect(await client.pricing.specConditions()).toEqual(body);
   });
 
-  it('requires ids for print calls', () => {
-    const { client } = makeContract();
-    expect(() => client.print.sticker100([])).toThrow(TypeError);
-    expect(() => client.print.sticker100('')).toThrow(TypeError);
-  });
-});
-
-describe('errors', () => {
-  it('maps HTTP status and info.fieldName to a CarrierError', async () => {
-    const { client } = makeContract({ handler: () => fail(404, 'parcelID', 'Parcel not found') });
-    expect(await rejection(client.parcels.get('x'))).toMatchObject({
-      code: '404:parcelID',
-      field: 'parcelID',
-      category: CarrierErrorCategory.NotFound,
-      message: 'Parcel not found',
-    });
-  });
-
-  it('maps an Error envelope inside a 200 body, flat or nested', async () => {
-    const flat = makeContract({
-      handler: () => ({ data: { status: 'Error', fieldName: 'x', message: 'Flat', result: null } }),
-    });
-    expect(await rejection(flat.client.pricing.specConditions())).toMatchObject({
-      message: 'Flat',
-      field: 'x',
-      category: CarrierErrorCategory.Validation,
-    });
-    const nested = makeContract({
-      handler: () => ({ data: { status: 'Error', info: { message: 'Nested' }, result: null } }),
-    });
-    expect(await rejection(nested.client.pricing.specConditions())).toMatchObject({
-      message: 'Nested',
-      category: CarrierErrorCategory.BusinessLogic,
-    });
-  });
-
-  it('treats a lowercase "ok" status as success and a bare array as a payload', async () => {
+  it('passes a lowercase ok status and a bare array through untouched', async () => {
     const lower = makeContract({ handler: () => ({ data: { status: 'ok', result: [1] } }) });
-    expect(await lower.client.pricing.specConditions()).toEqual([1]);
+    expect(await lower.client.pricing.specConditions()).toEqual({ status: 'ok', result: [1] });
     const bare = makeContract({ handler: () => ({ data: [{ status: 'Created', statusCode: '2' }] }) });
     expect(await bare.client.parcels.status('p1')).toEqual([{ status: 'Created', statusCode: '2' }]);
+  });
+
+  it('offers unwrapMeestResponse to callers who want results and exceptions', () => {
+    expect(unwrapMeestResponse({ status: 200, data: { status: 'ok', result: [1] } })).toEqual([1]);
+    expect(unwrapMeestResponse({ status: 200, data: [1] })).toEqual([1]);
+    expect(() =>
+      unwrapMeestResponse({
+        status: 200,
+        data: { status: 'Error', info: { fieldName: 'token', message: 'Invalid token' } },
+      }),
+    ).toThrow(expect.objectContaining({ category: CarrierErrorCategory.Authentication, field: 'token' }));
+    expect(() =>
+      unwrapMeestResponse({ status: 200, data: { status: 'Error', fieldName: 'x', message: 'Flat', result: null } }),
+    ).toThrow(expect.objectContaining({ message: 'Flat', category: CarrierErrorCategory.Validation }));
   });
 });
 
@@ -432,7 +392,7 @@ describe('resilience', () => {
             : ok([{ ok: true }]),
     });
     const t0 = clock.now();
-    expect(await client.pricing.specConditions()).toEqual([{ ok: true }]);
+    expect((await client.pricing.specConditions()).result).toEqual([{ ok: true }]);
     expect(apiCalls()).toHaveLength(3);
     expect(clock.now() - t0).toBeGreaterThanOrEqual(2000);
   });
