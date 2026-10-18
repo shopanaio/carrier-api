@@ -23,10 +23,12 @@ import type { CourierInterval } from '../contract/types/courier';
 import { invalidInput, isNotFound, notAllowed } from './errors';
 import {
   SERVICE_NAMES,
+  contactChanges,
   deliveryTypeOf,
   findAddress,
   lifecycleToTrackingStatus,
   postcodeOf,
+  samePhone,
   shipmentTypeOf,
   toAddressInput,
   toClientInput,
@@ -46,6 +48,7 @@ async function resolveParty(
   party: Party,
   field: string,
   options: CallOptions,
+  bankAccount?: string,
 ): Promise<Resolved> {
   const refs =
     party.point.type === 'door'
@@ -66,9 +69,14 @@ async function resolveParty(
   if (!client) {
     const addressId = refs?.addressId ? Number(refs.addressId) : (await ecom.addresses.create(wanted, options)).id;
     // Validate the contact before the client is created, so a bad phone never leaves an orphan address behind.
-    const created = await ecom.clients.create(toClientInput(party, addressId, field), options);
+    const created = await ecom.clients.create(toClientInput(party, addressId, field, bankAccount), options);
     return { clientUuid: created.uuid, addressId, client: created };
   }
+
+  // A party with an external id (or a known client) is the same person, but the contact may have changed since:
+  // the latest contact the consumer gives wins and is written to the client before it is used.
+  const changes = contactChanges(client, toClientInput(party, client.addressId, field));
+  if (Object.keys(changes).length > 0) client = await ecom.clients.update(client.uuid, changes, options);
 
   let address: ClientAddress | undefined = refs?.addressId
     ? client.addresses.find(item => String(item.addressId) === refs.addressId)
@@ -81,6 +89,12 @@ async function resolveParty(
   }
   if (!address) throw invalidInput('The address could not be attached to the client', `${field}.point`);
   return { clientUuid: client.uuid, addressId: address.addressId, client };
+}
+
+/** The sender's IBAN for a new company client, from `options.extra.senderBankAccount`. */
+function bankAccountOf(extra: Record<string, unknown> | undefined): string | undefined {
+  const value = extra?.senderBankAccount;
+  return typeof value === 'string' && value !== '' ? value : undefined;
 }
 
 function toShipment(raw: UkrposhtaShipment): Shipment {
@@ -126,20 +140,45 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
       const parcels = input.parcels.map(toParcelInput);
       assertCodCovered(parcels, cod);
 
+      const senderBankAccount = bankAccountOf(input.options?.extra);
+      const senderRefs =
+        input.sender.point.type === 'door'
+          ? input.sender.point.address.carrierRefs?.ukrposhta
+          : input.sender.point.address?.carrierRefs?.ukrposhta;
+      if (
+        cod !== undefined &&
+        input.sender.contact.company &&
+        senderBankAccount === undefined &&
+        !input.sender.externalId &&
+        !senderRefs?.clientUuid
+      ) {
+        throw invalidInput(
+          'A company receives cash on delivery to a bank account: give options.extra.senderBankAccount (an IBAN)',
+          'options.extra.senderBankAccount',
+        );
+      }
       // Validate everything that can be validated locally before the first request, so a bad input leaves nothing behind.
       for (const [party, field] of [
         [input.sender, 'sender'],
         [input.recipient, 'recipient'],
       ] as const) {
         toAddressInput(party, `${field}.point`);
-        toClientInput(party, 0, field);
+        toClientInput(party, 0, field, field === 'sender' ? senderBankAccount : undefined);
       }
       if (input.reference !== undefined && input.reference.length > 64) {
         throw invalidInput('reference is at most 64 characters (it becomes the shipment externalId)', 'reference');
       }
 
-      const sender = await resolveParty(ecom, input.sender, 'sender', options);
+      const sender = await resolveParty(ecom, input.sender, 'sender', options, senderBankAccount);
       const recipient = await resolveParty(ecom, input.recipient, 'recipient', options);
+
+      // A company receives cash on delivery on its bank account, which must be on file.
+      if (cod !== undefined && sender.client.type === 'COMPANY' && !sender.client.bankAccount) {
+        throw invalidInput(
+          'A company receives cash on delivery to a bank account: give options.extra.senderBankAccount (an IBAN) or use a client that has one',
+          'options.extra.senderBankAccount',
+        );
+      }
 
       const body: ShipmentInput = {
         sender: { uuid: sender.clientUuid },
@@ -154,7 +193,6 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
           ? {
               postPay: cod,
               postPayPaidByRecipient: (input.options?.cashOnDelivery?.payer ?? 'recipient') === 'recipient',
-              // A company receives cash on delivery on its bank account.
               ...(sender.client.type === 'COMPANY' ? { transferPostPayToBankAccount: true } : {}),
             }
           : {}),
@@ -341,26 +379,34 @@ export function createPickupApi(ecom: UkrposhtaEcomClientWithCourier) {
       if (shipments.some(shipment => shipment.sender.uuid !== first.sender.uuid)) {
         throw invalidInput('All shipments of a pickup need one sender', 'shipmentIds');
       }
+      if (shipments.some(shipment => shipment.senderAddressId !== first.senderAddressId)) {
+        throw invalidInput('All shipments of a pickup need one sender address', 'shipmentIds');
+      }
       const pickupAddress = first.sender.addresses.find(item => item.addressId === first.senderAddressId);
-      if (
-        request.address.postalCode !== undefined &&
-        pickupAddress &&
-        pickupAddress.address.postcode !== request.address.postalCode
-      ) {
+      if (pickupAddress === undefined) {
+        throw invalidInput('The sender address of the shipments is not on the sender', 'shipmentIds');
+      }
+      const differs = addressDiffers(request.address, pickupAddress.address);
+      if (differs !== undefined) {
         throw invalidInput(
-          `The courier collects from the sender address of the shipments (${pickupAddress.address.postcode}), not ${request.address.postalCode}`,
+          `The courier collects from the sender address of the shipments, which has a different ${differs}`,
           'address',
         );
       }
-      const wanted = request.contact.phone?.replace(/\D/g, '');
+      const given = request.contact.phone;
       const phone =
-        first.sender.phones.find(
-          item =>
-            wanted !== undefined && wanted !== '' && item.phoneNumber.replace(/\D/g, '').endsWith(wanted.slice(-9)),
-        ) ??
-        first.sender.phones.find(item => item.main) ??
-        (first.sender.phones[0] as (typeof first.sender.phones)[number] | undefined);
-      if (phone === undefined) throw invalidInput('The sender has no phone number', 'contact.phone');
+        given !== undefined && given !== ''
+          ? first.sender.phones.find(item => samePhone(item.phoneNumber, given))
+          : (first.sender.phones.find(item => item.main) ??
+            (first.sender.phones[0] as (typeof first.sender.phones)[number] | undefined));
+      if (phone === undefined) {
+        throw invalidInput(
+          given !== undefined && given !== ''
+            ? `The phone ${given} is not a phone of the sender`
+            : 'The sender has no phone number',
+          'contact.phone',
+        );
+      }
 
       const order = await ecom.courier.createOrder(
         {
@@ -391,4 +437,19 @@ function kyivNow(): string {
     minute: '2-digit',
   }).format(new Date());
   return parts.slice(0, 16);
+}
+
+const norm = (value: string | null | undefined) => (value ?? '').trim().toLowerCase();
+
+/** The first field of a requested pickup address that differs from the stored one; fields not given are not compared. */
+function addressDiffers(wanted: PickupRequest['address'], stored: ClientAddress['address']): string | undefined {
+  if (wanted.country.toUpperCase() !== 'UA') return 'country';
+  if (wanted.postalCode !== undefined && wanted.postalCode !== stored.postcode) return 'postcode';
+  const checks: Array<[string, string | undefined, string | null | undefined]> = [
+    ['street', wanted.street ?? wanted.lines?.join(', '), stored.street],
+    ['house number', wanted.building, stored.houseNumber],
+    ['apartment', wanted.apartment, stored.apartmentNumber],
+    ['city', wanted.city, stored.city],
+  ];
+  return checks.find(([, given, have]) => given !== undefined && given !== '' && norm(given) !== norm(have))?.[0];
 }

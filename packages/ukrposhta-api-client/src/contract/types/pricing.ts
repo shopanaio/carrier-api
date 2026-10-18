@@ -31,6 +31,10 @@ export interface PriceParcel {
   width?: number;
   height?: number;
   declaredPrice?: number;
+  /** Packaging by the post office, paid by the recipient. */
+  packagingPaidByRecipient?: boolean;
+  /** Packaging price in UAH. */
+  packagingPrice?: number;
 }
 
 export interface PriceDiscount {

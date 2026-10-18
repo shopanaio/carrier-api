@@ -57,12 +57,16 @@ export function sizesOf(parcel: CanonicalParcel): Pick<ParcelInput, 'length' | '
 }
 
 export function toParcelInput(parcel: CanonicalParcel): ParcelInput {
+  // Express and Standard are priced by volume and need all three sizes; guessing them would misprice the shipment.
   const sizes = sizesOf(parcel);
+  if (!sizes) {
+    throw invalidInput('Parcel dimensions (length, width and height) are required', 'parcels.dimensions');
+  }
   return {
     weight: gramsOf(parcel),
-    // Without dimensions the API still needs a length; 1 cm keeps the weight tariff.
-    length: sizes?.length ?? 1,
-    ...(sizes ? { width: sizes.width, height: sizes.height } : {}),
+    length: sizes.length,
+    width: sizes.width,
+    height: sizes.height,
     ...(parcel.declaredValue ? { declaredPrice: uah(parcel.declaredValue, 'parcels.declaredValue') } : {}),
     ...(parcel.description ? { description: parcel.description.slice(0, 1024) } : {}),
   };
@@ -77,6 +81,7 @@ export function deliveryTypeOf(sender: Party, recipient: Party): DeliveryType {
 
 /** Postcode of a party: the address postcode, or the post office index of a location. */
 export function postcodeOf(party: Party, field: string): string {
+  assertUkraine(party.point.address?.country, field);
   const code =
     party.point.type === 'location'
       ? (party.point.address?.postalCode ?? party.point.locationId)
@@ -87,7 +92,15 @@ export function postcodeOf(party: Party, field: string): string {
   return code;
 }
 
+/** Ukrposhta's domestic API serves Ukrainian addresses only. */
+export function assertUkraine(country: string | undefined, field: string): void {
+  if (country !== undefined && country.toUpperCase() !== 'UA') {
+    throw invalidInput(`Ukrposhta delivers within Ukraine only, got country ${country}`, field);
+  }
+}
+
 export function toAddressInput(party: Party, field: string): AddressInput {
+  assertUkraine(party.point.address?.country, field);
   const postcode = postcodeOf(party, field);
   const address: CanonicalAddress | undefined = party.point.address;
   return {
@@ -150,7 +163,12 @@ export function namesOf(contact: Contact, field: string): Names {
   throw invalidInput('firstName and lastName (or a name of two words) are required', field);
 }
 
-export function toClientInput(party: Party, addressId: number | string, field: string): ClientInput {
+export function toClientInput(
+  party: Party,
+  addressId: number | string,
+  field: string,
+  bankAccount?: string,
+): ClientInput {
   const { contact } = party;
   if (!contact.phone) throw invalidInput('A phone number is required', `${field}.contact.phone`);
   const base = {
@@ -158,6 +176,7 @@ export function toClientInput(party: Party, addressId: number | string, field: s
     phoneNumber: contact.phone,
     ...(contact.email ? { email: contact.email } : {}),
     ...(party.externalId ? { externalId: party.externalId } : {}),
+    ...(bankAccount ? { bankAccount } : {}),
   };
   if (contact.company) {
     if (!party.taxId) throw invalidInput('A company needs its EDRPOU in taxId', `${field}.taxId`);
@@ -196,3 +215,35 @@ export function lifecycleToTrackingStatus(status: LifecycleStatus): TrackingStat
 }
 
 export type { Client };
+
+const digits = (value: string | null | undefined) => (value ?? '').replace(/\D/g, '');
+
+/** Whether two phone numbers are the same subscriber (the last nine digits agree). */
+export function samePhone(a: string | null | undefined, b: string | null | undefined): boolean {
+  const x = digits(a).slice(-9);
+  return x !== '' && x === digits(b).slice(-9);
+}
+
+/**
+ * What differs between the stored client and the contact the consumer gave now. Only given fields count: a missing
+ * e-mail or middle name never clears the stored one.
+ */
+export function contactChanges(client: Client, wanted: ClientInput): Partial<ClientInput> {
+  const changes: Partial<ClientInput> = {};
+  if (client.type === 'COMPANY' && wanted.name !== undefined && norm(client.name) !== norm(wanted.name)) {
+    changes.name = wanted.name;
+  }
+  if (client.type !== 'COMPANY') {
+    if (wanted.firstName !== undefined && norm(client.firstName) !== norm(wanted.firstName))
+      changes.firstName = wanted.firstName;
+    if (wanted.lastName !== undefined && norm(client.lastName) !== norm(wanted.lastName))
+      changes.lastName = wanted.lastName;
+    if (wanted.middleName !== undefined && norm(client.middleName) !== norm(wanted.middleName))
+      changes.middleName = wanted.middleName;
+  }
+  if (!samePhone(client.phoneNumber, wanted.phoneNumber)) {
+    changes.phoneNumber = wanted.phoneNumber;
+  }
+  if (wanted.email !== undefined && norm(client.email) !== norm(wanted.email)) changes.email = wanted.email;
+  return changes;
+}

@@ -51,7 +51,8 @@ function createHttp(config: UkrposhtaContractConfig, baseUrl: string): HttpClien
     mapError: mapUkrposhtaError,
     // Both the bearer and the counterparty token are credentials.
     logger: config.logger,
-    redact: { keys: ['token'] },
+    // `senderToken` is the counterparty token again, inside the body of the return order.
+    redact: { keys: ['token', 'senderToken'] },
   });
 }
 

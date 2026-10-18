@@ -57,6 +57,18 @@ describe('ClassifierService queries', () => {
       query: { lat: 50.45, long: 30.52, maxdistance: 3 },
     });
 
+    await c.getPostOfficeOpenHours({ postcode: '01001', postOfficeId: 5 });
+    expect(last()).toEqual({
+      path: `${base}/get_postoffices_openhours_by_postindex`,
+      query: { pc: '01001', id: 5 },
+    });
+
+    await c.getMobilePostOfficeOpenHours({ techIndex: '12345' });
+    expect(last()).toEqual({
+      path: `${base}/get_postoffices_mobile_openhours_by_postindex`,
+      query: { techindex: '12345' },
+    });
+
     await c.getCityDetailsByPostcode('01001');
     expect(last()).toEqual({
       path: `${base}/get_city_details_by_postcode`,

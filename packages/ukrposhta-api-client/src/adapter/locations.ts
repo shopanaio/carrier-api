@@ -111,6 +111,9 @@ export function createLocationsApi(classifier: UkrposhtaClassifierClient) {
      * locality of the postcode. The normalized address carries the classifier's region, district and locality.
      */
     async validateAddress(address: Address, options: CallOptions = {}): Promise<AddressValidationResult> {
+      if (address.country.toUpperCase() !== 'UA') {
+        return { valid: false, messages: [`Ukrposhta delivers within Ukraine only, not ${address.country}`] };
+      }
       if (address.postalCode === undefined || !/^\d{5}$/.test(address.postalCode)) {
         return { valid: false, messages: ['A five-digit postcode is required'] };
       }

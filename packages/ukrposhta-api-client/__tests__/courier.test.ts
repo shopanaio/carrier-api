@@ -230,6 +230,39 @@ describe('schedulePickup', () => {
     expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(0);
   });
 
+  it("refuses another street or a phone that is not the sender's", async () => {
+    const a = makeShipment('s1');
+    const mock = pickupMock([a]);
+    const adapter = createUkrposhtaAdapter({ ecom: build(mock) });
+    const base = { shipmentIds: ['s1'], date: '2026-10-20', contact: {} };
+    await expect(
+      adapter.schedulePickup({ ...base, address: { country: 'UA', postalCode: '04071', street: 'Other street' } }),
+    ).rejects.toMatchObject({ field: 'address', message: expect.stringContaining('street') });
+    await expect(
+      adapter.schedulePickup({ ...base, address: { country: 'PL', postalCode: '04071' } }),
+    ).rejects.toMatchObject({ field: 'address' });
+    await expect(
+      adapter.schedulePickup({ ...base, address: { country: 'UA' }, contact: { phone: '0990000000' } }),
+    ).rejects.toMatchObject({ field: 'contact.phone' });
+    expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(0);
+    await adapter.schedulePickup({ ...base, address: { country: 'UA', postalCode: '04071', street: 'khoryva' } });
+    expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(1);
+  });
+
+  it('refuses shipments collected from different sender addresses', async () => {
+    const a = makeShipment('s1');
+    const b = { ...makeShipment('s2'), senderAddressId: 999 };
+    const adapter = createUkrposhtaAdapter({ ecom: build(pickupMock([a, b])) });
+    await expect(
+      adapter.schedulePickup({
+        shipmentIds: ['s1', 's2'],
+        address: { country: 'UA' },
+        contact: {},
+        date: '2026-10-20',
+      }),
+    ).rejects.toMatchObject({ field: 'shipmentIds' });
+  });
+
   it('needs a phone on the sender', async () => {
     const a = makeShipment('s1', { ...senderClient, phones: [] });
     const adapter = createUkrposhtaAdapter({ ecom: build(pickupMock([a])) });
@@ -283,7 +316,7 @@ describe('management service', () => {
     expect(last().body).toEqual({ recipient: { uuid: 'c2' } });
     await client.management.forward('s1', { recipient: { uuid: 'c2' }, deliveryType: 'W2W' });
     expect(last()).toMatchObject({
-      method: 'POST',
+      method: 'PUT',
       path: `${base}/shipments/management/s1/forward`,
       body: { deliveryType: 'W2W' },
     });
@@ -299,6 +332,22 @@ describe('management service', () => {
       path: `${base}/dispatch/return-order`,
       body: { barcode: '0500000145397', senderToken: 'tok', returnAddressId: '7656280' },
     });
+  });
+
+  it('masks the counterparty token inside the return order body in logs', async () => {
+    const events: string[] = [];
+    const transport: HttpTransport = (async () => ({ status: 200, headers: {}, data: {} })) as HttpTransport;
+    const client = createUkrposhtaContractClient({
+      transport,
+      bearer: 'secret-bearer',
+      counterpartyToken: 'secret-token',
+      retry: false,
+      logger: event => events.push(JSON.stringify(event)),
+    }).use(new ManagementService());
+    await client.management.createReturnOrder({ barcode: 'B', returnAddressId: 1 });
+    expect(events.length).toBeGreaterThan(0);
+    expect(events.join('')).not.toContain('secret-token');
+    expect(events.join('')).not.toContain('secret-bearer');
   });
 
   it('resolves a lazy counterparty token for the return order body', async () => {

@@ -55,6 +55,7 @@ const shipmentInput: CreateShipmentInput = {
   reference: 'order-1',
 };
 
+const dims = { length: 20, width: 10, height: 10, unit: 'cm' as const };
 const bodyOf = <T>(call: MockCall) => call.body as T;
 
 /** A mock of the eCom host: every create echoes the request, lookups by external id answer 404. */
@@ -364,11 +365,12 @@ describe('createShipment', () => {
     const { adapter } = build(mock);
     await adapter.createShipment({
       ...shipmentInput,
-      parcels: [{ weight: { value: 800, unit: 'g' }, declaredValue: money(300, 'UAH') }],
+      parcels: [{ weight: { value: 800, unit: 'g' }, dimensions: dims, declaredValue: money(300, 'UAH') }],
       options: {
         service: 'standard',
         payer: 'recipient',
         cashOnDelivery: { amount: money(300, 'UAH'), payer: 'sender' },
+        extra: { senderBankAccount: 'UA073808050000000026000439806' },
       },
       sender: { ...sender, contact: { company: 'TOV Limon', phone: '0671231234' }, taxId: '40145721' },
     });
@@ -377,7 +379,7 @@ describe('createShipment', () => {
       paidByRecipient: true,
       postPay: 300,
       postPayPaidByRecipient: false,
-      parcels: [{ weight: 800, length: 1, declaredPrice: 300 }],
+      parcels: [{ weight: 800, length: 20, width: 10, height: 10, declaredPrice: 300 }],
       // A company receives cash on delivery on its bank account.
       transferPostPayToBankAccount: true,
     });
@@ -394,7 +396,7 @@ describe('createShipment', () => {
     await expect(
       adapter.createShipment({
         ...shipmentInput,
-        parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(100, 'UAH') }],
+        parcels: [{ weight: { value: 1, unit: 'kg' }, dimensions: dims, declaredValue: money(100, 'UAH') }],
         options: { cashOnDelivery: { amount: money(300, 'UAH') } },
       }),
     ).rejects.toMatchObject({ category: CarrierErrorCategory.Validation, field: 'parcels.declaredValue' });
@@ -422,14 +424,147 @@ describe('createShipment', () => {
     expect(await adapter.createShipment(shipmentInput)).not.toHaveProperty('createdAt');
   });
 
+  it('refuses parcels without dimensions instead of inventing them', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await expect(
+      adapter.createShipment({ ...shipmentInput, parcels: [{ weight: { value: 1, unit: 'kg' } }] }),
+    ).rejects.toMatchObject({ category: CarrierErrorCategory.Validation, field: 'parcels.dimensions' });
+    await expect(
+      adapter.getRates({ sender, recipient, parcels: [{ weight: { value: 1, unit: 'kg' } }] }),
+    ).rejects.toMatchObject({ field: 'parcels.dimensions' });
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it.each(['PL', 'de'])('refuses an address in %s before any request', async country => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    const abroad = { ...recipient, point: { type: 'door' as const, address: { ...recipientAddress, country } } };
+    await expect(adapter.createShipment({ ...shipmentInput, recipient: abroad })).rejects.toMatchObject({
+      field: 'recipient.point',
+    });
+    await expect(adapter.getRates({ sender, recipient: abroad, parcels: shipmentInput.parcels })).rejects.toMatchObject(
+      {
+        field: 'recipient.point',
+      },
+    );
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('refuses cash on delivery for a company without a bank account, before creating anything', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    const company = {
+      ...sender,
+      externalId: undefined,
+      contact: { company: 'TOV Limon', phone: '0671231234' },
+      taxId: '40145721',
+    };
+    await expect(
+      adapter.createShipment({
+        ...shipmentInput,
+        sender: company,
+        options: { cashOnDelivery: { amount: money(100, 'UAH') } },
+      }),
+    ).rejects.toMatchObject({ field: 'options.extra.senderBankAccount' });
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('refuses cash on delivery when the known company client has no bank account', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
+    const known = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0671231234',
+        externalId: 'co-1',
+        type: 'COMPANY',
+        name: 'TOV Limon',
+        edrpou: '40145721',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/co-1`, respond: ok(known) });
+    const { adapter } = build(mock);
+    await expect(
+      adapter.createShipment({
+        ...shipmentInput,
+        sender: {
+          ...sender,
+          externalId: 'co-1',
+          contact: { company: 'TOV Limon', phone: '0671231234' },
+          taxId: '40145721',
+        },
+        options: { cashOnDelivery: { amount: money(100, 'UAH') } },
+      }),
+    ).rejects.toMatchObject({ field: 'options.extra.senderBankAccount' });
+    expect(mock.callsTo('POST', `${ECOM}/shipments`)).toHaveLength(0);
+  });
+
+  it('updates the stored contact when the same external id comes with a new phone, e-mail or name', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
+    const existing = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0501112233',
+        externalId: 'shop-1',
+        type: 'PRIVATE_ENTREPRENEUR',
+        firstName: 'Old',
+        lastName: 'Name',
+        tin: '4201030327',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
+    mock.on({
+      method: 'PUT',
+      path: `${ECOM}/clients/{uuid}`,
+      respond: ok({ ...existing, phoneNumber: '+380672802273' }),
+    });
+    const { adapter } = build(mock);
+    await adapter.createShipment({
+      ...shipmentInput,
+      sender: { ...sender, contact: { ...sender.contact, email: 'new@example.com' } },
+    });
+    const [update] = mock.callsTo('PUT', `${ECOM}/clients/{uuid}`);
+    expect(update!.body).toEqual({
+      firstName: 'Petro',
+      lastName: 'Petrenko',
+      phoneNumber: '+380672802273',
+      email: 'new@example.com',
+    });
+  });
+
+  it('leaves the stored client alone when the contact is unchanged', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
+    const existing = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0672802273',
+        externalId: 'shop-1',
+        type: 'PRIVATE_ENTREPRENEUR',
+        firstName: 'Petro',
+        lastName: 'Petrenko',
+        tin: '4201030327',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
+    const { adapter } = build(mock);
+    await adapter.createShipment(shipmentInput);
+    expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)).toHaveLength(0);
+  });
+
   it('sends several parcels and returns their numbers', async () => {
     const mock = ecomMock();
     const { adapter } = build(mock);
     const shipment = await adapter.createShipment({
       ...shipmentInput,
       parcels: [
-        { weight: { value: 1, unit: 'kg' }, declaredValue: money(10, 'UAH') },
-        { weight: { value: 2, unit: 'kg' } },
+        { weight: { value: 1, unit: 'kg' }, dimensions: dims, declaredValue: money(10, 'UAH') },
+        { weight: { value: 2, unit: 'kg' }, dimensions: dims },
       ],
     });
     expect(shipment.parcelTrackingNumbers).toHaveLength(2);
@@ -454,10 +589,17 @@ describe('createShipment', () => {
     ],
     [
       'a foreign currency',
-      { ...shipmentInput, parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(10, 'EUR') }] },
+      {
+        ...shipmentInput,
+        parcels: [{ weight: { value: 1, unit: 'kg' }, dimensions: dims, declaredValue: money(10, 'EUR') }],
+      },
       'parcels.declaredValue',
     ],
-    ['a zero weight', { ...shipmentInput, parcels: [{ weight: { value: 0, unit: 'kg' } }] }, 'parcels.weight'],
+    [
+      'a zero weight',
+      { ...shipmentInput, parcels: [{ weight: { value: 0, unit: 'kg' }, dimensions: dims }] },
+      'parcels.weight',
+    ],
     ['no parcels', { ...shipmentInput, parcels: [] }, 'parcels'],
     ['an unknown service', { ...shipmentInput, options: { service: 'teleport' } }, 'options.service'],
     ['a third-party payer', { ...shipmentInput, options: { payer: 'third_party' as const } }, 'options.payer'],
@@ -575,7 +717,7 @@ describe('getRates', () => {
     const rates = await adapter.getRates({
       sender: { contact: {}, point: { type: 'location', locationId: '04071' } },
       recipient: { contact: {}, point: { type: 'location', locationId: '79000' } },
-      parcels: [{ weight: { value: 2, unit: 'kg' } }],
+      parcels: [{ weight: { value: 2, unit: 'kg' }, dimensions: dims }],
     });
     expect(rates.length).toBeGreaterThan(0);
     expect(bodyOf(mock.last())).toMatchObject({ deliveryType: 'W2W' });
@@ -865,6 +1007,10 @@ describe('locations and address validation', () => {
     });
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Kyi' })).toMatchObject({
       valid: false,
+    });
+    expect(await adapter.validateAddress({ country: 'PL', postalCode: '01001' })).toMatchObject({
+      valid: false,
+      messages: [expect.stringContaining('Ukraine only')],
     });
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '99999' })).toMatchObject({ valid: false });
     const before = mock.calls.length;

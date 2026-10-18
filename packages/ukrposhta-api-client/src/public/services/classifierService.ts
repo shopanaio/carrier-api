@@ -180,6 +180,31 @@ export class ClassifierService {
     );
   }
 
+  /** Work schedule of a post office: `pc` is the delivery zone code, `id` the post office id. */
+  getPostOfficeOpenHours(
+    params: { postcode: string; postOfficeId?: string | number },
+    options: ClassifierCallOptions = {},
+  ) {
+    return this.list<ClassifierRecord>(
+      '/get_postoffices_openhours_by_postindex',
+      { pc: params.postcode, id: params.postOfficeId },
+      options,
+    );
+  }
+
+  /** Arrival schedule of a mobile post office in a locality, by delivery zone code, record id or technical index. */
+  getMobilePostOfficeOpenHours(
+    params: { postcode?: string; postOfficeId?: string | number; techIndex?: string },
+    options: ClassifierCallOptions = {},
+  ) {
+    return this.list<ClassifierRecord>(
+      '/get_postoffices_mobile_openhours_by_postindex',
+      { pc: params.postcode, id: params.postOfficeId, techindex: params.techIndex },
+      options,
+      true,
+    );
+  }
+
   /** Nearest post offices to a point, within `maxDistanceKm`. */
   getNearestPostOffices(
     params: { latitude: number; longitude: number; maxDistanceKm: number },

@@ -62,12 +62,12 @@ export class ManagementService {
   }
 
   /**
-   * `POST /shipments/management/{uuid}/forward`: redirects the shipment to another address. The name, e-mail and
+   * `PUT /shipments/management/{uuid}/forward`: redirects the shipment to another address. The name, e-mail and
    * phone of the new recipient must equal the original ones; only the address may differ.
    */
   forward(shipmentUuid: string, request: ForwardRequest, options: CallOptions = {}): Promise<Shipment> {
     return this.ctx.http.request<Shipment>({
-      method: 'POST',
+      method: 'PUT',
       path: '/shipments/management/{shipmentUuid}/forward',
       pathParams: { shipmentUuid },
       json: request,

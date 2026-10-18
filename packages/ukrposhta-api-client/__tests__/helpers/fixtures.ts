@@ -51,6 +51,7 @@ export function clientFrom(input: ClientInput, address?: Address): Client {
     checkOnDeliveryAllowed: type !== 'INDIVIDUAL',
     ...(input.edrpou ? { edrpou: input.edrpou } : {}),
     ...(input.tin ? { tin: input.tin } : {}),
+    ...(input.bankAccount ? { bankAccount: input.bankAccount } : {}),
   };
 }
 

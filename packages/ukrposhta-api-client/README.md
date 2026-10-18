@@ -105,12 +105,16 @@ Pass the clients you have; a capability is declared only when the client behind 
 How the adapter maps the model:
 
 - **Parties.** A client and address are found or created from the party; a party with `externalId` is looked up first and reused, with `carrierRefs.ukrposhta.{clientUuid,addressId}` nothing is looked up. A `contact.company` makes a company (needs the EDRPOU in `taxId`), a ten-digit `taxId` a sole proprietor (tin). A plain `contact.name` is read as "Surname Name Patronymic".
+- **Dimensions.** Every parcel needs length, width and height: Express and Standard are priced by volume and the adapter does not guess them.
+- **Country.** Only Ukrainian addresses are accepted (`country: 'UA'`); anything else is rejected before a request.
+- **Known parties.** For a party found by `externalId` or `carrierRefs.ukrposhta.clientUuid`, the contact you pass now wins: a changed name, phone or e-mail is written to the stored client before the shipment is created (a field you leave out is never cleared).
+- **Company cash on delivery.** It is paid to a bank account: pass `options.extra.senderBankAccount` (an IBAN) when the company is created by the adapter, or use a client that already has one.
 - **Delivery type.** A door point is `D`, a carrier location `W` (the location id is the post office index): `D2D`, `D2W`, `W2D`, `W2W`.
 - **Service.** `options.service` is `EXPRESS` (default), `STANDARD`, `DOCUMENT` or `CARGO`. Rates without a service return Express and Standard.
 - **Money.** Everything is UAH; another currency is rejected before any request. Cash on delivery must not exceed the declared value of the parcels; the adapter rejects it instead of raising the declared value (which changes the fee).
 - **Cancel.** Only a `CREATED` shipment can be deleted; any later status fails with `NOT_CANCELLABLE`.
 - **Manifest.** Puts the shipments (one sender, one type, not yet registered) into a new group and returns form 103a.
-- **Pickup.** The courier comes to the sender address of the shipments in one of three windows (09-12, 12-15, 15-18).
+- **Pickup.** The courier comes to the sender address of the shipments in one of three windows (09-12, 12-15, 15-18). The address and phone you pass must be the stored ones (postcode, and street, house, apartment and city when given); a different address or an unknown phone is rejected, not replaced.
 - **Tracking.** Statuses come from the event codes of the tracking documentation (`ukrposhtaStatusMap`); the raw code is always kept. Event times are local Kyiv time without a zone in the API and are returned as ISO strings with the real UTC offset.
 
 ## Errors

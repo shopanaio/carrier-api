@@ -261,7 +261,9 @@ describe('pricing', () => {
       addressTo: { postcode: '47743' },
       type: 'EXPRESS',
       deliveryType: 'W2W',
-      parcels: [{ weight: 3000, length: 35, width: 20, height: 20 }],
+      parcels: [
+        { weight: 3000, length: 35, width: 20, height: 20, packagingPrice: 12, packagingPaidByRecipient: true },
+      ],
       declaredPrice: 150,
     });
     expect(last()).toMatchObject({ method: 'POST', path: '/ecom/0.0.1/domestic/delivery-price' });
