@@ -39,8 +39,8 @@
   },
   "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/demo-post-api-client#readme",
   "dependencies": {
-    "@shopana/carrier-core": "^0.1.0",
-    "@shopana/carrier-contracts": "^0.1.0"
+    "@shopana/carrier-core": "^0.0.1",
+    "@shopana/carrier-contracts": "^0.0.1"
   },
   "peerDependencies": {
     "@shopana/carrier-testing": ">=0.0.1 <1.0.0"
@@ -51,7 +51,7 @@
     }
   },
   "devDependencies": {
-    "@shopana/carrier-testing": "^0.1.0"
+    "@shopana/carrier-testing": "^0.0.1"
   },
   "exports": {
     ".": {
