@@ -1,11 +1,13 @@
 {
-  "$comment": "Differences between the SwaggerHub snapshot (ukrposhta-ecom.openapi.json) and the API documentation of 09.03.2026. Applied by scripts/gen-ecom-spec.mjs; the snapshot itself is never edited. addResponses adds statuses the documentation lists (207 for mass add to a group). nullableOptionalProperties: the documentation examples show null for every unset field (\"firstName\": null), while the snapshot declares plain types, so optional properties are made nullable. replaceProperties: the documentation lets a shipment reference its sender and recipient by uuid only (the minimal request), the snapshot demands a whole ClientDto. removeRequired/optionalProperties: the documentation shows minimal requests the snapshot would reject (a shipment or client update without sender or addressId, a group without type); the simulator validates the real required fields itself. operations: arrayable = the endpoint also takes and returns an array (mass create); response = replaces the response schema. addErrorResponses: error statuses every operation can answer with { code, message } (the snapshot lists only 401, 403 and 404 for most).",
+  "$comment": "Differences between the SwaggerHub snapshot (ukrposhta-ecom.openapi.json) and the API documentation of 09.03.2026. Applied by scripts/gen-ecom-spec.mjs; the snapshot itself is never edited. addResponses adds statuses the documentation lists (207 for mass add to a group). nullableOptionalProperties: the documentation examples show null for every unset field (\"firstName\": null), while the snapshot declares plain types, so optional properties are made nullable. replaceProperties: the documentation lets a shipment reference its sender and recipient by uuid only (the minimal request), the snapshot demands a whole ClientDto. removeRequired/optionalProperties: the documentation shows minimal requests the snapshot would reject (a shipment or client update without sender or addressId, a group without type); the simulator validates the real required fields itself. operations: arrayable = the endpoint also takes and returns an array (mass create); response = replaces the response schema. addErrorResponses: error statuses every operation can answer with { code, message } (the snapshot lists only 401, 403 and 404 for most). The courier status list is /statuses in the documentation and /status in the snapshot: both are kept. The documentation returns one order for GET /courier-service/orders/{uuid}, the snapshot an array.",
   "enumAdd": {
     "ShipmentType": ["CARGO"],
     "ShipmentGroupShipmentType": ["CARGO"],
     "OnFailReceiveType": ["RETURN_AFTER_5_DAYS"],
     "LifecycleStatus": ["IN_DEPARTMENT", "STORAGE", "CANCELED", "DELETED"],
-    "Status1": ["IN_DEPARTMENT", "STORAGE", "CANCELED", "DELETED"]
+    "Status1": ["IN_DEPARTMENT", "STORAGE", "CANCELED", "DELETED"],
+    "CourierDeliveryOrderDto.lastStatus": ["NOT_DELIVERED"],
+    "CourierDeliveryLifecycleDto.orderStatus": ["NOT_DELIVERED"]
   },
   "addPaths": {
     "/dictionaries/tariffs": {
@@ -106,6 +108,50 @@
               "*/*": {
                 "schema": {
                   "type": "object"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "404": {
+            "description": "Not found"
+          }
+        }
+      }
+    },
+    "/courier-service/orders/{orderUuid}/statuses": {
+      "get": {
+        "operationId": "getCourierDeliveryOrderStatusesUsingGET",
+        "parameters": [
+          {
+            "name": "orderUuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "token",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CourierDeliveryLifecycleDto"
+                  }
                 }
               }
             }
@@ -238,6 +284,13 @@
           "items": {
             "type": "object"
           }
+        }
+      }
+    },
+    "getCourierDeliveryOrderUsingGET": {
+      "response": {
+        "200": {
+          "$ref": "#/components/schemas/CourierDeliveryOrderDto"
         }
       }
     }

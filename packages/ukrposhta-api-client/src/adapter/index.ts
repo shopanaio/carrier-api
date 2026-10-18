@@ -10,9 +10,9 @@ import type {
 import { effectiveEventCode } from '../public/types/trackingEvents';
 import { TRACKING_MAX_BARCODES_ALL_STATUSES } from '../public/services/trackingService';
 import type { UkrposhtaStatusEvent } from '../public/types/tracking';
-import type { UkrposhtaAdapterClients, UkrposhtaTrackingClient } from './clients';
+import type { UkrposhtaAdapterClients, UkrposhtaEcomClientWithCourier, UkrposhtaTrackingClient } from './clients';
 import { createLocationsApi } from './locations';
-import { createShipmentsApi } from './shipments';
+import { createPickupApi, createShipmentsApi } from './shipments';
 import { ukrposhtaStatusMap } from './statusMap';
 import { kyivLocalToIso } from './time';
 
@@ -22,6 +22,7 @@ export type {
   UkrposhtaAdapterClients,
   UkrposhtaClassifierClient,
   UkrposhtaEcomClient,
+  UkrposhtaEcomClientWithCourier,
   UkrposhtaTrackingClient,
 } from './clients';
 
@@ -29,6 +30,7 @@ export type {
 export type UkrposhtaCapabilities<T extends UkrposhtaAdapterClients> =
   | (T['tracking'] extends object ? 'tracking' : never)
   | (T['ecom'] extends object ? 'shipments' | 'rates' | 'labels' | 'cancel' | 'manifest' : never)
+  | (T['ecom'] extends { courier: object } ? 'pickup' : never)
   | (T['classifier'] extends object ? 'locations' | 'addressValidation' : never);
 
 /**
@@ -49,6 +51,10 @@ export function createUkrposhtaAdapter<const T extends UkrposhtaAdapterClients>(
   if (clients.ecom) {
     capabilities.push('shipments', 'rates', 'labels', 'cancel', 'manifest');
     Object.assign(methods, createShipmentsApi(clients.ecom));
+    if ('courier' in clients.ecom) {
+      capabilities.push('pickup');
+      Object.assign(methods, createPickupApi(clients.ecom as UkrposhtaEcomClientWithCourier));
+    }
   }
   if (clients.classifier) {
     capabilities.push('locations', 'addressValidation');

@@ -17,8 +17,12 @@ const overrides = JSON.parse(readFileSync(overridesFile, 'utf8'));
 
 // The documentation (09.03.2026) is newer than the SwaggerHub snapshot: add what it lists and the snapshot lacks.
 for (const [name, values] of Object.entries(overrides.enumAdd ?? {})) {
-  const schema = spec.components.schemas[name];
-  if (!schema?.enum) throw new Error(`overrides.json: ${name} is not an enum schema of the snapshot`);
+  // "Schema" is an enum schema, "Schema.property" an enum property.
+  const [schemaName, property] = name.split('.');
+  const schema = property
+    ? spec.components.schemas[schemaName]?.properties?.[property]
+    : spec.components.schemas[schemaName];
+  if (!schema?.enum) throw new Error(`overrides.json: ${name} is not an enum of the snapshot`);
   schema.enum = [...new Set([...schema.enum, ...values])];
 }
 if (overrides.nullableOptionalProperties) {

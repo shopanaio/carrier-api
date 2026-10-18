@@ -7,6 +7,8 @@ import type {
   LabelRequest,
   Manifest,
   Party,
+  Pickup,
+  PickupRequest,
   Rate,
   RateRequest,
   Shipment,
@@ -16,7 +18,8 @@ import type { Client, ClientAddress } from '../contract/types/client';
 import type { ShipmentInput, Shipment as UkrposhtaShipment } from '../contract/types/shipment';
 import type { DeliveryPriceRequest } from '../contract/types/pricing';
 import { kyivLocalToIso } from './time';
-import type { UkrposhtaEcomClient } from './clients';
+import type { UkrposhtaEcomClient, UkrposhtaEcomClientWithCourier } from './clients';
+import type { CourierInterval } from '../contract/types/courier';
 import { invalidInput, isNotFound, notAllowed } from './errors';
 import {
   SERVICE_NAMES,
@@ -268,4 +271,84 @@ function stickerSize(size: string | undefined): StickerSize | undefined {
   if (normalized === 'A4') return 'SIZE_A4';
   if (normalized === 'A5') return 'SIZE_A5';
   throw invalidInput(`Unknown sticker size "${size}": use 100x100, A4 or A5`, 'size');
+}
+
+const COURIER_INTERVALS: ReadonlyArray<{ interval: CourierInterval; from: number; to: number }> = [
+  { interval: 'INTERVAL_09_12', from: 9 * 60, to: 12 * 60 },
+  { interval: 'INTERVAL_12_15', from: 12 * 60, to: 15 * 60 },
+  { interval: 'INTERVAL_15_18', from: 15 * 60, to: 18 * 60 },
+];
+
+const minutesOf = (time: string): number => {
+  const match = /^(\d{1,2}):(\d{2})$/.exec(time.trim());
+  if (!match) throw invalidInput(`Expected a HH:mm time, got "${time}"`, 'window');
+  return Number(match[1]) * 60 + Number(match[2]);
+};
+
+/**
+ * The courier comes in one of three three-hour windows. A requested window maps to the interval that contains it;
+ * without a window the morning interval is booked.
+ */
+export function courierIntervalOf(window: PickupRequest['window']): CourierInterval {
+  if (!window) return 'INTERVAL_09_12';
+  const from = minutesOf(window.from);
+  const to = minutesOf(window.to);
+  const match = COURIER_INTERVALS.find(item => from >= item.from && to <= item.to);
+  if (!match) {
+    throw invalidInput('Ukrposhta couriers come between 09:00-12:00, 12:00-15:00 or 15:00-18:00', 'window');
+  }
+  return match.interval;
+}
+
+export function createPickupApi(ecom: UkrposhtaEcomClientWithCourier) {
+  return {
+    /**
+     * Orders a courier collection from the sender's address of the shipments (one sender, shipments not yet
+     * collected). One shipment makes a SINGLE order, several a MASS order.
+     */
+    async schedulePickup(request: PickupRequest, options: CallOptions = {}): Promise<Pickup> {
+      if (request.shipmentIds.length === 0) throw invalidInput('At least one shipment is required', 'shipmentIds');
+      const interval = courierIntervalOf(request.window);
+      const shipments = await Promise.all(request.shipmentIds.map(id => ecom.shipments.get(id, options)));
+      const first = shipments[0];
+      if (shipments.some(shipment => shipment.sender.uuid !== first.sender.uuid)) {
+        throw invalidInput('All shipments of a pickup need one sender', 'shipmentIds');
+      }
+      const pickupAddress = first.sender.addresses.find(item => item.addressId === first.senderAddressId);
+      if (
+        request.address.postalCode !== undefined &&
+        pickupAddress &&
+        pickupAddress.address.postcode !== request.address.postalCode
+      ) {
+        throw invalidInput(
+          `The courier collects from the sender address of the shipments (${pickupAddress.address.postcode}), not ${request.address.postalCode}`,
+          'address',
+        );
+      }
+      const wanted = request.contact.phone?.replace(/\D/g, '');
+      const phone =
+        first.sender.phones.find(
+          item =>
+            wanted !== undefined && wanted !== '' && item.phoneNumber.replace(/\D/g, '').endsWith(wanted.slice(-9)),
+        ) ??
+        first.sender.phones.find(item => item.main) ??
+        (first.sender.phones[0] as (typeof first.sender.phones)[number] | undefined);
+      if (phone === undefined) throw invalidInput('The sender has no phone number', 'contact.phone');
+
+      const order = await ecom.courier.createOrder(
+        {
+          clientUuid: first.sender.uuid,
+          type: shipments.length > 1 ? 'MASS' : 'SINGLE',
+          addressId: first.senderAddressId,
+          phoneId: phone.phoneId,
+          dropDate: request.date.slice(0, 10),
+          interval,
+          shipmentBarcodes: shipments.map(shipment => shipment.barcode),
+          ...(request.contact.email ? { email: request.contact.email } : {}),
+        },
+        options,
+      );
+      return { id: order.uuid, carrier: 'ukrposhta', date: order.dropDate, status: order.lastStatus, raw: order };
+    },
+  };
 }

@@ -177,6 +177,7 @@ export interface Shipment {
   availablePaymentTypes?: PaymentType[];
   withDeliveryNotification?: boolean;
   free?: boolean;
+  listOfEnclosedItems?: boolean;
 }
 
 /** `GET /shipments/{id}/lifecycle`. */

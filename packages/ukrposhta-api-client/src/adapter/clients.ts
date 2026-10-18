@@ -2,6 +2,7 @@
 import type { Client } from '@shopana/carrier-core';
 import type { UkrposhtaContractContext } from '../contract';
 import type { AddressesService } from '../contract/services/addressesService';
+import type { CourierService } from '../contract/services/courierService';
 import type { ClientsService } from '../contract/services/clientsService';
 import type { LabelsService } from '../contract/services/labelsService';
 import type { PricingService } from '../contract/services/pricingService';
@@ -22,6 +23,10 @@ export type UkrposhtaEcomClient = Client<
   },
   UkrposhtaContractContext
 >;
+
+/** An eCom client that also has the courier service: it enables `schedulePickup`. */
+export type UkrposhtaEcomClientWithCourier = UkrposhtaEcomClient &
+  Client<{ courier: CourierService }, UkrposhtaContractContext>;
 
 export type UkrposhtaTrackingClient = Client<{ tracking: TrackingService }, UkrposhtaTrackingContext>;
 export type UkrposhtaClassifierClient = Client<{ classifier: ClassifierService }, UkrposhtaClassifierContext>;

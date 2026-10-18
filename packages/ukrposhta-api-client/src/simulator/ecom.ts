@@ -17,6 +17,12 @@ import type { LifecycleStatus } from '../contract/types/common';
 import type { DeliveryPriceRequest } from '../contract/types/pricing';
 import type { Parcel, ParcelInput, Shipment, ShipmentInput } from '../contract/types/shipment';
 import type { ShipmentGroup, ShipmentGroupInput } from '../contract/types/group';
+import type {
+  CourierOrder,
+  CourierOrderInput,
+  CourierOrderStatus,
+  CourierOrderStatusEntry,
+} from '../contract/types/courier';
 import type { UkrposhtaStatusEvent } from '../public/types/tracking';
 import { takesCounterpartyToken, ukrposhtaEcomContract } from './ecomContract';
 import { requestToPriceInput, simulatedPrice, simulatedTariffs } from './ecomPricing';
@@ -91,6 +97,8 @@ export function createUkrposhtaEcomSimulator(options: UkrposhtaSimulatorOptions 
   const groups = state.collection<ShipmentGroup>('ecom-groups');
   const barcodes = state.collection<{ shipmentUuid: string }>('ecom-barcodes');
   const tracked = state.collection<UkrposhtaStatusEvent[]>('tracked');
+  const courierOrders = state.collection<CourierOrder>('ecom-courier-orders');
+  const courierStatuses = state.collection<CourierOrderStatusEntry[]>('ecom-courier-statuses');
 
   // --- lookups ---------------------------------------------------------------------------------------------------
 
@@ -551,6 +559,42 @@ export function createUkrposhtaEcomSimulator(options: UkrposhtaSimulatorOptions 
       : byStatus;
   };
 
+  // --- courier ---------------------------------------------------------------------------------------------------
+
+  const createCourierOrder = (input: CourierOrderInput): CourierOrder => {
+    const client = clientBy(input.clientUuid);
+    if (!client.addresses.some(a => a.addressId === input.addressId)) {
+      throw invalid('addressId is not an address of the client', 'addressId');
+    }
+    if (!client.phones.some(p => p.phoneId === input.phoneId))
+      throw invalid('phoneId is not a phone of the client', 'phoneId');
+    const barcodesGiven = [...(input.shipmentBarcodes ?? []), ...(input.letterBarcodes ?? [])];
+    if (barcodesGiven.length === 0) throw invalid('At least one barcode is required', 'shipmentBarcodes');
+    if (input.type === 'SINGLE' && barcodesGiven.length > 1) throw invalid('A SINGLE order has one shipment', 'type');
+    for (const barcode of input.shipmentBarcodes ?? []) {
+      const shipment = shipmentBy(barcode);
+      if (shipment.sender.uuid !== client.uuid)
+        throw invalid(`Shipment ${barcode} belongs to another sender`, 'shipmentBarcodes');
+      if (shipment.type === 'DOCUMENT' && shipment.listOfEnclosedItems) {
+        throw invalid('A DOCUMENT shipment with enclosed items cannot be collected by a courier', 'shipmentBarcodes');
+      }
+    }
+    const uuid = state.ids.uuid('ecom-courier-order');
+    const stamp = nowOf(clock);
+    const order: CourierOrder = {
+      ...input,
+      uuid,
+      orderNumber: Number(state.ids.sequence('ecom-courier-order-number', { start: 3219085 })),
+      email: input.email ?? null,
+      lastStatus: 'ORDERED',
+      lastStatusDate: stamp,
+    } as CourierOrder;
+    courierStatuses.insert(uuid, [
+      { uuid: state.ids.uuid('ecom-courier-status'), orderUuid: uuid, statusDate: stamp, orderStatus: 'ORDERED' },
+    ]);
+    return courierOrders.insert(uuid, order);
+  };
+
   // --- authorization and errors ----------------------------------------------------------------------------------
 
   const sim = createSimulator({
@@ -722,6 +766,14 @@ export function createUkrposhtaEcomSimulator(options: UkrposhtaSimulatorOptions 
         return json({ message: `Quantity of shipments in shipment group '${group.uuid}'`, quantity });
       },
 
+      createCourierDeliveryOrderUsingPOST: ctx => json(createCourierOrder(ctx.body as CourierOrderInput)),
+      getCourierDeliveryOrderUsingGET: ctx =>
+        json(courierOrders.require(String(ctx.params.orderUuid), () => notFound('Courier order'))),
+      getAllCourierDeliveryOrdersForClientUsingGET: ctx =>
+        json(courierOrders.filter(order => order.clientUuid === ctx.params.clientUuid)),
+      getCourierDeliveryOrderStatusesUsingGET: ctx =>
+        json(courierStatuses.require(String(ctx.params.orderUuid), () => notFound('Courier order'))),
+
       getShipmentStickerUsingGET_2: ctx =>
         binary('application/pdf', minimalPdf(shipmentBy(String(ctx.params.uuidOrBarcode)).barcode)),
       getShipmentStickerUsingGET_1: ctx =>
@@ -795,5 +847,32 @@ export function createUkrposhtaEcomSimulator(options: UkrposhtaSimulatorOptions 
     return shipment;
   };
 
-  return Object.assign(sim, { advance, shipmentLifecycle });
+  /** Moves a courier order to `status` (the operator confirmed it, the courier took the parcels, ...). */
+  const advanceCourierOrder = (orderUuid: string, status: CourierOrderStatus): CourierOrder => {
+    const order = courierOrders.require(orderUuid);
+    clock.advance(3_600_000);
+    const stamp = nowOf(clock);
+    const next: CourierOrder = {
+      ...order,
+      lastStatus: status,
+      lastStatusDate: stamp,
+      ...(status === 'TRANSFERRED_TO_COURIER'
+        ? {
+            courierLastName: 'Іванов',
+            courierFirstName: 'Іван',
+            courierMiddleName: 'Іванович',
+            courierPhoneNumber: '0504384782',
+            carNumber: 'AA3534AI',
+            carType: 'грузова',
+          }
+        : {}),
+    };
+    courierStatuses.upsert(orderUuid, [
+      ...(courierStatuses.get(orderUuid) ?? []),
+      { uuid: state.ids.uuid('ecom-courier-status'), orderUuid, statusDate: stamp, orderStatus: status },
+    ]);
+    return courierOrders.upsert(orderUuid, next);
+  };
+
+  return Object.assign(sim, { advance, advanceCourierOrder, shipmentLifecycle });
 }

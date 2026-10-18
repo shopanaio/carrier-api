@@ -14,6 +14,8 @@ export * from './services/shipmentsService';
 export * from './services/pricingService';
 export * from './services/shipmentGroupsService';
 export * from './services/labelsService';
+export * from './services/courierService';
+export * from './services/managementService';
 export * from './services/transfersService';
 export * from './services/barcodesService';
 export * from './services/referenceService';
@@ -24,6 +26,8 @@ export * from './types/shipment';
 export * from './types/pricing';
 export * from './types/group';
 export * from './types/reference';
+export * from './types/courier';
+export * from './types/management';
 
 /**
  * Bearer in the header; the counterparty token in the query of the operations that take it

@@ -268,5 +268,6 @@ export function createUkrposhtaSimulator(options: UkrposhtaSimulatorOptions = {}
     transport: combineSimulators(ecom, tracking, classifier),
     /** Moves a shipment (uuid or barcode) through its lifecycle, one tracking event per step. */
     advance: ecom.advance,
+    advanceCourierOrder: ecom.advanceCourierOrder,
   };
 }
