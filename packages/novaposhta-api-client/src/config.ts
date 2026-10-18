@@ -39,10 +39,18 @@ function isRateLimited(data: unknown): boolean {
 
 /** Builds the carrier-core context used by every service. */
 export function createNovaPoshtaContext(config: NovaPoshtaConfig = {}): ClientContext {
-  const retry =
+  const userRetry = config.retry === false ? undefined : config.retry;
+  const retry: RetryOptions | false =
     config.retry === false
       ? false
-      : { maxRetries: 2, baseDelayMs: 1000, ...config.retry, shouldRetryResponse: (response: { data: unknown }) => isRateLimited(response.data) };
+      : {
+          maxRetries: 2,
+          baseDelayMs: 1000,
+          ...userRetry,
+          // The built-in rate-limit check runs first; a user predicate adds its own conditions.
+          shouldRetryResponse: (response, request) =>
+            isRateLimited(response.data) || (userRetry?.shouldRetryResponse?.(response, request) ?? false),
+        };
   return {
     http: createHttpClient({
       carrier: 'novaposhta',

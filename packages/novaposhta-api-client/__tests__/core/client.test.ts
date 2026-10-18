@@ -79,3 +79,28 @@ describe('carrier-core transport adapter', () => {
     );
   });
 });
+
+describe('custom retry predicate', () => {
+  it('runs next to the built-in rate-limit check', async () => {
+    const shouldRetryResponse = jest.fn(
+      (response: { data: unknown }) => (response.data as { info: string[] }).info[0] === 'again',
+    );
+    const responses = [
+      envelope({ info: ['again'] }),
+      envelope({ success: false, errorCodes: ['20000401501'] }),
+      envelope({}),
+    ];
+    let n = 0;
+    const transport = (async () => ({ status: 200, headers: {}, data: responses[n++] })) as never;
+
+    const ctx = createNovaPoshtaContext({
+      transport,
+      retry: { maxRetries: 2, baseDelayMs: 0, jitter: 'none', shouldRetryResponse },
+    });
+    const response = await toHttpTransport(ctx).request(request);
+
+    expect(n).toBe(3);
+    expect(shouldRetryResponse).toHaveBeenCalled();
+    expect(response).toEqual(responses[2]);
+  });
+});
