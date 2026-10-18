@@ -515,6 +515,8 @@ export type CountryProhibitionDto = {
   uuid?: string | null;
   /** Shipment with delivery notification */
   withDeliveryNotification?: boolean | null;
+  phone?: string | null;
+  worldwide?: boolean | null;
 };
 
 export type CountryValidationData = {
@@ -694,6 +696,7 @@ export type Form119Pdf = {
   description?: string | null;
   isWithDeliveryNotification?: boolean | null;
   isWithEmailDeliveryNotification?: boolean | null;
+  recommended?: boolean | null;
 };
 
 export type categoryOfDeparture = 'RECOMMENDED' | 'POSTAL_TRANSFER' | 'OTHER';
@@ -853,6 +856,10 @@ export type Letter = {
   stringId?: string | null;
   submissionDate?: string | null;
   typePostOffice?: number | null;
+  properties?: {
+    postIndexBlocked?: string | null;
+  } | null;
+  withEmailNotification?: boolean | null;
 };
 
 export type LetterCalculationData = {
@@ -1017,22 +1024,32 @@ export type LetterDto = {
   sms?: boolean | null;
   /** True, if letter is with Email delivery notification as forms 119e, 20e */
   withEmailDeliveryNotification?: boolean | null;
+  /** Additional letter properties */
+  properties?: {
+    /** Post index is unavailable: "true" or "false" */
+    postIndexBlocked?: string | null;
+  } | null;
+  withEmailNotification?: boolean | null;
 };
 
 export type LetterGroup = {
-  closed: boolean;
-  created: string;
+  closed?: boolean | null;
+  created?: string | null;
   entityType?: EntityType | null;
-  isRecommended: boolean;
-  letterContract: LetterContract;
-  modified: string;
-  name: string;
-  paymentType: PaymentType;
-  sender: Client;
+  isRecommended?: boolean | null;
+  letterContract?: LetterContract | null;
+  modified?: string | null;
+  name?: string | null;
+  paymentType?: PaymentType | null;
+  sender?: Client | null;
   submissionDate?: string | null;
   uuid?: string | null;
   isValuable?: boolean | null;
   stringId?: string | null;
+  letterContractUuid?: string | null;
+  senderUuid?: string | null;
+  recommended?: boolean | null;
+  valuable?: boolean | null;
 };
 
 export type LetterGroupDto = {
@@ -1097,6 +1114,7 @@ export type LetterStickerPdf = {
   paidByCardPaymentId?: number | null;
   /** Subpoena */
   subPoena?: string | null;
+  sms?: boolean | null;
 };
 
 export type LetterStickerWithForm119Pdf = {
@@ -1233,6 +1251,7 @@ export type PhoneProhibition = {
   modifier: User;
   phone: string;
   uuid?: string | null;
+  worldwide?: boolean | null;
 };
 
 export type PhoneShortDto = {
@@ -1561,6 +1580,8 @@ export type ShipmentDto = {
   transferPostPayToCard?: boolean | null;
   /** True if Email notifications are enabled */
   withEmailDeliveryNotification?: boolean | null;
+  ownerId?: string | null;
+  isAutomated?: boolean | null;
 };
 
 export type ShipmentGroupDto = {
@@ -1754,7 +1775,8 @@ export type LifecycleStatus =
   | 'IN_DEPARTMENT'
   | 'STORAGE'
   | 'CANCELED'
-  | 'DELETED';
+  | 'DELETED'
+  | 'TRANSFERRED_COURIER';
 
 /** On fail to receive type */
 export type OnFailReceiveType = 'RETURN' | 'RETURN_AFTER_7_DAYS' | 'PROCESS_AS_REFUSAL' | 'RETURN_AFTER_5_DAYS';
@@ -1769,7 +1791,7 @@ export type PackageType = 'LETTER' | 'BANDEROLE' | 'SMALL_BAG' | 'PARCEL' | 'DEC
 export type ParentType = 'BELONG_TO_SHIPMENT' | 'BELONG_TO_LETTER';
 
 /** Letter payment type */
-export type PaymentType = 'POSTAGE_STAMP' | 'FRANKING_MACHINE' | 'POSTAGE_PAID_IMPRINT';
+export type PaymentType = 'POSTAGE_STAMP' | 'FRANKING_MACHINE' | 'POSTAGE_PAID_IMPRINT' | 'DIGITAL_POSTAGE_STAMP';
 
 /** Period */
 export type Period = 'MONTH' | 'QUART';
@@ -1807,7 +1829,8 @@ export type Status1 =
   | 'IN_DEPARTMENT'
   | 'STORAGE'
   | 'CANCELED'
-  | 'DELETED';
+  | 'DELETED'
+  | 'TRANSFERRED_COURIER';
 
 export type statusesGroup = 'ALL' | 'NONREGISTERED';
 
@@ -1907,6 +1930,8 @@ export type DocumentBackDto = {
     | 'VALUABLE_LETTER'
     | 'STANDARD_CARGO'
     | null;
+  height?: number | null;
+  width?: number | null;
 };
 
 export type DocumentBackPdf = {
@@ -2302,4 +2327,8 @@ export type FlatEnclosedItemDto = {
   name?: string | null;
   quantity?: number | null;
   value?: number | null;
+};
+
+export type MessageAnswer = {
+  message: string;
 };

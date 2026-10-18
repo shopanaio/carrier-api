@@ -1,5 +1,5 @@
 // code and comments in English
-import type { InternationalDataDto, PackageType, ParcelItemDto } from '../generated/types';
+import type { InternationalDataDto, PackageType, ParcelItemDto, ShipmentDto } from '../generated/types';
 import type { Client } from './client';
 import type {
   DeliveryType,
@@ -167,7 +167,7 @@ export interface ShipmentDirection {
   postOfficeNumber?: string;
 }
 
-export interface Shipment {
+export interface ShipmentCore {
   uuid: string;
   type: ShipmentType;
   sender: Client;
@@ -223,6 +223,12 @@ export interface Shipment {
   free?: boolean;
   listOfEnclosedItems?: boolean;
 }
+
+/**
+ * A shipment as the API returns it: the common fields above plus every other field the snapshot or the documentation
+ * lists (international data, package type, currency, owner, cargo flags, ...), all optional.
+ */
+export type Shipment = ShipmentCore & Partial<Omit<ShipmentDto, keyof ShipmentCore>>;
 
 /** `GET /shipments/{id}/lifecycle`. */
 export interface ShipmentLifecycleInfo {

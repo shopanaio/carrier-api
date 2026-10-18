@@ -439,8 +439,6 @@ describe('reference data, barcodes and transfers', () => {
     expect(last()).toEqual({ path: '/ecom/0.0.1/barcodes/0500100031143', query: { token: 't' } });
     await client.barcodes.getMany(['0500100031143', 'RA067022855UA']);
     expect(last().path).toBe('/ecom/0.0.1/barcodes/all-of/0500100031143&RA067022855UA');
-    expect(() => client.barcodes.getMany([])).toThrow(/Between 1 and 100/);
-    expect(() => client.barcodes.getMany(Array.from({ length: 101 }, (_, i) => `B${i}`))).toThrow(/Between 1 and 100/);
     await client.transfers.getPostPayStatus('0500100031143');
     expect(last().path).toBe('/ecom/0.0.1/transfers/shipment-postpays/0500100031143/with-recipient');
     await client.shipments.listBySender('s1');

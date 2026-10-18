@@ -26,6 +26,7 @@ export type LifecycleStatus =
   | 'CREATED'
   | 'REGISTERED'
   | 'DELIVERING'
+  | 'TRANSFERRED_COURIER'
   | 'IN_DEPARTMENT'
   | 'FORWARDING'
   | 'RETURNING'

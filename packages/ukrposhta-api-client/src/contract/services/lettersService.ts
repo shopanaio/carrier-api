@@ -3,7 +3,7 @@ import type { BinaryData } from '@shopana/carrier-core';
 import { LettersOperations } from '../generated/operations';
 import type { LetterDto } from '../generated/types';
 import type { CallOptions } from '../types/common';
-import type { Form119eRequest, Form20eRequest, FormOption } from '../types/extra';
+import type { EnvelopeSize, Form119eRequest, Form20eRequest, FormOption, LetterInGroupCreation } from '../types/extra';
 import { WITH_TOKEN } from './base';
 
 /**
@@ -12,12 +12,66 @@ import { WITH_TOKEN } from './base';
  */
 export class LettersService extends LettersOperations {
   /** `POST /letters/domestic/groups/{letterGroupUuid}/letters/async`: creates several letters in a group. */
-  createInGroupAsync(letterGroupUuid: string, letters: LetterDto[], options: CallOptions = {}): Promise<unknown> {
-    return this.ctx.http.request({
+  createInGroupAsync(
+    letterGroupUuid: string,
+    letters: LetterDto[],
+    options: CallOptions = {},
+  ): Promise<LetterInGroupCreation[]> {
+    return this.ctx.http.request<LetterInGroupCreation[]>({
       method: 'POST',
       path: '/letters/domestic/groups/{letterGroupUuid}/letters/async',
       pathParams: { letterGroupUuid },
       json: letters,
+      meta: WITH_TOKEN,
+      signal: options.signal,
+    });
+  }
+
+  /**
+   * `POST /letters/domestic/groups/{letterGroupUuid}/letters`: creates one letter in a group, or several when an array
+   * is sent.
+   */
+  createLetterAndAddToLetterGroup(
+    letterGroupUuid: string,
+    letter: LetterDto,
+    options?: CallOptions,
+  ): Promise<LetterDto>;
+  createLetterAndAddToLetterGroup(
+    letterGroupUuid: string,
+    letters: LetterDto[],
+    options?: CallOptions,
+  ): Promise<LetterDto[]>;
+  createLetterAndAddToLetterGroup(
+    letterGroupUuid: string,
+    body: LetterDto | LetterDto[],
+    options: CallOptions = {},
+  ): Promise<LetterDto | LetterDto[]> {
+    return this.ctx.http.request<LetterDto | LetterDto[]>({
+      method: 'POST',
+      path: '/letters/domestic/groups/{letterGroupUuid}/letters',
+      pathParams: { letterGroupUuid },
+      json: body,
+      meta: WITH_TOKEN,
+      signal: options.signal,
+    });
+  }
+
+  /**
+   * `GET /letters/domestic/{letterUuid}/e-stamp`: the envelope of a letter paid with a digital stamp (PDF or ZIP).
+   * `size`: LETTER_110_X_220, LETTER_114_X_162, LETTER_162_X_229 or LETTER_229_X_324. `frmOption`: 0 or absent prints
+   * the stamp and the addresses without the logo, 1 the logo without addresses, 2 neither, 3 both.
+   */
+  getEnvelopeWithDigitalStamp(
+    letterUuid: string,
+    query: { size?: EnvelopeSize; frmOption?: 0 | 1 | 2 | 3 } = {},
+    options: CallOptions = {},
+  ): Promise<BinaryData> {
+    return this.ctx.forms.request<BinaryData>({
+      method: 'GET',
+      path: '/letters/domestic/{letterUuid}/e-stamp',
+      pathParams: { letterUuid },
+      query,
+      responseType: 'binary',
       meta: WITH_TOKEN,
       signal: options.signal,
     });

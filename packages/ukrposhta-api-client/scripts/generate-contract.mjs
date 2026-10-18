@@ -20,14 +20,56 @@ const ENUM_ADD = {
   ShipmentType: ['CARGO', 'VALUABLE_LETTER'],
   ShipmentGroupShipmentType: ['CARGO', 'VALUABLE_LETTER'],
   PackageType: ['EMS', 'PRIME'],
+  PaymentType: ['DIGITAL_POSTAGE_STAMP'],
   OnFailReceiveType: ['RETURN_AFTER_5_DAYS'],
-  LifecycleStatus: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED'],
-  Status1: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED'],
+  LifecycleStatus: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED', 'TRANSFERRED_COURIER'],
+  Status1: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED', 'TRANSFERRED_COURIER'],
 };
+
+// Properties the documentation shows in request or response bodies and the snapshot lacks.
+const str = { type: 'string' };
+const bool = { type: 'boolean' };
+const FIELD_ADD = {
+  ShipmentDto: { ownerId: str, isAutomated: bool },
+  LetterDto: {
+    properties: {
+      type: 'object',
+      description: 'Additional letter properties',
+      properties: { postIndexBlocked: { type: 'string', description: 'Post index is unavailable: "true" or "false"' } },
+    },
+    withEmailNotification: bool,
+  },
+  Letter: {
+    properties: { type: 'object', properties: { postIndexBlocked: str } },
+    withEmailNotification: bool,
+  },
+  LetterGroup: {
+    letterContractUuid: str,
+    senderUuid: str,
+    recommended: bool,
+    valuable: bool,
+  },
+  CountryProhibitionDto: { phone: str, worldwide: bool },
+  PhoneProhibition: { worldwide: bool },
+  DocumentBackDto: { height: { type: 'number' }, width: { type: 'number' } },
+  LetterStickerPdf: { sms: bool },
+  Form119Pdf: { recommended: bool },
+};
+// The documentation answers `{ "message": "..." }` where the snapshot says string.
+const MESSAGE_ANSWER = new Set([
+  'DELETE /letters/domestic/{uuidOrBarcode}',
+  'DELETE /letters/domestic/groups/letters/{letterUuidOrBarcode}',
+  'PUT /letters/domestic/groups/{letterGroupUuid}/letters/{letterUuidOrBarcode}',
+]);
 
 const schemas = spec.components.schemas;
 for (const [name, values] of Object.entries(ENUM_ADD))
   schemas[name].enum = [...new Set([...schemas[name].enum, ...values])];
+for (const [name, props] of Object.entries(FIELD_ADD))
+  schemas[name].properties = { ...schemas[name].properties, ...props };
+// The documented group answer carries only part of the snapshot's entity fields.
+delete schemas.LetterGroup.required;
+schemas.MessageAnswer = { type: 'object', properties: { message: str }, required: ['message'] };
 
 // ---------- types ----------
 
@@ -282,7 +324,13 @@ for (const [groupName, list] of [...byGroup].sort(([a], [b]) => a.localeCompare(
       fields.push(`${doc(p.description, '    ')}    ${key(p.name)}${p.required ? '' : '?'}: ${render(p.schema)};`);
     if (op.body) fields.push(`    body${op.bodyRequired ? '' : '?'}: ${render(op.body, '    ')};`);
     const argsType = fields.length ? `{\n${fields.join('\n')}\n  }` : null;
-    const resType = op.binary ? 'BinaryData' : op.response ? render(op.response, '  ') : 'unknown';
+    const resType = op.binary
+      ? 'BinaryData'
+      : MESSAGE_ANSWER.has(`${op.method} ${op.path}`)
+        ? 'T.MessageAnswer'
+        : op.response
+          ? render(op.response, '  ')
+          : 'unknown';
     const pathExpr = op.pathParams.length
       ? `,\n      pathParams: { ${op.pathParams.map(p => `${key(p.name)}: args.${p.name}`).join(', ')} }`
       : '';

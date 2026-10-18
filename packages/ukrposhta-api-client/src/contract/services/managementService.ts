@@ -52,8 +52,8 @@ export class ManagementService {
       path: '/dispatch/return-order',
       json: {
         barcode: request.barcode,
-        // The return order also wants the counterparty token in its body.
-        senderToken: await resolveSecret(this.ctx.config.counterpartyToken),
+        // The return order also wants the counterparty token in its body; the configured one unless given.
+        senderToken: request.senderToken ?? (await resolveSecret(this.ctx.config.counterpartyToken)),
         returnAddressId: String(request.returnAddressId),
       },
       meta: WITH_TOKEN,

@@ -61,6 +61,25 @@ export function categoryOfUkrposhtaCode(code: string | undefined, httpStatus: nu
   return categoryFromHttpStatus(httpStatus);
 }
 
+/** One entry of `validationProblems` (UPE10002, international documentation section 6): a hint for one parcel item. */
+export interface UkrposhtaValidationProblem {
+  /** The description that was sent; the partner service's key. */
+  description: string;
+  /** Status of the description from the partner service, e.g. `INCOMPLETE`. */
+  status: string;
+  /** What to clarify in the description. */
+  clarifications: string[];
+}
+
+/** The documented error body; `CarrierError.raw` holds it as the service sent it. */
+export interface UkrposhtaErrorResponse {
+  code?: string;
+  message?: string;
+  field?: string;
+  /** UPE10002 only. */
+  validationProblems?: UkrposhtaValidationProblem[];
+}
+
 interface UkrposhtaErrorBody {
   code?: unknown;
   message?: unknown;

@@ -14,6 +14,8 @@ export interface ReturnOrderRequest {
   barcode: string;
   /** Id of the sender's address to return the shipment to. */
   returnAddressId: number | string;
+  /** Token of the sender (counterparty), shown in the documentation example. */
+  senderToken?: string;
 }
 
 export interface ReturnOrderAnswer {

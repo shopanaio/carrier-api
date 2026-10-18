@@ -45,8 +45,8 @@ export interface PriceDiscount {
 
 /** Body of `POST /domestic/delivery-price`. Postcodes are the delivery zone codes of the addresses. */
 export interface DeliveryPriceRequest {
-  addressFrom: { postcode: string };
-  addressTo: { postcode: string };
+  addressFrom: { postcode: string; conglomerationPostcode?: string | null };
+  addressTo: { postcode: string; conglomerationPostcode?: string | null };
   type: ShipmentType;
   deliveryType: DeliveryType;
   /** Total weight in grams; also the weight of the one parcel when `parcels` is omitted. */
@@ -73,6 +73,23 @@ export interface DeliveryPriceRequest {
   listOfEnclosedItems?: boolean;
   /** True: also check the shipment against the restrictions of its type. */
   validate?: boolean;
+  returnDeliveryPrice?: number;
+  /** Tariff and surcharge tokens, price ratios and the totals of the measurables, as the documentation example shows. */
+  tariffToken?: string | null;
+  surchargeTariffToken?: string | null;
+  lengthOverpayRatio?: number | null;
+  returnDeliveryPriceRatio?: number | null;
+  returnDeliveryPriceValue?: number | null;
+  recalculation?: boolean;
+  w2wVariation?: TariffZone;
+  isMobilePostOfficeDelivery?: boolean | null;
+  measurablesTotalWeight?: number;
+  measurablesMaxLength?: number;
+  measurablesMaxWidth?: number;
+  measurablesMaxHeight?: number;
+  volume?: number;
+  specialTariff?: boolean;
+  declaredPriceSurcharge?: number;
 }
 
 export interface DeliveryPrice {

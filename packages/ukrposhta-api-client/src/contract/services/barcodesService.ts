@@ -1,5 +1,4 @@
 // code and comments in English
-import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
 import type { CallOptions } from '../types/common';
 import type { BarcodeInfo } from '../types/reference';
 import { BarcodesOperations } from '../generated/operations';
@@ -22,16 +21,8 @@ export class BarcodesService extends BarcodesOperations {
     });
   }
 
-  /** `GET /barcodes/all-of/{a}&{b}&...`: up to 100 barcodes at once. */
+  /** `GET /barcodes/all-of/{a}&{b}&...`: the documentation allows up to `BARCODES_MAX_PER_REQUEST` barcodes. */
   getMany(barcodes: string[], options: CallOptions = {}): Promise<BarcodeInfo[]> {
-    if (barcodes.length === 0 || barcodes.length > BARCODES_MAX_PER_REQUEST) {
-      throw new CarrierError({
-        carrier: 'ukrposhta',
-        code: 'INVALID_REQUEST',
-        message: `Between 1 and ${BARCODES_MAX_PER_REQUEST} barcodes per request, got ${barcodes.length}`,
-        category: CarrierErrorCategory.Validation,
-      });
-    }
     return this.ctx.http.request<BarcodeInfo[]>({
       method: 'GET',
       // The barcodes are joined with a literal `&`, so the path is built here rather than from `pathParams`.

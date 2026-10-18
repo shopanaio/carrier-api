@@ -1,5 +1,5 @@
 // code and comments in English
-import type { PackageType } from '../generated/types';
+import type { LetterDto, PackageType } from '../generated/types';
 import type { UkrposhtaDateTime } from './common';
 
 // ---- Letter tariffs (letters documentation of 07.10.2026, section 3) ----
@@ -187,4 +187,16 @@ export interface EstampCashlessPaymentRequest {
 /** Body of `POST /payments/payments-bank-account/by-letter-group`. */
 export interface LetterGroupPaymentRequest {
   letterGroupUuid: string;
+}
+
+/** Envelope sizes of `GET /letters/domestic/{letterUuid}/e-stamp`. */
+export type EnvelopeSize = 'LETTER_110_X_220' | 'LETTER_114_X_162' | 'LETTER_162_X_229' | 'LETTER_229_X_324';
+
+/** One element of the answer of `POST /letters/domestic/groups/{letterGroupUuid}/letters/async`. */
+export interface LetterInGroupCreation {
+  letter: LetterDto;
+  result: {
+    status: 'SUCCESS' | 'FAILURE';
+    details: string;
+  };
 }

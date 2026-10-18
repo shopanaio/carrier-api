@@ -1579,8 +1579,8 @@ export class LettersOperations {
       uuidOrBarcode: string;
     },
     options: CallOptions = {},
-  ): Promise<Record<string, unknown>> {
-    return this.ctx.http.request<Record<string, unknown>>({
+  ): Promise<T.MessageAnswer> {
+    return this.ctx.http.request<T.MessageAnswer>({
       method: 'DELETE',
       path: '/letters/domestic/{uuidOrBarcode}',
       pathParams: { uuidOrBarcode: args.uuidOrBarcode },
@@ -1943,8 +1943,8 @@ export class LettersOperations {
       letterUuidOrBarcode: string;
     },
     options: CallOptions = {},
-  ): Promise<string> {
-    return this.ctx.http.request<string>({
+  ): Promise<T.MessageAnswer> {
+    return this.ctx.http.request<T.MessageAnswer>({
       method: 'DELETE',
       path: '/letters/domestic/groups/letters/{letterUuidOrBarcode}',
       pathParams: { letterUuidOrBarcode: args.letterUuidOrBarcode },
@@ -1982,23 +1982,6 @@ export class LettersOperations {
       method: 'GET',
       path: '/letters/domestic/groups/senders/{clientUuid}',
       pathParams: { clientUuid: args.clientUuid },
-      meta: WITH_TOKEN,
-      signal: options.signal,
-    });
-  }
-
-  /** POST /letters/domestic/groups/{letterGroupUuid}/letters - Create Letter And Add To Letter Group */
-  createLetterAndAddToLetterGroup(
-    args: {
-      /** letterGroupUuid */
-      letterGroupUuid: string;
-    },
-    options: CallOptions = {},
-  ): Promise<T.LetterDto> {
-    return this.ctx.http.request<T.LetterDto>({
-      method: 'POST',
-      path: '/letters/domestic/groups/{letterGroupUuid}/letters',
-      pathParams: { letterGroupUuid: args.letterGroupUuid },
       meta: WITH_TOKEN,
       signal: options.signal,
     });
@@ -2047,8 +2030,8 @@ export class LettersOperations {
       letterUuidOrBarcode: string;
     },
     options: CallOptions = {},
-  ): Promise<string> {
-    return this.ctx.http.request<string>({
+  ): Promise<T.MessageAnswer> {
+    return this.ctx.http.request<T.MessageAnswer>({
       method: 'PUT',
       path: '/letters/domestic/groups/{letterGroupUuid}/letters/{letterUuidOrBarcode}',
       pathParams: { letterGroupUuid: args.letterGroupUuid, letterUuidOrBarcode: args.letterUuidOrBarcode },
@@ -3360,14 +3343,6 @@ export const GENERATED_OPERATIONS: OperationInfo[] = [
     method: 'getLetterGroupsBySender',
     httpMethod: 'GET',
     path: '/letters/domestic/groups/senders/{clientUuid}',
-    token: true,
-    binary: false,
-  },
-  {
-    group: 'letters',
-    method: 'createLetterAndAddToLetterGroup',
-    httpMethod: 'POST',
-    path: '/letters/domestic/groups/{letterGroupUuid}/letters',
     token: true,
     binary: false,
   },

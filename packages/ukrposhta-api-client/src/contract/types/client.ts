@@ -1,4 +1,5 @@
 // code and comments in English
+import type { ClientDto } from '../generated/types';
 import type { Address } from './address';
 import type { ClientType, PostPayPaymentType, UkrposhtaDateTime } from './common';
 
@@ -25,7 +26,7 @@ export interface ClientPhone {
   phoneNumber: string;
   type: PhoneType;
   main: boolean;
-  isConfirmed?: boolean;
+  confirmed?: boolean;
 }
 
 export interface ClientEmail {
@@ -50,6 +51,8 @@ export interface ClientInput {
   /** Digits, up to 25. Required for EXPRESS and STANDARD shipments. */
   phoneNumber: string;
   email?: string;
+  /** English name; shown in the documentation example of `PUT /clients/{uuid}`. */
+  nameEn?: string;
   edrpou?: string;
   tin?: string;
   /** IBAN. Give only this field to create a client with a bank account. */
@@ -77,7 +80,7 @@ export interface PostPayRecipient {
   personalDataApproved?: boolean;
 }
 
-export interface Client {
+export interface ClientCore {
   uuid: string;
   name: string;
   firstName: string | null;
@@ -109,6 +112,12 @@ export interface Client {
   postPayRecipients?: PostPayRecipient[];
 }
 
+/**
+ * A client as the API returns it: the common fields above plus every other field the snapshot or the documentation
+ * lists (`accountType`, `crmUuid`, `counterpartyDogId`, `clientDogId`, `freeStorageAvailable`, ...), all optional.
+ */
+export type Client = ClientCore & Partial<Omit<ClientDto, keyof ClientCore>>;
+
 export interface PostPayRecipientLink {
   uuid: string;
   recipient: PostPayRecipient;
@@ -118,7 +127,10 @@ export interface PostPayRecipientLink {
 export interface ProhibitedPhone {
   phone: string;
   fromDate: string;
-  country: string;
+  /** Present for `/phones/UA/prohibited`; absent for `/phones/worldwide/prohibited`. */
+  country?: string;
+  /** True for a number prohibited in every country (`/phones/worldwide/prohibited`). */
+  worldwide?: boolean;
 }
 
 export interface PhoneInfo {

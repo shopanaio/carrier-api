@@ -45,7 +45,7 @@ describe('the client mounts every service', () => {
 
 describe('generated operations', () => {
   it('cover the rest of the snapshot', () => {
-    expect(GENERATED_OPERATIONS.length).toBeGreaterThanOrEqual(130);
+    expect(GENERATED_OPERATIONS.length).toBeGreaterThanOrEqual(125);
     const keys = GENERATED_OPERATIONS.map(op => `${op.group}.${op.method}`);
     expect(new Set(keys).size).toBe(keys.length);
   });

@@ -1,5 +1,6 @@
 // code and comments in English
 import type { UkrposhtaDateTime } from './common';
+import type { PostPayRecipient } from './client';
 
 export interface Bank {
   code: string;
@@ -37,5 +38,5 @@ export interface PostPayDivideShare {
   created: string;
   dividedSum: number;
   postPayDeliveryDividePrice: number;
-  recipient: { uuid: string; name: string; type: string; bankAccount?: string | null };
+  recipient: PostPayRecipient;
 }
