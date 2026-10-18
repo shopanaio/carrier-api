@@ -5,11 +5,9 @@
   "fixed": [],
   "linked": [],
   "access": "public",
-  "baseBranch": "release/2.0",
+  "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@shopana/tests"
-  ],
+  "ignore": ["@shopana/tests"],
   "privatePackages": {
     "version": false,
     "tag": false

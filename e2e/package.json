@@ -1,6 +1,6 @@
 {
   "name": "@shopana/tests",
-  "version": "2.0.0-0",
+  "version": "1.0.0",
   "private": true,
   "description": "API integration tests for Nova Poshta client",
   "scripts": {
@@ -9,8 +9,8 @@
     "test:coverage": "jest --coverage"
   },
   "dependencies": {
-    "@shopana/carrier-core": "^2.0.0-0",
-    "@shopana/novaposhta-api-client": "^2.0.0-0"
+    "@shopana/carrier-core": "^0.0.1",
+    "@shopana/novaposhta-api-client": "^0.0.1"
   },
   "devDependencies": {
     "@types/jest": "^29.5.8",

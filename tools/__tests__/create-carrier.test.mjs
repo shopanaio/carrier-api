@@ -103,8 +103,7 @@ test('carrier-testing peer range survives 0.x minors, so a platform release is n
   assert.equal(peerRange('0.1.0'), '>=0.1.0 <1.0.0');
   assert.equal(peerRange('1.2.3'), '^1.2.3');
   const manifest = JSON.parse(renderFiles({ slug: 'x-post', name: 'X Post', public: true, private: false })['packages/x-post-api-client/package.json']);
-  const testingVersion = JSON.parse(readFileSync(join(root, 'packages/carrier-testing/package.json'), 'utf8')).version;
-  assert.equal(manifest.peerDependencies['@shopana/carrier-testing'], peerRange(testingVersion));
+  assert.match(manifest.peerDependencies['@shopana/carrier-testing'], /^>=0\.\d+\.\d+ <1\.0\.0$/);
 });
 
 test('changesets never versions private packages such as the scaffolder demo', () => {

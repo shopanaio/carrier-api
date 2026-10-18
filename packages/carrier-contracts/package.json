@@ -1,6 +1,6 @@
 {
   "name": "@shopana/carrier-contracts",
-  "version": "2.0.0-0",
+  "version": "0.0.1",
   "description": "Unified shipping domain model and capability interfaces shared by Shopana carrier adapters",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",

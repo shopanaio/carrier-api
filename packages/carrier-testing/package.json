@@ -1,6 +1,6 @@
 {
   "name": "@shopana/carrier-testing",
-  "version": "2.0.0-0",
+  "version": "0.0.1",
   "description": "Contract-driven carrier API simulator and adapter conformance checks for Shopana carrier clients",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -41,8 +41,8 @@
   },
   "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/carrier-testing#readme",
   "dependencies": {
-    "@shopana/carrier-core": "^2.0.0-0",
-    "@shopana/carrier-contracts": "^2.0.0-0",
+    "@shopana/carrier-core": "^0.0.1",
+    "@shopana/carrier-contracts": "^0.0.1",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1"
   },

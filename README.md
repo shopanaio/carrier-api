@@ -325,37 +325,20 @@ yarn changeset
 ```
 
 Select every affected public package and use `patch` for backwards-compatible
-fixes or `minor` for backwards-compatible features. Placeholder release notes
-and major Changesets are rejected automatically. Documentation-only,
+fixes or `minor` for backwards-compatible features. Major Changesets and
+placeholder release notes are rejected automatically. Documentation-only,
 test-only, and repository maintenance changes do not need a Changeset.
 
 The `Changeset Required` workflow checks pull requests before release automation
 can run.
 
-Stable releases of the 1.x line use the `main` branch:
+Releases use the `main` branch:
 
 1. Merge a source change and its `.changeset/*.md` file into `main`.
 2. The `Release` workflow opens a `chore: version packages` pull request.
 3. Review and merge that version pull request.
 4. The same workflow builds and publishes stable package versions to npm with
    the `latest` tag and creates GitHub releases.
-
-#### 2.0 release
-
-The 2.0 line is developed on `release/2.0` and, once merged into `main`, released by the `Release` workflow in Changesets pre mode
-(`.changeset/pre.json`, tag `next`). Every public package starts from the
-`2.0.0-0` baseline, so the first Changeset (`minor` or `patch`) yields
-`2.0.0-next.0` without a major Changeset.
-
-1. Merge `release/2.0` (with its Changesets) into `main`.
-2. The `Release` workflow opens a `chore: version packages` pull request.
-3. Merging it publishes `X.Y.Z-next.N` versions to npm with the `next` tag.
-4. To cut the stable 2.0.0, run `yarn changeset pre exit`, commit, and merge
-   the resulting version pull request: stable versions are published with the
-   `latest` tag.
-
-`yarn release` (`tools/release.mjs`) refuses to publish stable versions while
-pre mode is active and prerelease versions once it is not.
 
 Manual release packaging checks are:
 
