@@ -21,7 +21,8 @@ export interface LetterTariff {
 
 export interface LetterSurchargeTariff {
   uuid: string;
-  surchargeType: 'DELIVERY_NOTIFICATION' | 'RECOMMENDED' | 'SMS' | string;
+  /** `DELIVERY_NOTIFICATION`, `RECOMMENDED`, `SMS`, ... */
+  surchargeType: string;
   price: number;
   vat: number;
   fromDate: string;

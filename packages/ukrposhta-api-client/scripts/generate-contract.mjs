@@ -38,27 +38,27 @@ const key = name =>
     : JSON.stringify(name).replace(/[^\x20-\x7e]/g, c => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
 const literal = value =>
   JSON.stringify(value).replace(/[^\x20-\x7e]/g, c => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
-// The snapshot has Cyrillic look-alikes inside English descriptions ("Сreate"); comments stay ASCII-only.
+// The snapshot has Cyrillic look-alikes inside English descriptions ("\\u0421reate"); comments stay ASCII-only.
 const LOOKALIKES = {
-  А: 'A',
-  В: 'B',
-  С: 'C',
-  Е: 'E',
-  Н: 'H',
-  І: 'I',
-  К: 'K',
-  М: 'M',
-  О: 'O',
-  Р: 'P',
-  Т: 'T',
-  Х: 'X',
-  а: 'a',
-  с: 'c',
-  е: 'e',
-  і: 'i',
-  о: 'o',
-  р: 'p',
-  х: 'x',
+  '\u0410': 'A',
+  '\u0412': 'B',
+  '\u0421': 'C',
+  '\u0415': 'E',
+  '\u041d': 'H',
+  '\u0406': 'I',
+  '\u041a': 'K',
+  '\u041c': 'M',
+  '\u041e': 'O',
+  '\u0420': 'P',
+  '\u0422': 'T',
+  '\u0425': 'X',
+  '\u0430': 'a',
+  '\u0441': 'c',
+  '\u0435': 'e',
+  '\u0456': 'i',
+  '\u043e': 'o',
+  '\u0440': 'p',
+  '\u0445': 'x',
 };
 const ascii = text => text.replace(/[^\x00-\x7f]/g, c => LOOKALIKES[c] ?? '?');
 const doc = (text, indent = '') => {

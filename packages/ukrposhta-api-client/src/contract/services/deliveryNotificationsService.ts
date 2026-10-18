@@ -1,5 +1,4 @@
 // code and comments in English
-import type { BinaryData } from '@shopana/carrier-core';
 import { DeliveryNotificationsOperations } from '../generated/operations';
 import type { Form119Pdf, ShipmentDto } from '../generated/types';
 import type { CallOptions } from '../types/common';
@@ -51,14 +50,14 @@ export class DeliveryNotificationsService extends DeliveryNotificationsOperation
 
   /**
    * `POST /signed-notifications/{clientUuid}/batch`: signed delivery notifications of a period. The answer is a ZIP
-   * archive (several come as multipart/form-data) unless `responseType` is `JSON`.
+   * archive (a `BinaryData`; several come as multipart/form-data) unless `responseType` is `JSON`.
    */
   getSignedNotifications(
     clientUuid: string,
     request: SignedNotificationsRequest,
     options: CallOptions = {},
-  ): Promise<BinaryData | unknown> {
-    return this.ctx.http.request<BinaryData | unknown>({
+  ): Promise<unknown> {
+    return this.ctx.http.request<unknown>({
       method: 'POST',
       path: '/signed-notifications/{clientUuid}/batch',
       pathParams: { clientUuid },
