@@ -2,9 +2,9 @@
 
 Typed clients for Meest (Meest Express, Ukraine) on top of [`@shopana/carrier-core`](../carrier-core).
 
-| API                                                 | Base URL                             | Auth                               | Status                    |
-| --------------------------------------------------- | ------------------------------------ | ---------------------------------- | ------------------------- |
-| Public (`createMeestPublicClient`)                  | `https://publicapi.meest.com`        | none                               | ready                     |
+| API                                                 | Base URL                             | Auth                               | Status                                           |
+| --------------------------------------------------- | ------------------------------------ | ---------------------------------- | ------------------------------------------------ |
+| Public (`createMeestPublicClient`)                  | `https://publicapi.meest.com`        | none                               | ready                                            |
 | Contract openAPI v3.0 (`createMeestContractClient`) | `https://api.meest.com/v3.0/openAPI` | login + password -> `token` header | ready (all 52 operations of the current Swagger) |
 
 ## Public API
