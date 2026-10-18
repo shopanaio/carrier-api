@@ -7,7 +7,7 @@ const client = createMeestContractClient({ username: 'user', password: 'pass' })
 export async function readReturn(): Promise<string | undefined> {
   const result: ParcelReturnNewResult = await client.misc.returnParcel({ parcelID: 'p1', reasonID: 'r1' });
   // The documented keys use a look-alike non-Latin letter; they are exact keys, not an open record.
-  return result['doсNumber'];
+  return result['do\u0441Number'];
 }
 
 export async function readContract(): Promise<string> {
