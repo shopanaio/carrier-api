@@ -13,6 +13,6 @@ The documentation wins; the client follows it. Known differences:
 - **Lists.** `GET /client-addresses`, `/client-phones` and `/client-emails` answer arrays, the snapshot says object. `GET /clients/phone` answers a list in the snapshot and one client in the documentation: the client accepts both and returns a list.
 - **Empty answers.** `DELETE /shipments/{uuid}` and `DELETE /shipments/{uuid}/shipment-group` answer an empty body, not a shipment.
 - **Courier.** The status history is `GET /courier-service/orders/{uuid}/statuses` in the documentation and `/status` in the snapshot; `GET /courier-service/orders/{uuid}` returns one order, the snapshot an array.
-- **Missing from the snapshot.** `GET /dictionaries/tariffs[/{uuid}]`, `POST /shipments/stickers-by-barcodes`, `/shipments/management/*`, `POST /dispatch/return-order`, the `form2-service` forms.
+- **Missing from the snapshot.** `GET /dictionaries/tariffs[/{uuid}]`, `POST /shipments/stickers-by-barcodes`, `DELETE /shipments/{uuid}/parcels/{barcode}`, `GET /addresses/availability-checking/...`, `PUT /addresses/description/{id}`, `/shipments/management/*`, `POST /dispatch/return-order`, the `form2-service` forms.
 - **Statuses.** The snapshot lists only 401, 403 and 404 for most operations; every operation can also answer 400 (`UPE01002`) and 500.
 - **Tokens.** `GET /shipments/{uuid}/lifecycle`, `/transfers/...`, `/banks`, `/dictionaries/...`, `POST /domestic/delivery-price` and `/addresses` take no counterparty token.

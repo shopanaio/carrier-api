@@ -126,9 +126,9 @@ export function createLocationsApi(classifier: UkrposhtaClassifierClient) {
         ...(text(details.DISTRICT_NAME) === undefined ? {} : { district: text(details.DISTRICT_NAME) }),
         ...(text(details.CITY_NAME) === undefined ? {} : { city: text(details.CITY_NAME) }),
       };
-      const given = address.city?.trim().toLowerCase();
-      const known = normalized.city?.toLowerCase();
-      if (given !== undefined && known !== undefined && !known.includes(given) && !given.includes(known)) {
+      const given = cityKey(address.city);
+      const known = cityKey(normalized.city);
+      if (given !== undefined && known !== undefined && given !== known) {
         return {
           valid: false,
           normalized,
@@ -141,3 +141,12 @@ export function createLocationsApi(classifier: UkrposhtaClassifierClient) {
 }
 
 export type { ClassifierRecord };
+
+/** A locality name for comparison: lower case, without the "m." / "city" prefix of the classifier. */
+function cityKey(city: string | undefined): string | undefined {
+  const key = city
+    ?.trim()
+    .toLowerCase()
+    .replace(/^(m|city|misto|mis)\.?\s+/, '');
+  return key === undefined || key === '' ? undefined : key;
+}

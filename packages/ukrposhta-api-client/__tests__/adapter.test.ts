@@ -206,6 +206,11 @@ describe('kyivLocalToIso', () => {
     expect(kyivLocalToIso('2026-10-25T12:00:00')).toBe('2026-10-25T12:00:00+02:00');
   });
 
+  it('resolves the hour the clocks go back to the earlier offset, and the skipped hour to the old one', () => {
+    expect(kyivLocalToIso('2026-10-25T03:30:00')).toBe('2026-10-25T03:30:00+03:00');
+    expect(kyivLocalToIso('2026-03-29T03:30:00')).toBe('2026-03-29T03:30:00+02:00');
+  });
+
   it('leaves unparseable input alone', () => {
     expect(kyivLocalToIso('yesterday')).toBe('yesterday');
   });
@@ -359,7 +364,7 @@ describe('createShipment', () => {
     const { adapter } = build(mock);
     await adapter.createShipment({
       ...shipmentInput,
-      parcels: [{ weight: { value: 800, unit: 'g' } }],
+      parcels: [{ weight: { value: 800, unit: 'g' }, declaredValue: money(300, 'UAH') }],
       options: {
         service: 'standard',
         payer: 'recipient',
@@ -372,7 +377,6 @@ describe('createShipment', () => {
       paidByRecipient: true,
       postPay: 300,
       postPayPaidByRecipient: false,
-      // No declared value was given, so the COD amount is declared.
       parcels: [{ weight: 800, length: 1, declaredPrice: 300 }],
       // A company receives cash on delivery on its bank account.
       transferPostPayToBankAccount: true,
@@ -384,15 +388,38 @@ describe('createShipment', () => {
     });
   });
 
-  it('raises the declared price only as far as the cash on delivery needs', async () => {
+  it('refuses cash on delivery above the declared value instead of raising it', async () => {
     const mock = ecomMock();
     const { adapter } = build(mock);
-    await adapter.createShipment({
-      ...shipmentInput,
-      parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(100, 'UAH') }],
-      options: { cashOnDelivery: { amount: money(300, 'UAH') } },
+    await expect(
+      adapter.createShipment({
+        ...shipmentInput,
+        parcels: [{ weight: { value: 1, unit: 'kg' }, declaredValue: money(100, 'UAH') }],
+        options: { cashOnDelivery: { amount: money(300, 'UAH') } },
+      }),
+    ).rejects.toMatchObject({ category: CarrierErrorCategory.Validation, field: 'parcels.declaredValue' });
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('refuses a reference too long for the external id, and validates both parties before any request', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await expect(adapter.createShipment({ ...shipmentInput, reference: 'x'.repeat(65) })).rejects.toMatchObject({
+      field: 'reference',
     });
-    expect(bodyOf<{ parcels: Array<{ declaredPrice: number }> }>(mock.last()).parcels[0]!.declaredPrice).toBe(300);
+    // The recipient is invalid: the sender's address and client must not be created first.
+    await expect(
+      adapter.createShipment({
+        ...shipmentInput,
+        recipient: { ...recipient, contact: { name: 'Ivanov', phone: '1' } },
+      }),
+    ).rejects.toMatchObject({ field: 'recipient.contact' });
+    expect(mock.calls).toHaveLength(0);
+  });
+
+  it('does not invent a creation time', async () => {
+    const { adapter } = build(ecomMock());
+    expect(await adapter.createShipment(shipmentInput)).not.toHaveProperty('createdAt');
   });
 
   it('sends several parcels and returns their numbers', async () => {
@@ -580,9 +607,9 @@ describe('getRates', () => {
     const { adapter } = build(mock);
     await adapter.getRates({
       ...request,
-      options: { service: 'EXPRESS', cashOnDelivery: { amount: money(700, 'UAH') } },
+      options: { service: 'EXPRESS', cashOnDelivery: { amount: money(400, 'UAH') } },
     });
-    expect(bodyOf(mock.last())).toMatchObject({ postPay: 700, parcels: [{ declaredPrice: 700 }] });
+    expect(bodyOf(mock.last())).toMatchObject({ postPay: 400, parcels: [{ declaredPrice: 500 }] });
   });
 });
 
@@ -707,6 +734,14 @@ describe('createManifest', () => {
     expect(mock.callsTo('PUT', `${ECOM}/shipment-groups/g1/shipments`)[0]!.body).toEqual([a.uuid, b.uuid]);
   });
 
+  it('refuses shipments that are already registered', async () => {
+    const a = make('sender-1');
+    const mock = manifestMock([{ ...a, lifecycle: { status: 'REGISTERED', statusDate: '2026-01-01T09:00:00' } }]);
+    const { adapter } = build(mock);
+    await expect(adapter.createManifest([a.uuid])).rejects.toMatchObject({ field: 'shipmentIds' });
+    expect(mock.callsTo('POST', `${ECOM}/shipment-groups`)).toHaveLength(0);
+  });
+
   it('refuses shipments of different senders or types, and none at all', async () => {
     const a = make('sender-1');
     const other = make('sender-2');
@@ -827,6 +862,9 @@ describe('locations and address validation', () => {
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Lviv' })).toMatchObject({
       valid: false,
       messages: [expect.stringContaining('belongs to Kyiv')],
+    });
+    expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Kyi' })).toMatchObject({
+      valid: false,
     });
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '99999' })).toMatchObject({ valid: false });
     const before = mock.calls.length;

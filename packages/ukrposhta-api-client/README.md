@@ -14,7 +14,7 @@ Ukrposhta issues credentials with the contract. Each service takes its own beare
 | Address classifier | eCom bearer                      | `createUkrposhtaClassifierClient` |
 | eCom and forms     | eCom bearer + counterparty token | `createUkrposhtaContractClient`   |
 
-The sandbox (`environment: 'sandbox'`, host `dev.ukrposhta.ua`) uses a separate bearer and token. The documentation names no sandbox for tracking and the classifier; pass `baseUrl` if you have one.
+The environment defaults to `production`: pass `environment: 'sandbox'` explicitly for tests, or a test shipment goes to the real service. The sandbox (`environment: 'sandbox'`, host `dev.ukrposhta.ua`) uses a separate bearer and token. The documentation names no sandbox for tracking and the classifier; pass `baseUrl` if you have one.
 
 The eCom client adds the token (`?token=`) only to operations that take it. Pass the secrets as strings or as functions (`() => string | Promise<string>`); the bearer and the token are masked in logs.
 
@@ -107,7 +107,7 @@ How the adapter maps the model:
 - **Parties.** A client and address are found or created from the party; a party with `externalId` is looked up first and reused, with `carrierRefs.ukrposhta.{clientUuid,addressId}` nothing is looked up. A `contact.company` makes a company (needs the EDRPOU in `taxId`), a ten-digit `taxId` a sole proprietor (tin). A plain `contact.name` is read as "Surname Name Patronymic".
 - **Delivery type.** A door point is `D`, a carrier location `W` (the location id is the post office index): `D2D`, `D2W`, `W2D`, `W2W`.
 - **Service.** `options.service` is `EXPRESS` (default), `STANDARD`, `DOCUMENT` or `CARGO`. Rates without a service return Express and Standard.
-- **Money.** Everything is UAH; another currency is rejected before any request. Cash on delivery needs a declared price at least as large: when none is given, the first parcel carries the cash amount.
+- **Money.** Everything is UAH; another currency is rejected before any request. Cash on delivery must not exceed the declared value of the parcels; the adapter rejects it instead of raising the declared value (which changes the fee).
 - **Cancel.** Only a `CREATED` shipment can be deleted; any later status fails with `NOT_CANCELLABLE`.
 - **Manifest.** Puts the shipments (one sender, one type, not yet registered) into a new group and returns form 103a.
 - **Pickup.** The courier comes to the sender address of the shipments in one of three windows (09-12, 12-15, 15-18).
@@ -115,7 +115,7 @@ How the adapter maps the model:
 
 ## Errors
 
-Every failure is a `CarrierError`. `UPExxxxx` codes from Annex J map to categories by group (validation, not found, status, PDF, authentication, database, invalid operation, internal); only 5xx and 429 answers are retryable. Input the adapter cannot map fails with `INVALID_INPUT` and the offending `field`, before anything is sent. A shipment creation is never repeated automatically after a server error or a lost connection: the carrier may have created it.
+Every failure is a `CarrierError`. `UPExxxxx` codes from Annex J map to categories by group (validation, not found, status, PDF, authentication, database, invalid operation, internal); only 5xx and 429 answers are retryable. `createShipment` creates addresses and clients before the shipment; every local check runs first, but a carrier failure after that leaves those records behind. Input the adapter cannot map fails with `INVALID_INPUT` and the offending `field`, before anything is sent. A shipment creation is never repeated automatically after a server error or a lost connection: the carrier may have created it.
 
 ## Contracts
 

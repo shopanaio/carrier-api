@@ -93,18 +93,23 @@ function toShipment(raw: UkrposhtaShipment): Shipment {
     status: lifecycleToTrackingStatus(raw.lifecycle.status),
     price: money(raw.deliveryPrice, 'UAH'),
     ...(raw.deliveryDate ? { estimatedDeliveryDate: kyivLocalToIso(raw.deliveryDate).slice(0, 10) } : {}),
-    createdAt: kyivLocalToIso(raw.lastModified),
     raw,
   };
 }
 
-/** COD needs a declared price at least as large; when the consumer gave none, the first parcel carries the COD amount. */
-function withDeclaredPriceForCod(parcels: ReturnType<typeof toParcelInput>[], cod: number | undefined) {
-  if (cod === undefined) return parcels;
+/**
+ * Cash on delivery must not exceed the declared price (Ukrposhta rejects it otherwise). The adapter does not raise the
+ * declared value for you: it changes the insurance fee and the amount on the waybill.
+ */
+function assertCodCovered(parcels: ReturnType<typeof toParcelInput>[], cod: number | undefined): void {
+  if (cod === undefined) return;
   const declared = parcels.reduce((sum, parcel) => sum + (parcel.declaredPrice ?? 0), 0);
-  if (declared >= cod || parcels.length === 0) return parcels;
-  const [first, ...rest] = parcels as [ReturnType<typeof toParcelInput>, ...ReturnType<typeof toParcelInput>[]];
-  return [{ ...first, declaredPrice: (first.declaredPrice ?? 0) + (cod - declared) }, ...rest];
+  if (declared < cod) {
+    throw invalidInput(
+      `Cash on delivery (${cod}) cannot exceed the declared value of the parcels (${declared}): set parcels.declaredValue`,
+      'parcels.declaredValue',
+    );
+  }
 }
 
 export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
@@ -118,7 +123,20 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
       const cod = input.options?.cashOnDelivery
         ? uah(input.options.cashOnDelivery.amount, 'options.cashOnDelivery')
         : undefined;
-      const parcels = withDeclaredPriceForCod(input.parcels.map(toParcelInput), cod);
+      const parcels = input.parcels.map(toParcelInput);
+      assertCodCovered(parcels, cod);
+
+      // Validate everything that can be validated locally before the first request, so a bad input leaves nothing behind.
+      for (const [party, field] of [
+        [input.sender, 'sender'],
+        [input.recipient, 'recipient'],
+      ] as const) {
+        toAddressInput(party, `${field}.point`);
+        toClientInput(party, 0, field);
+      }
+      if (input.reference !== undefined && input.reference.length > 64) {
+        throw invalidInput('reference is at most 64 characters (it becomes the shipment externalId)', 'reference');
+      }
 
       const sender = await resolveParty(ecom, input.sender, 'sender', options);
       const recipient = await resolveParty(ecom, input.recipient, 'recipient', options);
@@ -140,7 +158,7 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
               ...(sender.client.type === 'COMPANY' ? { transferPostPayToBankAccount: true } : {}),
             }
           : {}),
-        ...(input.reference ? { externalId: input.reference.slice(0, 64) } : {}),
+        ...(input.reference ? { externalId: input.reference } : {}),
       };
       return toShipment(await ecom.shipments.create(body, options));
     },
@@ -157,7 +175,8 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
       const cod = request.options?.cashOnDelivery
         ? uah(request.options.cashOnDelivery.amount, 'options.cashOnDelivery')
         : undefined;
-      const parcels = withDeclaredPriceForCod(request.parcels.map(toParcelInput), cod);
+      const parcels = request.parcels.map(toParcelInput);
+      assertCodCovered(parcels, cod);
 
       const results = await Promise.allSettled(
         services.map(async (type): Promise<Rate> => {
@@ -225,7 +244,15 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
      */
     async createManifest(shipmentIds: string[], options: CallOptions = {}): Promise<Manifest> {
       if (shipmentIds.length === 0) throw invalidInput('At least one shipment is required', 'shipmentIds');
-      const shipments = await Promise.all(shipmentIds.map(id => ecom.shipments.get(id, options)));
+      const shipments = [];
+      for (const id of shipmentIds) shipments.push(await ecom.shipments.get(id, options));
+      const registered = shipments.find(shipment => shipment.lifecycle.status !== 'CREATED');
+      if (registered) {
+        throw invalidInput(
+          `Shipment ${registered.uuid} is already ${registered.lifecycle.status}: only unregistered shipments can join a manifest`,
+          'shipmentIds',
+        );
+      }
       const first = shipments[0];
       for (const shipment of shipments) {
         if (shipment.sender.uuid !== first.sender.uuid)
@@ -235,7 +262,7 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
       }
       const group = await ecom.shipmentGroups.create(
         {
-          name: `Manifest ${new Date().toISOString().slice(0, 16).replace('T', ' ')}`,
+          name: `Manifest ${kyivNow()}`,
           clientUuid: first.sender.uuid,
           type: first.type,
         },
@@ -351,4 +378,17 @@ export function createPickupApi(ecom: UkrposhtaEcomClientWithCourier) {
       return { id: order.uuid, carrier: 'ukrposhta', date: order.dropDate, status: order.lastStatus, raw: order };
     },
   };
+}
+
+/** Current Kyiv time as `YYYY-MM-DD HH:mm`, for group names. */
+function kyivNow(): string {
+  const parts = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(new Date());
+  return parts.slice(0, 16);
 }

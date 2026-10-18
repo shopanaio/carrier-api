@@ -12,10 +12,11 @@ export function kyivLocalToIso(local: string): string {
   if (!match) return local;
   const [, y, mo, d, h, mi, s = '00'] = match;
   const asUtc = Date.UTC(Number(y), Number(mo) - 1, Number(d), Number(h), Number(mi), Number(s));
-  // The offset depends on the instant, so try the offset at the naive guess first and re-check once.
-  let offsetMinutes = kyivOffsetMinutes(asUtc);
-  const corrected = kyivOffsetMinutes(asUtc - offsetMinutes * 60_000);
-  if (corrected !== offsetMinutes) offsetMinutes = corrected;
+  // Pick the offset that is real at that instant. A local time that happens twice (clocks go back) takes the
+  // earlier one (+03:00); one that never happens (clocks go forward) takes the offset before the switch (+02:00).
+  const candidates = [180, 120];
+  const offsetMinutes =
+    candidates.find(candidate => kyivOffsetMinutes(asUtc - candidate * 60_000) === candidate) ?? 120;
   const sign = offsetMinutes >= 0 ? '+' : '-';
   const abs = Math.abs(offsetMinutes);
   const offset = `${sign}${String(Math.floor(abs / 60)).padStart(2, '0')}:${String(abs % 60).padStart(2, '0')}`;
