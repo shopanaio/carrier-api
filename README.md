@@ -326,8 +326,7 @@ yarn changeset
 
 Select every affected public package and use `patch` for backwards-compatible
 fixes or `minor` for backwards-compatible features. Placeholder release notes
-are rejected automatically, and so are major Changesets, except while
-Changesets pre mode is active (see the 2.0 release below). Documentation-only,
+and major Changesets are rejected automatically. Documentation-only,
 test-only, and repository maintenance changes do not need a Changeset.
 
 The `Changeset Required` workflow checks pull requests before release automation
@@ -344,8 +343,9 @@ Stable releases of the 1.x line use the `main` branch:
 #### 2.0 release
 
 The 2.0 line is developed on `release/2.0` and, once merged into `main`, released by the `Release` workflow in Changesets pre mode
-(`.changeset/pre.json`, tag `next`). Every public package starts from a `1.0.0`
-baseline with a `major` Changeset, so the first versions are `2.0.0-next.0`.
+(`.changeset/pre.json`, tag `next`). Every public package starts from the
+`2.0.0-0` baseline, so the first Changeset (`minor` or `patch`) yields
+`2.0.0-next.0` without a major Changeset.
 
 1. Merge `release/2.0` (with its Changesets) into `main`.
 2. The `Release` workflow opens a `chore: version packages` pull request.

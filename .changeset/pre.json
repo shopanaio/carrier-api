@@ -2,16 +2,16 @@
   "mode": "pre",
   "tag": "next",
   "initialVersions": {
-    "@shopana/tests": "1.0.0",
-    "@shopana/carrier-contracts": "1.0.0",
-    "@shopana/carrier-core": "1.0.0",
-    "@shopana/carrier-testing": "1.0.0",
+    "@shopana/tests": "2.0.0-0",
+    "@shopana/carrier-contracts": "2.0.0-0",
+    "@shopana/carrier-core": "2.0.0-0",
+    "@shopana/carrier-testing": "2.0.0-0",
     "@shopana/demo-post-api-client": "0.0.0",
-    "@shopana/meest-api-client": "1.0.0",
-    "@shopana/novaposhta-api-client": "1.0.0",
-    "@shopana/novaposhta-mcp-server": "1.0.0",
-    "@shopana/novaposhta-transport-fetch": "1.0.0",
-    "@shopana/ukrposhta-api-client": "1.0.0"
+    "@shopana/meest-api-client": "2.0.0-0",
+    "@shopana/novaposhta-api-client": "2.0.0-0",
+    "@shopana/novaposhta-mcp-server": "2.0.0-0",
+    "@shopana/novaposhta-transport-fetch": "2.0.0-0",
+    "@shopana/ukrposhta-api-client": "2.0.0-0"
   },
   "changesets": []
 }
