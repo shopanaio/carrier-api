@@ -2751,82 +2751,6 @@
         ]
       }
     },
-    "/print/declaration/{printValue}/{contentType}": {
-      "get": {
-        "tags": [
-          "print"
-        ],
-        "operationId": "declaration_get",
-        "consumes": [
-          "application/pdf",
-          "text/html"
-        ],
-        "produces": [
-          "application/pdf",
-          "text/html"
-        ],
-        "parameters": [
-          {
-            "name": "printValue",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "contentType",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {}
-          },
-          "404": {
-            "schema": {}
-          }
-        }
-      }
-    },
-    "/print/cn23/{printValue}/{contentType}": {
-      "get": {
-        "tags": [
-          "print"
-        ],
-        "operationId": "cn23_get",
-        "consumes": [
-          "application/pdf",
-          "text/html"
-        ],
-        "produces": [
-          "application/pdf",
-          "text/html"
-        ],
-        "parameters": [
-          {
-            "name": "printValue",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          },
-          {
-            "name": "contentType",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "schema": {}
-          },
-          "404": {
-            "schema": {}
-          }
-        }
-      }
-    },
     "/print/register/{printValue}/{contentType}": {
       "get": {
         "tags": [
@@ -6654,9 +6578,15 @@
         ],
         "parameters": [
           {
+            "name": "cityID",
+            "in": "query",
+            "required": false,
+            "type": "string"
+          },
+          {
             "name": "streetID",
             "in": "query",
-            "required": true,
+            "required": false,
             "type": "string"
           },
           {
@@ -8254,6 +8184,562 @@
               },
               "xml": {
                 "name": "data"
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": []
+          }
+        ]
+      }
+    },
+    "/print/cn23Form/{printValue}/{phone}": {
+      "get": {
+        "tags": [
+          "print"
+        ],
+        "operationId": "cn23Form_get",
+        "consumes": [
+          "application/pdf"
+        ],
+        "produces": [
+          "application/pdf"
+        ],
+        "parameters": [
+          {
+            "name": "printValue",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {}
+          }
+        }
+      }
+    },
+    "/print/declarationForm/{printValue}/{phone}/{contentType}": {
+      "get": {
+        "tags": [
+          "print"
+        ],
+        "operationId": "declarationForm_get",
+        "consumes": [
+          "application/pdf",
+          "text/html"
+        ],
+        "produces": [
+          "application/pdf",
+          "text/html"
+        ],
+        "parameters": [
+          {
+            "name": "printValue",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "phone",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "contentType",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "schema": {}
+          }
+        }
+      }
+    },
+    "/changingParcelBySender": {
+      "post": {
+        "tags": [
+          "parcels"
+        ],
+        "operationId": "changingParcelBySender_post",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "parcelID": {
+                  "type": "string",
+                  "example": "1a2bc345-6789-01d2-34e5-678f9012g345"
+                },
+                "senderPhone": {
+                  "type": "string",
+                  "example": "+380671112233"
+                },
+                "reciever": {
+                  "type": "string"
+                },
+                "recieverPhone": {
+                  "type": "string",
+                  "example": "+380671112233"
+                },
+                "COD": {
+                  "type": "number",
+                  "format": "float",
+                  "example": 1200
+                },
+                "NumberCardForCOD": {
+                  "type": "string",
+                  "example": "1234123412341230"
+                }
+              },
+              "xml": {
+                "name": "..."
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "info": {
+                  "type": "object",
+                  "properties": {
+                    "fieldName": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "messageDetails": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "errorCode": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  }
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "Success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "DocuentNumber": {
+                      "type": "string",
+                      "example": "1a23b45c-6d7e-8fg9-0h12-34i5jk6l7m89"
+                    },
+                    "SMS_sended": {
+                      "type": "boolean",
+                      "example": true
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "..."
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "token": []
+          }
+        ]
+      }
+    },
+    "/calculateExportB2C": {
+      "post": {
+        "tags": [
+          "parcels"
+        ],
+        "operationId": "calculateExportB2C_post",
+        "consumes": [
+          "application/json",
+          "application/xml"
+        ],
+        "produces": [
+          "application/json",
+          "application/xml"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": false,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "receiver": {
+                  "type": "object",
+                  "properties": {
+                    "service": {
+                      "type": "string",
+                      "example": "Door"
+                    },
+                    "countryID": {
+                      "type": "string",
+                      "example": "c35b6195-4ea3-11de-8591-001d600938f8"
+                    },
+                    "regionID": {
+                      "type": "string",
+                      "example": "d15e3024-60b0-11de-be1e-0030485903e8"
+                    },
+                    "cityID": {
+                      "type": "string",
+                      "example": "62c3d54a-749b-11df-b112-00215aee3ebe"
+                    }
+                  },
+                  "required": [
+                    "countryID"
+                  ]
+                },
+                "ioss": {
+                  "type": "boolean",
+                  "example": false
+                },
+                "contractID": {
+                  "type": "string",
+                  "example": "a123b4c5-6d78-90e1-23f4-5i67jk890123"
+                },
+                "sendingDate": {
+                  "type": "string",
+                  "example": "2025-12-25T10:00:00"
+                },
+                "placesItems": {
+                  "type": "array",
+                  "xml": {
+                    "name": "placesItems",
+                    "wrapped": true
+                  },
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "quantity": {
+                        "type": "integer",
+                        "format": "int32",
+                        "example": 3
+                      },
+                      "placeWeight": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 4.2
+                      },
+                      "weight": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 12.6
+                      },
+                      "placeVolume": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.03
+                      },
+                      "volume": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 0.09
+                      },
+                      "insurance": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 200
+                      },
+                      "length": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 20
+                      },
+                      "width": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 30
+                      },
+                      "height": {
+                        "type": "number",
+                        "format": "float",
+                        "example": 10
+                      },
+                      "formatID": {
+                        "type": "string",
+                        "example": "c29bb3cf-4954-11df-9fc4-0030485903e8"
+                      }
+                    },
+                    "xml": {
+                      "name": "placesItems_body"
+                    }
+                  }
+                }
+              },
+              "xml": {
+                "name": "body"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "status": {
+                  "type": "string",
+                  "example": "OK"
+                },
+                "info": {
+                  "type": "object",
+                  "properties": {
+                    "fieldName": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "messageDetails": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "errorCode": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  },
+                  "xml": {
+                    "name": "info"
+                  }
+                },
+                "result": {
+                  "type": "object",
+                  "properties": {
+                    "Success": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "Message": {
+                      "type": "string"
+                    },
+                    "Tariff": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 29.51
+                    },
+                    "Currency": {
+                      "type": "string",
+                      "example": "978"
+                    },
+                    "CurrencyName": {
+                      "type": "string",
+                      "example": "EUR"
+                    },
+                    "PriceSource": {
+                      "type": "string"
+                    },
+                    "Formula": {
+                      "type": "string"
+                    },
+                    "CountryGUID": {
+                      "type": "string",
+                      "example": "c35b60ba-4ea3-11de-8591-001d600938f8"
+                    },
+                    "CountryCode": {
+                      "type": "integer",
+                      "format": "int32",
+                      "example": 0
+                    },
+                    "CountryName": {
+                      "type": "string"
+                    },
+                    "CityGUID": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "CityCode": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "CityName": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "AgentGUID": {
+                      "type": "string",
+                      "example": "6f804266-11e4-11eb-80cd-000c29800ae7"
+                    },
+                    "AgentCode": {
+                      "type": "string",
+                      "example": "MG-025632"
+                    },
+                    "AgentName": {
+                      "type": "string"
+                    },
+                    "ContractGUID": {
+                      "type": "string",
+                      "example": "7e7a1d58-11e4-11eb-80cd-000c29800ae7"
+                    },
+                    "ContractCode": {
+                      "type": "string",
+                      "example": "ZPS32593  "
+                    },
+                    "ContractName": {
+                      "type": "string"
+                    },
+                    "ServiceType": {
+                      "type": "string",
+                      "example": "DOOR"
+                    },
+                    "ServiceTypeName": {
+                      "type": "string"
+                    },
+                    "PlacesCount": {
+                      "type": "integer",
+                      "format": "int32",
+                      "example": 1
+                    },
+                    "InputWeight": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 5
+                    },
+                    "InputVolumeCm": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 125
+                    },
+                    "InputVolumeM3": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 0.000125
+                    },
+                    "InputLengthCm": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 5
+                    },
+                    "InputWidthCm": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 5
+                    },
+                    "InputHeightCm": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 5
+                    },
+                    "VolumeCalculatedByDimensions": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "VolumeWeight": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 0
+                    },
+                    "CalculatedWeight": {
+                      "type": "number",
+                      "format": "float",
+                      "example": 5
+                    },
+                    "UsedVolumeWeight": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "IOSS": {
+                      "type": "string"
+                    },
+                    "CalculationDate": {
+                      "type": "string",
+                      "format": "date-time",
+                      "example": "2026-07-09T16:26:06"
+                    },
+                    "CalculationDateFormatted": {
+                      "type": "string",
+                      "example": "20260709162606"
+                    },
+                    "PriceDependsOnCity": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "UsedCityTariff": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "UsedAgentTariff": {
+                      "type": "boolean",
+                      "example": false
+                    },
+                    "UsedDefaultTariff": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "RegionGUID": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "RegionName": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "ZoneGUID": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "ZoneName": {
+                      "type": "string",
+                      "example": ""
+                    },
+                    "UsedZoneTariff": {
+                      "type": "boolean",
+                      "example": false
+                    }
+                  },
+                  "xml": {
+                    "name": "result"
+                  }
+                }
+              },
+              "xml": {
+                "name": "body"
               }
             }
           }

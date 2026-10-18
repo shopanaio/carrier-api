@@ -22,8 +22,15 @@ describe('authentication', () => {
 
   it('accepts refreshToken as the field name too, and rejects a response without tokens', async () => {
     const noWait = makeContract();
-    const mock = mockTransport(BASE, call => (call.path === '/auth' ? ok({ token: 't', refreshToken: 'r', expiresIn: 60 }) : ok([])));
-    const camel = createMeestContractClient({ username: 'u', password: 'p', transport: mock.transport, clock: noWait.clock });
+    const mock = mockTransport(BASE, call =>
+      call.path === '/auth' ? ok({ token: 't', refreshToken: 'r', expiresIn: 60 }) : ok([]),
+    );
+    const camel = createMeestContractClient({
+      username: 'u',
+      password: 'p',
+      transport: mock.transport,
+      clock: noWait.clock,
+    });
     expect(await camel.auth.login()).toMatchObject({ refreshToken: 'r' });
     const empty = mockTransport(BASE, () => ok({}));
     const bad = createMeestContractClient({ username: 'u', password: 'p', transport: empty.transport });
@@ -52,7 +59,9 @@ describe('authentication', () => {
 
   it('refreshes after a 401 and falls back to a full login when the refresh token is rejected', async () => {
     let reject = 0;
-    const { client, tokenCalls, apiCalls } = makeContract({ handler: () => (reject-- > 0 ? fail(401, 'token', 'expired') : ok([{ conditionID: 'c' }])) });
+    const { client, tokenCalls, apiCalls } = makeContract({
+      handler: () => (reject-- > 0 ? fail(401, 'token', 'expired') : ok([{ conditionID: 'c' }])),
+    });
     reject = 1;
     await client.pricing.specConditions();
     expect(tokenCalls('/refreshToken')).toHaveLength(1);
@@ -70,7 +79,14 @@ describe('authentication', () => {
     const store = new InMemoryTokenStore();
     const a = makeContract({ client: { tokenStore: store } });
     await a.client.pricing.specConditions();
-    const second = createMeestContractClient({ username: 'user', password: 'pass', transport: a.transport, tokenStore: store, clock: a.clock, sleep: a.clock.sleep });
+    const second = createMeestContractClient({
+      username: 'user',
+      password: 'pass',
+      transport: a.transport,
+      tokenStore: store,
+      clock: a.clock,
+      sleep: a.clock.sleep,
+    });
     await second.pricing.specConditions();
     expect(a.tokenCalls('/auth')).toHaveLength(1);
   });
@@ -103,11 +119,19 @@ describe('requests', () => {
 
   it('pricing', async () => {
     const { client, apiCalls } = makeContract({ handler: () => ok([{ costServices: '100.00' }]) });
-    const body = { sender: { branchID: 'a', cityID: 'c', service: 'Branch' }, receiver: { branchID: 'b', cityID: 'c', service: 'Branch' }, placesItems: [{ quantity: 1, weight: 2 }] };
+    const body = {
+      sender: { branchID: 'a', cityID: 'c', service: 'Branch' },
+      receiver: { branchID: 'b', cityID: 'c', service: 'Branch' },
+      placesItems: [{ quantity: 1, weight: 2 }],
+    };
     expect(await client.pricing.calculate(body)).toEqual([{ costServices: '100.00' }]);
     await client.pricing.specConditions();
     await client.pricing.orderDateInfo('street-1');
-    expect(apiCalls().map(c => `${c.method} ${c.path}`)).toEqual(['POST /calculate', 'GET /specConditions', 'GET /orderDateInfo/street-1']);
+    expect(apiCalls().map(c => `${c.method} ${c.path}`)).toEqual([
+      'POST /calculate',
+      'GET /specConditions',
+      'GET /orderDateInfo/street-1',
+    ]);
     expect(apiCalls()[0]!.body).toEqual(body);
   });
 
@@ -162,7 +186,8 @@ describe('requests', () => {
     const page = (n: number) => Array.from({ length: n }, (_, i) => ({ parcelNumber: `P${i}` }));
     const { client, apiCalls } = makeContract({ handler: call => ok(call.path.endsWith('/1') ? page(150) : page(3)) });
     const seen: string[] = [];
-    for await (const item of client.tracking.iterateDelivered('2026-01-01 00:00:00', '2026-01-02 00:00:00')) seen.push(item.parcelNumber!);
+    for await (const item of client.tracking.iterateDelivered('2026-01-01 00:00:00', '2026-01-02 00:00:00'))
+      seen.push(item.parcelNumber!);
     expect(seen).toHaveLength(153);
     expect(apiCalls()).toHaveLength(2);
   });
@@ -176,7 +201,7 @@ describe('requests', () => {
     await client.registers.updatePickup('r2', {} as never);
     await client.registers.deletePickup('r2');
     await client.registers.list('01.01.2026');
-    await client.registers.availableTimeSlots('street-1');
+    await client.registers.availableTimeSlots({ type: 'PickUp', streetId: 'street-1' });
     await client.misc.returnParcel({ parcelID: 'p1', reasonID: 'x' });
     await client.misc.returnReasons();
     await client.misc.contractInfo('k1');
@@ -199,36 +224,108 @@ describe('requests', () => {
       'POST /contract_validation_check',
       'GET /banners',
     ]);
-    expect(apiCalls()[7]!.query).toEqual({ streetID: 'street-1', type: 'pickup' });
+    expect(apiCalls()[7]!.query).toEqual({ streetID: 'street-1', type: 'PickUp' });
   });
 });
 
 describe('print', () => {
   const pdf = { contentType: 'application/pdf', data: new Uint8Array([0x25, 0x50, 0x44, 0x46]) };
-  const handler = (call: { responseType?: string }) => ({ data: call.responseType === 'binary' ? pdf : call.responseType === 'text' ? '<html></html>' : [] });
+  const handler = (call: { responseType?: string }) => ({
+    data: call.responseType === 'binary' ? pdf : call.responseType === 'text' ? '<html></html>' : [],
+  });
 
-  it('asks for binary PDF and text HTML, joins ids and passes sticker options', async () => {
+  it('uses the current form routes with the phone number and the right response type', async () => {
     const { client, apiCalls } = makeContract({ handler });
-    expect(await client.print.declaration('p1', 'pdf')).toEqual(pdf);
-    expect(await client.print.cn23(['p1', 'p2'], 'html')).toBe('<html></html>');
+    expect(await client.print.declaration('p1', '+380671234567', 'pdf')).toEqual(pdf);
+    expect(await client.print.declaration(['p1', 'p2'], '+380671234567', 'html')).toBe('<html></html>');
+    expect(await client.print.cn23('p1', '+380671234567')).toEqual(pdf);
     await client.print.register('p1', 'pdf');
+    await client.print.register('p1', 'html');
+    expect(apiCalls().map(c => `${c.method} ${c.path} ${c.responseType}`)).toEqual([
+      'GET /print/declarationForm/p1/%2B380671234567/pdf binary',
+      // Commas between ids stay literal on the wire (no %2C).
+      'GET /print/declarationForm/p1,p2/%2B380671234567/html text',
+      'GET /print/cn23Form/p1/%2B380671234567 binary',
+      'GET /print/register/p1/pdf binary',
+      'GET /print/register/p1/html text',
+    ]);
+  });
+
+  it('requires a phone for the form endpoints', () => {
+    const { client } = makeContract({ handler });
+    expect(() => client.print.declaration('p1', '', 'pdf')).toThrow(TypeError);
+    expect(() => client.print.cn23('p1', '')).toThrow(TypeError);
+  });
+
+  it('prints stickers with agent, page and position', async () => {
+    const { client, apiCalls } = makeContract({ handler });
     await client.print.sticker100(['711-1', '711-2'], { agent: 'k1', page: 1 });
     await client.print.sticker100A4('p1');
     await client.print.sticker100A4('p1', { position: 3 });
-    // Commas between ids stay literal on the wire (no %2C).
-    expect(apiCalls()[1]!.path).toBe('/print/cn23/p1,p2/html');
-    expect(apiCalls()[3]!.path).toBe('/print/sticker100/711-1,711-2');
-    expect(apiCalls().map(c => `${c.method} ${decodeURIComponent(c.path)} ${c.responseType}`)).toEqual([
-      'GET /print/declaration/p1/pdf binary',
-      'GET /print/cn23/p1,p2/html text',
-      'GET /print/register/p1/pdf binary',
+    expect(apiCalls().map(c => `${c.method} ${c.path} ${c.responseType}`)).toEqual([
       'GET /print/sticker100/711-1,711-2 binary',
       'GET /print/sticker100A4/p1 binary',
       'GET /print/sticker100A4/p1 binary',
     ]);
-    expect(apiCalls()[3]!.query).toEqual({ agent: 'k1', page: 1 });
-    expect(apiCalls()[4]!.query).toEqual({ position: 1 });
-    expect(apiCalls()[5]!.query).toEqual({ position: 3 });
+    expect(apiCalls()[0]!.query).toEqual({ agent: 'k1', page: 1 });
+    expect(apiCalls()[1]!.query).toEqual({ position: 1 });
+    expect(apiCalls()[2]!.query).toEqual({ position: 3 });
+  });
+});
+
+describe('courier slots and newer operations', () => {
+  it('queries slots by street or by city with the documented type values', async () => {
+    const { client, apiCalls } = makeContract({
+      handler: () => ok({ zone: 'Z', availableTimeSlots: [], availableDates: [] }),
+    });
+    await client.registers.availableTimeSlots({ type: 'PickUp', streetId: 's1' });
+    await client.registers.availableTimeSlots({ type: 'Delivery', cityId: 'c1' });
+    expect(apiCalls().map(c => c.query)).toEqual([
+      { streetID: 's1', type: 'PickUp' },
+      { cityID: 'c1', type: 'Delivery' },
+    ]);
+    expect(() => client.registers.availableTimeSlots({ type: 'PickUp' })).toThrow(TypeError);
+  });
+
+  it('changes a parcel as the sender and calculates export B2C prices', async () => {
+    const { client, apiCalls } = makeContract({ handler: () => ok({ Success: true }) });
+    await client.parcels.changeBySender({ parcelID: 'p1', recieverPhone: '+380671112233' });
+    await client.pricing.calculateExportB2C({
+      receiver: { countryID: 'c' },
+      placesItems: [{ quantity: 1, weight: 1 }],
+    } as never);
+    expect(apiCalls().map(c => `${c.method} ${c.path}`)).toEqual([
+      'POST /changingParcelBySender',
+      'POST /calculateExportB2C',
+    ]);
+    expect(apiCalls()[0]!.body).toEqual({ parcelID: 'p1', recieverPhone: '+380671112233' });
+  });
+});
+
+describe('per-call abort signal', () => {
+  it('reaches the transport from every kind of method', async () => {
+    const { client, apiCalls } = makeContract({ handler: () => ok([]) });
+    const controller = new AbortController();
+    const { signal } = controller;
+    await client.search.branchTypes({ signal });
+    await client.search.cities({}, { signal });
+    await client.parcels.get('p1', 'parcelID', 'objectData', { signal });
+    await client.pricing.calculate({} as never, { signal });
+    await client.tracking.byNumber('711-1', { signal });
+    await client.registers.list('01.01.2026', { signal });
+    await client.misc.banners({ signal });
+    await client.print.sticker100('p1', { signal });
+    await client.print.register('p1', 'pdf', { signal });
+    expect(apiCalls().every(c => c.signal === signal)).toBe(true);
+    expect(apiCalls()).toHaveLength(9);
+  });
+
+  it('passes the signal to the login request', async () => {
+    const mock = mockTransport(BASE, () => ok({ token: 't', refresh_token: 'r', expiresIn: 60 }));
+    const client = createMeestContractClient({ username: 'u', password: 'p', transport: mock.transport, retry: false });
+    const controller = new AbortController();
+    await client.auth.login({ signal: controller.signal });
+    expect(mock.calls[0]!.signal).toBe(controller.signal);
   });
 });
 
@@ -236,12 +333,28 @@ describe('review fixes', () => {
   it('keys cached tokens per account so a shared store never mixes them', async () => {
     const store = new InMemoryTokenStore();
     const login = (name: string, token: string) =>
-      mockTransport(BASE, call => (call.path === '/auth' ? ok({ token, refresh_token: `r-${token}`, expiresIn: 3600 }) : ok([{ seen: call.headers.token, name }])));
+      mockTransport(BASE, call =>
+        call.path === '/auth'
+          ? ok({ token, refresh_token: `r-${token}`, expiresIn: 3600 })
+          : ok([{ seen: call.headers.token, name }]),
+      );
     const ta = login('alice', 'token-alice');
     const tb = login('bob', 'token-bob');
     const clock = new FakeClock();
-    const alice = createMeestContractClient({ username: 'alice', password: 'x', transport: ta.transport, tokenStore: store, clock });
-    const bob = createMeestContractClient({ username: 'bob', password: 'x', transport: tb.transport, tokenStore: store, clock });
+    const alice = createMeestContractClient({
+      username: 'alice',
+      password: 'x',
+      transport: ta.transport,
+      tokenStore: store,
+      clock,
+    });
+    const bob = createMeestContractClient({
+      username: 'bob',
+      password: 'x',
+      transport: tb.transport,
+      tokenStore: store,
+      clock,
+    });
     expect(await alice.pricing.specConditions()).toEqual([{ seen: 'token-alice', name: 'alice' }]);
     expect(await bob.pricing.specConditions()).toEqual([{ seen: 'token-bob', name: 'bob' }]);
     expect(tb.callsTo('POST', '/auth')).toHaveLength(1);
@@ -249,15 +362,28 @@ describe('review fixes', () => {
 
   it('applies the timeout to login and refresh too', async () => {
     const hang = mockTransport(BASE, () => new Promise(() => {}));
-    const client = createMeestContractClient({ username: 'u', password: 'p', transport: hang.transport, loginTimeoutMs: 20, retry: false });
+    const client = createMeestContractClient({
+      username: 'u',
+      password: 'p',
+      transport: hang.transport,
+      loginTimeoutMs: 20,
+      retry: false,
+    });
     const error = await rejection(client.pricing.specConditions());
     expect(error).toMatchObject({ retryable: true });
     expect(hang.calls[0]!.path).toBe('/auth');
   });
 
   it('classifies a complaint about the token inside a 200 body as an authentication error', async () => {
-    const { client } = makeContract({ handler: () => ({ data: { status: 'Error', info: { fieldName: 'token', message: 'Invalid token' }, result: null } }) });
-    expect(await rejection(client.pricing.specConditions())).toMatchObject({ category: CarrierErrorCategory.Authentication, field: 'token' });
+    const { client } = makeContract({
+      handler: () => ({
+        data: { status: 'Error', info: { fieldName: 'token', message: 'Invalid token' }, result: null },
+      }),
+    });
+    expect(await rejection(client.pricing.specConditions())).toMatchObject({
+      category: CarrierErrorCategory.Authentication,
+      field: 'token',
+    });
   });
 
   it('rejects a tracking window longer than two hours before sending anything', async () => {
@@ -279,14 +405,30 @@ describe('review fixes', () => {
 describe('errors', () => {
   it('maps HTTP status and info.fieldName to a CarrierError', async () => {
     const { client } = makeContract({ handler: () => fail(404, 'parcelID', 'Parcel not found') });
-    expect(await rejection(client.parcels.get('x'))).toMatchObject({ code: '404:parcelID', field: 'parcelID', category: CarrierErrorCategory.NotFound, message: 'Parcel not found' });
+    expect(await rejection(client.parcels.get('x'))).toMatchObject({
+      code: '404:parcelID',
+      field: 'parcelID',
+      category: CarrierErrorCategory.NotFound,
+      message: 'Parcel not found',
+    });
   });
 
   it('maps an Error envelope inside a 200 body, flat or nested', async () => {
-    const flat = makeContract({ handler: () => ({ data: { status: 'Error', fieldName: 'x', message: 'Flat', result: null } }) });
-    expect(await rejection(flat.client.pricing.specConditions())).toMatchObject({ message: 'Flat', field: 'x', category: CarrierErrorCategory.Validation });
-    const nested = makeContract({ handler: () => ({ data: { status: 'Error', info: { message: 'Nested' }, result: null } }) });
-    expect(await rejection(nested.client.pricing.specConditions())).toMatchObject({ message: 'Nested', category: CarrierErrorCategory.BusinessLogic });
+    const flat = makeContract({
+      handler: () => ({ data: { status: 'Error', fieldName: 'x', message: 'Flat', result: null } }),
+    });
+    expect(await rejection(flat.client.pricing.specConditions())).toMatchObject({
+      message: 'Flat',
+      field: 'x',
+      category: CarrierErrorCategory.Validation,
+    });
+    const nested = makeContract({
+      handler: () => ({ data: { status: 'Error', info: { message: 'Nested' }, result: null } }),
+    });
+    expect(await rejection(nested.client.pricing.specConditions())).toMatchObject({
+      message: 'Nested',
+      category: CarrierErrorCategory.BusinessLogic,
+    });
   });
 
   it('treats a lowercase "ok" status as success and a bare array as a payload', async () => {
@@ -301,7 +443,12 @@ describe('resilience', () => {
   it('retries a GET after a 503 and honours Retry-After on a 429', async () => {
     let n = 0;
     const { client, apiCalls, clock } = makeContract({
-      handler: () => (n++ === 0 ? { status: 503, data: 'x' } : n === 2 ? { status: 429, headers: { 'retry-after': '2' }, data: 'x' } : ok([{ ok: true }])),
+      handler: () =>
+        n++ === 0
+          ? { status: 503, data: 'x' }
+          : n === 2
+            ? { status: 429, headers: { 'retry-after': '2' }, data: 'x' }
+            : ok([{ ok: true }]),
     });
     const t0 = clock.now();
     expect(await client.pricing.specConditions()).toEqual([{ ok: true }]);
@@ -310,13 +457,23 @@ describe('resilience', () => {
   });
 
   it('gives up with a retryable rate_limit error when 429 persists', async () => {
-    const { client } = makeContract({ handler: () => ({ status: 429, data: 'slow down' }), client: { retry: { maxRetries: 1, baseDelayMs: 1, jitter: 'none', sleep: async () => {} } } });
-    expect(await rejection(client.search.branchTypes())).toMatchObject({ category: CarrierErrorCategory.RateLimit, retryable: true, httpStatus: 429 });
+    const { client } = makeContract({
+      handler: () => ({ status: 429, data: 'slow down' }),
+      client: { retry: { maxRetries: 1, baseDelayMs: 1, jitter: 'none', sleep: async () => {} } },
+    });
+    expect(await rejection(client.search.branchTypes())).toMatchObject({
+      category: CarrierErrorCategory.RateLimit,
+      retryable: true,
+      httpStatus: 429,
+    });
   });
 
   it('does not repeat parcel creation after a 5xx', async () => {
     const { client, apiCalls } = makeContract({ handler: () => ({ status: 503, data: 'down' }) });
-    expect(await rejection(client.parcels.create({ parcelNumber: 'T' } as never))).toMatchObject({ category: CarrierErrorCategory.Server, httpStatus: 503 });
+    expect(await rejection(client.parcels.create({ parcelNumber: 'T' } as never))).toMatchObject({
+      category: CarrierErrorCategory.Server,
+      httpStatus: 503,
+    });
     expect(apiCalls()).toHaveLength(1);
   });
 

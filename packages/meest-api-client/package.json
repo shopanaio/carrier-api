@@ -17,7 +17,7 @@
     "test": "jest --passWithNoTests",
     "test:coverage": "jest --coverage --passWithNoTests",
     "test:e2e": "jest -c jest.e2e.config.js",
-    "generate:types": "node scripts/generate-types.js"
+    "generate:types": "node scripts/generate-types.js && prettier --write src/contract/types/generated.ts"
   },
   "keywords": [
     "meest",

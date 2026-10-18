@@ -1,20 +1,20 @@
 // code and comments in English
 import type { AuthResult } from '../types/generated';
 import { ContractService } from './base';
-import type { MeestTokens } from './base';
+import type { MeestTokens, RequestOptions } from './base';
 
 /** Explicit access to the token endpoints. The client logs in and refreshes on its own; use this to test credentials. */
 export class AuthService extends ContractService {
   readonly namespace = 'auth' as const;
 
   /** `POST /auth` with the configured login and password. */
-  login(): Promise<MeestTokens> {
-    return this.ctx.config.auth.login();
+  login(options?: RequestOptions): Promise<MeestTokens> {
+    return this.ctx.config.auth.login(options?.signal);
   }
 
   /** `POST /refreshToken`. */
-  refresh(refreshToken: string): Promise<MeestTokens> {
-    return this.ctx.config.auth.refresh(refreshToken);
+  refresh(refreshToken: string, options?: RequestOptions): Promise<MeestTokens> {
+    return this.ctx.config.auth.refresh(refreshToken, options?.signal);
   }
 }
 

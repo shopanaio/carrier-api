@@ -8,6 +8,7 @@ export interface Call {
   headers: Record<string, string>;
   body: unknown;
   responseType?: string;
+  signal?: AbortSignal;
 }
 
 export type Reply = Partial<HttpResponse<unknown>> & { data?: unknown };
@@ -24,12 +25,17 @@ export function mockTransport(baseUrl: string, handler: Handler) {
       headers: Object.fromEntries(Object.entries(request.headers ?? {}).map(([k, v]) => [k.toLowerCase(), v])),
       body: request.body && 'value' in request.body ? request.body.value : undefined,
       ...(request.responseType ? { responseType: request.responseType } : {}),
+      ...(request.signal ? { signal: request.signal } : {}),
     };
     calls.push(call);
     const reply = await handler(call, calls.length - 1);
     return { status: 200, headers: {}, data: null, ...reply } as HttpResponse<T>;
   };
-  return { transport, calls, callsTo: (method: string, path: string) => calls.filter(c => c.method === method && c.path === path) };
+  return {
+    transport,
+    calls,
+    callsTo: (method: string, path: string) => calls.filter(c => c.method === method && c.path === path),
+  };
 }
 
 export const noWait = async () => {};

@@ -73,9 +73,9 @@ function renderOperation(operation) {
     section.push(`// ${collapseWhitespace(operation.description)}`);
   }
 
-  const bodyParam = operation.parameters.find((param) => param.in === 'body');
-  const queryParams = operation.parameters.filter((param) => param.in === 'query');
-  const pathParams = operation.parameters.filter((param) => param.in === 'path');
+  const bodyParam = operation.parameters.find(param => param.in === 'body');
+  const queryParams = operation.parameters.filter(param => param.in === 'query');
+  const pathParams = operation.parameters.filter(param => param.in === 'path');
 
   if (bodyParam && bodyParam.schema) {
     section.push(renderTypeAlias(`${baseName}RequestBody`, bodyParam.schema, bodyParam.description));
@@ -106,17 +106,19 @@ function renderOperation(operation) {
     requestInterface.push(`  path: ${baseName}PathParams;`);
   }
   if (queryParams.length > 0) {
-    const hasRequired = queryParams.some((param) => param.required);
+    const hasRequired = queryParams.some(param => param.required);
     requestInterface.push(`  query${hasRequired ? '' : '?'}: ${baseName}QueryParams;`);
   }
   if (bodyParam && bodyParam.schema) {
     requestInterface.push(`  body${bodyParam.required ? '' : '?'}: ${baseName}RequestBody;`);
   }
   if (requestInterface.length === 1) {
-    requestInterface.push('  // no parameters');
+    // An empty interface would accept any value; an operation without parameters takes an empty object.
+    section.push(`export type ${baseName}Request = Record<string, never>;`);
+  } else {
+    requestInterface.push('}');
+    section.push(requestInterface.join('\n'));
   }
-  requestInterface.push('}');
-  section.push(requestInterface.join('\n'));
 
   section.push('');
   return section;
@@ -127,8 +129,12 @@ function renderParamsInterface(name, parameters) {
   for (const param of parameters) {
     const typeExpression = renderSchema(param, 2, `${name}${toPascal(param.name || 'Param')}`);
     const optional = !param.required;
-    const doc = collapseWhitespace(param.description) ? `${indent(2)}/** ${collapseWhitespace(param.description)} */\n` : '';
-    lines.push(`${doc}${indent(2)}${sanitizePropName(param.name || 'param')}${optional ? '?' : ''}: ${typeExpression};`);
+    const doc = collapseWhitespace(param.description)
+      ? `${indent(2)}/** ${collapseWhitespace(param.description)} */\n`
+      : '';
+    lines.push(
+      `${doc}${indent(2)}${sanitizePropName(param.name || 'param')}${optional ? '?' : ''}: ${typeExpression};`,
+    );
   }
   lines.push('}');
   return lines.join('\n');
@@ -146,7 +152,7 @@ function renderSchema(schema, level, nameHint) {
   }
 
   if (schema.enum && Array.isArray(schema.enum) && schema.enum.length > 0) {
-    return schema.enum.map((value) => asciiJson(value)).join(' | ');
+    return schema.enum.map(value => asciiJson(value)).join(' | ');
   }
 
   if (schema.allOf && Array.isArray(schema.allOf)) {
@@ -174,7 +180,10 @@ function renderSchema(schema, level, nameHint) {
         const propSchema = properties[key];
         const propType = renderSchema(propSchema, level + 1, `${nameHint}${toPascal(key)}`);
         const optional = !required.has(key);
-        const doc = propSchema && collapseWhitespace(propSchema.description) ? `${innerIndent}/** ${collapseWhitespace(propSchema.description)} */\n` : '';
+        const doc =
+          propSchema && collapseWhitespace(propSchema.description)
+            ? `${innerIndent}/** ${collapseWhitespace(propSchema.description)} */\n`
+            : '';
         lines.push(`${doc}${innerIndent}${sanitizePropName(key)}${optional ? '?' : ''}: ${propType};`);
       }
       lines.push(`${outerIndent}}`);
@@ -206,7 +215,7 @@ function toPascal(value) {
     .replace(/[^a-zA-Z0-9]+/g, ' ')
     .split(' ')
     .filter(Boolean)
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .map(part => part.charAt(0).toUpperCase() + part.slice(1))
     .join('');
 }
 
@@ -225,14 +234,16 @@ function sanitizePropName(name) {
 // The vendor's descriptions are not in English; the generated file only keeps English text, so a description
 // with other characters is dropped instead of being copied into the sources.
 function collapseWhitespace(text) {
-  const collapsed = String(text || '').replace(/\s+/g, ' ').trim();
+  const collapsed = String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim();
   return /^[\x20-\x7e]*$/.test(collapsed) ? collapsed : '';
 }
 
 // Wire names may contain look-alike non-ASCII letters (the API spells one key with a Cyrillic letter); they are
 // written as \u escapes so the source stays ASCII.
 function asciiJson(value) {
-  return JSON.stringify(value).replace(/[\u0080-\uffff]/g, (c) => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
+  return JSON.stringify(value).replace(/[\u0080-\uffff]/g, c => `\\u${c.charCodeAt(0).toString(16).padStart(4, '0')}`);
 }
 
 main();

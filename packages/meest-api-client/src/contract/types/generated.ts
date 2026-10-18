@@ -36,26 +36,24 @@ export interface RefreshTokenRequest {
 // other :: GET /banners
 /** Result payload */
 export type BannersResult = Array<{
-    url?: {
-      UA?: string;
-      EN?: string;
-      RU?: string;
-    };
-    file?: {
-      UA?: string;
-      EN?: string;
-      RU?: string;
-    };
-  }>;
+  url?: {
+    UA?: string;
+    EN?: string;
+    RU?: string;
+  };
+  file?: {
+    UA?: string;
+    EN?: string;
+    RU?: string;
+  };
+}>;
 export type BannersResponse = MeestResponse<BannersResult>;
-export interface BannersRequest {
-  // no parameters
-}
+export type BannersRequest = Record<string, never>;
 
 // other :: GET /CheckPhoneOnParcel/{barCode}/{phoneCheck}
 export interface CheckPhoneOnParcelPathParams {
-    barCode: string;
-    phoneCheck: string;
+  barCode: string;
+  phoneCheck: string;
 }
 export type CheckPhoneOnParcelResponse = MeestResponse<void>;
 export interface CheckPhoneOnParcelRequest {
@@ -64,7 +62,7 @@ export interface CheckPhoneOnParcelRequest {
 
 // other :: GET /contractClientInfo/{contractID}
 export interface ContractClientInfoPathParams {
-    contractID: string;
+  contractID: string;
 }
 export type ContractClientInfoResponse = MeestResponse<void>;
 export interface ContractClientInfoRequest {
@@ -99,16 +97,14 @@ export interface ParcelReturnNewRequest {
 // other :: GET /parcelReturnReasons
 /** Result payload */
 export type ParcelReturnReasonsResult = Array<{
-    name?: string;
-    nameUA?: string;
-    nameRU?: string;
-    nameEN?: string;
-    uuid?: string;
-  }>;
+  name?: string;
+  nameUA?: string;
+  nameRU?: string;
+  nameEN?: string;
+  uuid?: string;
+}>;
 export type ParcelReturnReasonsResponse = MeestResponse<ParcelReturnReasonsResult>;
-export interface ParcelReturnReasonsRequest {
-  // no parameters
-}
+export type ParcelReturnReasonsRequest = Record<string, never>;
 
 // parcels :: POST /calculate
 export type CalculateRequestBody = {
@@ -130,38 +126,134 @@ export type CalculateRequestBody = {
     service: string;
   };
   specConditionsItems?: Array<{
-      conditionID?: string;
-    }>;
+    conditionID?: string;
+  }>;
   placesItems?: Array<{
-      quantity: number;
-      weight: number;
-      volume?: number;
-      insurance?: number;
-      length?: number;
-      width?: number;
-      height?: number;
-      wheels?: string;
-    }>;
+    quantity: number;
+    weight: number;
+    volume?: number;
+    insurance?: number;
+    length?: number;
+    width?: number;
+    height?: number;
+    wheels?: string;
+  }>;
 };
 /** Result payload */
 export type CalculateResult = Array<{
-    costServices?: string;
-    estimatedDeliveryDate?: string;
-    possibleDeliveryDates?: Array<{
-        deliveryDate?: string;
-      }>;
+  costServices?: string;
+  estimatedDeliveryDate?: string;
+  possibleDeliveryDates?: Array<{
+    deliveryDate?: string;
   }>;
+}>;
 export type CalculateResponse = MeestResponse<CalculateResult>;
 export interface CalculateRequest {
   body?: CalculateRequestBody;
 }
 
+// parcels :: POST /calculateExportB2C
+export type CalculateExportB2CRequestBody = {
+  receiver?: {
+    service?: string;
+    countryID: string;
+    regionID?: string;
+    cityID?: string;
+  };
+  ioss?: boolean;
+  contractID?: string;
+  sendingDate?: string;
+  placesItems?: Array<{
+    quantity?: number;
+    placeWeight?: number;
+    weight?: number;
+    placeVolume?: number;
+    volume?: number;
+    insurance?: number;
+    length?: number;
+    width?: number;
+    height?: number;
+    formatID?: string;
+  }>;
+};
+/** Result payload */
+export type CalculateExportB2CResult = {
+  Success?: boolean;
+  Message?: string;
+  Tariff?: number;
+  Currency?: string;
+  CurrencyName?: string;
+  PriceSource?: string;
+  Formula?: string;
+  CountryGUID?: string;
+  CountryCode?: number;
+  CountryName?: string;
+  CityGUID?: string;
+  CityCode?: string;
+  CityName?: string;
+  AgentGUID?: string;
+  AgentCode?: string;
+  AgentName?: string;
+  ContractGUID?: string;
+  ContractCode?: string;
+  ContractName?: string;
+  ServiceType?: string;
+  ServiceTypeName?: string;
+  PlacesCount?: number;
+  InputWeight?: number;
+  InputVolumeCm?: number;
+  InputVolumeM3?: number;
+  InputLengthCm?: number;
+  InputWidthCm?: number;
+  InputHeightCm?: number;
+  VolumeCalculatedByDimensions?: boolean;
+  VolumeWeight?: number;
+  CalculatedWeight?: number;
+  UsedVolumeWeight?: boolean;
+  IOSS?: string;
+  CalculationDate?: string;
+  CalculationDateFormatted?: string;
+  PriceDependsOnCity?: boolean;
+  UsedCityTariff?: boolean;
+  UsedAgentTariff?: boolean;
+  UsedDefaultTariff?: boolean;
+  RegionGUID?: string;
+  RegionName?: string;
+  ZoneGUID?: string;
+  ZoneName?: string;
+  UsedZoneTariff?: boolean;
+};
+export type CalculateExportB2CResponse = MeestResponse<CalculateExportB2CResult>;
+export interface CalculateExportB2CRequest {
+  body?: CalculateExportB2CRequestBody;
+}
+
+// parcels :: POST /changingParcelBySender
+export type ChangingParcelBySenderRequestBody = {
+  parcelID?: string;
+  senderPhone?: string;
+  reciever?: string;
+  recieverPhone?: string;
+  COD?: number;
+  NumberCardForCOD?: string;
+};
+/** Result payload */
+export type ChangingParcelBySenderResult = {
+  Success?: boolean;
+  DocuentNumber?: string;
+  SMS_sended?: boolean;
+};
+export type ChangingParcelBySenderResponse = MeestResponse<ChangingParcelBySenderResult>;
+export interface ChangingParcelBySenderRequest {
+  body?: ChangingParcelBySenderRequestBody;
+}
+
 // parcels :: GET /getParcel/{parcelID}/{searchMode}/{returnMode}
 export interface GetParcelPathParams {
-    parcelID: string;
-    searchMode: string;
-    /** objectData printCN23 printCP71 */
-    returnMode: string;
+  parcelID: string;
+  searchMode: string;
+  /** objectData printCN23 printCP71 */
+  returnMode: string;
 }
 /** Result payload */
 export type GetParcelResult = {
@@ -199,43 +291,43 @@ export type GetParcelResult = {
     service?: string;
   };
   placesItems?: Array<{
-      quantity?: string;
-      weight?: string;
-      volume?: string;
-      insurance?: string;
-      packID?: string;
-      length?: string;
-      width?: string;
-      height?: string;
-      wheels?: string;
-      size?: string;
-    }>;
+    quantity?: string;
+    weight?: string;
+    volume?: string;
+    insurance?: string;
+    packID?: string;
+    length?: string;
+    width?: string;
+    height?: string;
+    wheels?: string;
+    size?: string;
+  }>;
   specConditionsItems?: Array<{
-      conditionID?: string;
-    }>;
+    conditionID?: string;
+  }>;
   contentsItems?: Array<{
-      contentName?: string;
-      quantity?: string;
-      weight?: string;
-      value?: string;
-      customsCode?: string;
-      country?: string;
-    }>;
+    contentName?: string;
+    quantity?: string;
+    weight?: string;
+    value?: string;
+    customsCode?: string;
+    country?: string;
+  }>;
   codPaymentItems?: Array<{
-      agentId?: string;
-      cod?: string;
-    }>;
+    agentId?: string;
+    cod?: string;
+  }>;
   goods?: Array<{
-      article?: string;
-      name?: string;
-      serialNumber?: string;
-      weight?: string;
-      quantity?: string;
-      price?: string;
-      length?: string;
-      width?: string;
-      height?: string;
-    }>;
+    article?: string;
+    name?: string;
+    serialNumber?: string;
+    weight?: string;
+    quantity?: string;
+    price?: string;
+    length?: string;
+    width?: string;
+    height?: string;
+  }>;
   deliveryOptions?: {
     minAmountGoods?: string;
     amountDeliveryShortageGoods?: string;
@@ -269,13 +361,13 @@ export interface LockParcelRequest {
 
 // parcels :: GET /orderDateInfo/{streetID}
 export interface OrderDateInfoPathParams {
-    streetID: string;
+  streetID: string;
 }
 /** Result payload */
 export type OrderDateInfoResult = Array<{
-    date?: string;
-    isAvailable?: boolean;
-  }>;
+  date?: string;
+  isAvailable?: boolean;
+}>;
 export type OrderDateInfoResponse = MeestResponse<OrderDateInfoResult>;
 export interface OrderDateInfoRequest {
   path: OrderDateInfoPathParams;
@@ -351,50 +443,50 @@ export type ParcelRequestBody = {
     branchIdExternal?: string;
   };
   placesItems?: Array<{
-      quantity: number;
-      placeWeight: number;
-      weight?: number;
-      placeVolume: number;
-      volume?: number;
-      insurance?: number;
-      length?: number;
-      width?: number;
-      height?: number;
-      pallet?: boolean;
-      wheels?: string;
-      size?: string;
-      formatID?: string;
-    }>;
+    quantity: number;
+    placeWeight: number;
+    weight?: number;
+    placeVolume: number;
+    volume?: number;
+    insurance?: number;
+    length?: number;
+    width?: number;
+    height?: number;
+    pallet?: boolean;
+    wheels?: string;
+    size?: string;
+    formatID?: string;
+  }>;
   specConditionsItems?: Array<{
-      conditionID?: string;
-    }>;
+    conditionID?: string;
+  }>;
   contentsItems?: Array<{
-      contentName: string;
-      quantity: number;
-      weight: number;
-      value: number;
-      customsCode?: string;
-      country?: string;
-      size?: string;
-      ean13?: string;
-      gender?: string;
-      valueReceiverCurrency?: string;
-    }>;
+    contentName: string;
+    quantity: number;
+    weight: number;
+    value: number;
+    customsCode?: string;
+    country?: string;
+    size?: string;
+    ean13?: string;
+    gender?: string;
+    valueReceiverCurrency?: string;
+  }>;
   codPaymentsItems?: Array<{
-      agentId: string;
-      cod: number;
-    }>;
+    agentId: string;
+    cod: number;
+  }>;
   goods?: Array<{
-      article: string;
-      name: string;
-      serialNumber?: string;
-      weight: number;
-      quantity: number;
-      price: number;
-      length?: number;
-      width?: number;
-      height?: number;
-    }>;
+    article: string;
+    name: string;
+    serialNumber?: string;
+    weight: number;
+    quantity: number;
+    price: number;
+    length?: number;
+    width?: number;
+    height?: number;
+  }>;
   deliveryOptions?: {
     minAmountGoods?: number;
     amountDeliveryShortageGoods?: number;
@@ -459,7 +551,7 @@ export type ParcelChangeContractIDRequestBody = {
   receiverPay?: string;
 };
 export interface ParcelChangeContractIDQueryParams {
-    barCode: string;
+  barCode: string;
 }
 /** Result payload */
 export type ParcelChangeContractIDResult = Record<string, unknown>;
@@ -472,8 +564,8 @@ export interface ParcelChangeContractIDRequest {
 // parcels :: DELETE /parcel/{parcelID}/{contractID}
 export type ParcelDeleteRequestBody = unknown;
 export interface ParcelDeletePathParams {
-    parcelID: string;
-    contractID?: string;
+  parcelID: string;
+  contractID?: string;
 }
 /** Result payload */
 export type ParcelDeleteResult = Record<string, unknown>;
@@ -552,49 +644,49 @@ export type ParcelPutRequestBody = {
     branchIdExternal?: string;
   };
   placesItems?: Array<{
-      quantity: number;
-      weight: number;
-      volume?: number;
-      insurance?: number;
-      packID?: string;
-      length?: number;
-      width?: number;
-      height?: number;
-      pallet?: boolean;
-      wheels?: string;
-      size?: string;
-      formatID?: string;
-    }>;
+    quantity: number;
+    weight: number;
+    volume?: number;
+    insurance?: number;
+    packID?: string;
+    length?: number;
+    width?: number;
+    height?: number;
+    pallet?: boolean;
+    wheels?: string;
+    size?: string;
+    formatID?: string;
+  }>;
   specConditionsItems?: Array<{
-      conditionID?: string;
-    }>;
+    conditionID?: string;
+  }>;
   contentsItems?: Array<{
-      contentName: string;
-      quantity: number;
-      weight: number;
-      value: number;
-      customsCode?: string;
-      country?: string;
-      size?: string;
-      ean13?: string;
-      gender?: string;
-      valueReceiverCurrency?: string;
-    }>;
+    contentName: string;
+    quantity: number;
+    weight: number;
+    value: number;
+    customsCode?: string;
+    country?: string;
+    size?: string;
+    ean13?: string;
+    gender?: string;
+    valueReceiverCurrency?: string;
+  }>;
   codPaymentsItems?: Array<{
-      agentId: string;
-      cod: number;
-    }>;
+    agentId: string;
+    cod: number;
+  }>;
   goods?: Array<{
-      article: string;
-      name: string;
-      serialNumber?: string;
-      weight: number;
-      quantity: number;
-      price: number;
-      length?: number;
-      width?: number;
-      height?: number;
-    }>;
+    article: string;
+    name: string;
+    serialNumber?: string;
+    weight: number;
+    quantity: number;
+    price: number;
+    length?: number;
+    width?: number;
+    height?: number;
+  }>;
   deliveryOptions?: {
     minAmountGoods?: number;
     amountDeliveryShortageGoods?: number;
@@ -606,7 +698,7 @@ export type ParcelPutRequestBody = {
   };
 };
 export interface ParcelPutPathParams {
-    parcelID: string;
+  parcelID: string;
 }
 /** Result payload */
 export type ParcelPutResult = {
@@ -623,16 +715,16 @@ export interface ParcelPutRequest {
 
 // parcels :: GET /parcelsList/{dateFrom}
 export interface ParcelsListPathParams {
-    dateFrom: string;
+  dateFrom: string;
 }
 /** Result payload */
 export type ParcelsListResult = Array<{
-    parcelID?: string;
-    parcelNumber?: string;
-    "\u0432arCode"?: string;
-    registerID?: string;
-    registerType?: string;
-  }>;
+  parcelID?: string;
+  parcelNumber?: string;
+  '\u0432arCode'?: string;
+  registerID?: string;
+  registerType?: string;
+}>;
 export type ParcelsListResponse = MeestResponse<ParcelsListResult>;
 export interface ParcelsListRequest {
   path: ParcelsListPathParams;
@@ -640,14 +732,14 @@ export interface ParcelsListRequest {
 
 // parcels :: GET /parcelStatus/{parcelID}
 export interface ParcelStatusPathParams {
-    parcelID: string;
+  parcelID: string;
 }
 /** Result payload */
 export type ParcelStatusResult = Array<{
-    status?: string;
-    statusCode?: string;
-    date?: string;
-  }>;
+  status?: string;
+  statusCode?: string;
+  date?: string;
+}>;
 export type ParcelStatusResponse = MeestResponse<ParcelStatusResult>;
 export interface ParcelStatusRequest {
   path: ParcelStatusPathParams;
@@ -655,7 +747,7 @@ export interface ParcelStatusRequest {
 
 // parcels :: GET /parcelStatusDetails/{parcelID}
 export interface ParcelStatusDetailsPathParams {
-    parcelID: string;
+  parcelID: string;
 }
 /** Result payload */
 export type ParcelStatusDetailsResult = {
@@ -681,17 +773,15 @@ export interface ParcelStatusDetailsRequest {
 // parcels :: GET /specConditions
 /** Result payload */
 export type SpecConditionsResult = Array<{
-    conditionID?: string;
-    conditionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  conditionID?: string;
+  conditionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type SpecConditionsResponse = MeestResponse<SpecConditionsResult>;
-export interface SpecConditionsRequest {
-  // no parameters
-}
+export type SpecConditionsRequest = Record<string, never>;
 
 // parcels :: POST /UnlockParcel
 export type UnlockParcelRequestBody = {
@@ -708,34 +798,35 @@ export interface UnlockParcelRequest {
   body?: UnlockParcelRequestBody;
 }
 
-// print :: GET /print/cn23/{printValue}/{contentType}
-export interface Cn23PathParams {
-    printValue: string;
-    contentType: string;
+// print :: GET /print/cn23Form/{printValue}/{phone}
+export interface Cn23FormPathParams {
+  printValue: string;
+  phone: string;
 }
 /** Result payload */
-export type Cn23Result = unknown;
-export type Cn23Response = MeestResponse<Cn23Result>;
-export interface Cn23Request {
-  path: Cn23PathParams;
+export type Cn23FormResult = unknown;
+export type Cn23FormResponse = MeestResponse<Cn23FormResult>;
+export interface Cn23FormRequest {
+  path: Cn23FormPathParams;
 }
 
-// print :: GET /print/declaration/{printValue}/{contentType}
-export interface DeclarationPathParams {
-    printValue: string;
-    contentType: string;
+// print :: GET /print/declarationForm/{printValue}/{phone}/{contentType}
+export interface DeclarationFormPathParams {
+  printValue: string;
+  phone: string;
+  contentType: string;
 }
 /** Result payload */
-export type DeclarationResult = unknown;
-export type DeclarationResponse = MeestResponse<DeclarationResult>;
-export interface DeclarationRequest {
-  path: DeclarationPathParams;
+export type DeclarationFormResult = unknown;
+export type DeclarationFormResponse = MeestResponse<DeclarationFormResult>;
+export interface DeclarationFormRequest {
+  path: DeclarationFormPathParams;
 }
 
 // print :: GET /print/register/{printValue}/{contentType}
 export interface RegisterPathParams {
-    printValue: string;
-    contentType: string;
+  printValue: string;
+  contentType: string;
 }
 /** Result payload */
 export type RegisterResult = unknown;
@@ -746,11 +837,11 @@ export interface RegisterRequest {
 
 // print :: GET /print/sticker100/{printValue}
 export interface Sticker100QueryParams {
-    agent?: string;
-    page?: number;
+  agent?: string;
+  page?: number;
 }
 export interface Sticker100PathParams {
-    printValue: string;
+  printValue: string;
 }
 /** Result payload */
 export type Sticker100Result = unknown;
@@ -762,10 +853,10 @@ export interface Sticker100Request {
 
 // print :: GET /print/sticker100A4/{printValue}
 export interface Sticker100A4QueryParams {
-    position: string;
+  position: string;
 }
 export interface Sticker100A4PathParams {
-    printValue: string;
+  printValue: string;
 }
 /** Result payload */
 export type Sticker100A4Result = unknown;
@@ -777,23 +868,24 @@ export interface Sticker100A4Request {
 
 // registers :: GET /availableTimeSlots
 export interface AvailableTimeSlotsQueryParams {
-    streetID: string;
-    type: string;
+  cityID?: string;
+  streetID?: string;
+  type: string;
 }
 /** Result payload */
 export type AvailableTimeSlotsResult = {
   zone?: string;
   availableTimeSlots?: Array<{
-      ID?: string;
-      type?: string;
-      timeFrom?: string;
-      timeTo?: string;
-      availableToday?: boolean;
-    }>;
+    ID?: string;
+    type?: string;
+    timeFrom?: string;
+    timeTo?: string;
+    availableToday?: boolean;
+  }>;
   availableDates?: Array<{
-      date?: string;
-      isAvailable?: boolean;
-    }>;
+    date?: string;
+    isAvailable?: boolean;
+  }>;
 };
 export type AvailableTimeSlotsResponse = MeestResponse<AvailableTimeSlotsResult>;
 export interface AvailableTimeSlotsRequest {
@@ -805,8 +897,8 @@ export type RegisterBranchRequestBody = {
   notation?: string;
   contractID?: string;
   parcelsItems?: Array<{
-      parcelID: string;
-    }>;
+    parcelID: string;
+  }>;
 };
 /** Result payload */
 export type RegisterBranchResult = {
@@ -822,7 +914,7 @@ export interface RegisterBranchRequest {
 // registers :: DELETE /registerBranch/{registerID}
 export type RegisterBranchDeleteRequestBody = unknown;
 export interface RegisterBranchDeletePathParams {
-    registerID: string;
+  registerID: string;
 }
 /** Result payload */
 export type RegisterBranchDeleteResult = Record<string, unknown>;
@@ -837,11 +929,11 @@ export type RegisterBranchPutRequestBody = {
   notation?: string;
   contractID?: string;
   parcelsItems?: Array<{
-      parcelID: string;
-    }>;
+    parcelID: string;
+  }>;
 };
 export interface RegisterBranchPutPathParams {
-    registerID: string;
+  registerID: string;
 }
 /** Result payload */
 export type RegisterBranchPutResult = {
@@ -874,8 +966,8 @@ export type RegisterPickupRequestBody = {
     floor?: string;
   };
   parcelsItems?: Array<{
-      parcelID: string;
-    }>;
+    parcelID: string;
+  }>;
 };
 /** Result payload */
 export type RegisterPickupResult = {
@@ -891,7 +983,7 @@ export interface RegisterPickupRequest {
 // registers :: DELETE /registerPickup/{registerID}
 export type RegisterPickupDeleteRequestBody = unknown;
 export interface RegisterPickupDeletePathParams {
-    registerID: string;
+  registerID: string;
 }
 /** Result payload */
 export type RegisterPickupDeleteResult = Record<string, unknown>;
@@ -921,11 +1013,11 @@ export type RegisterPickupPutRequestBody = {
     floor?: string;
   };
   parcelsItems?: Array<{
-      parcelID: string;
-    }>;
+    parcelID: string;
+  }>;
 };
 export interface RegisterPickupPutPathParams {
-    registerID: string;
+  registerID: string;
 }
 /** Result payload */
 export type RegisterPickupPutResult = {
@@ -941,14 +1033,14 @@ export interface RegisterPickupPutRequest {
 
 // registers :: GET /registersList/{dateFrom}
 export interface RegistersListPathParams {
-    dateFrom: string;
+  dateFrom: string;
 }
 /** Result payload */
 export type RegistersListResult = Array<{
-    registerID?: string;
-    registerType?: string;
-    parcelQty?: number;
-  }>;
+  registerID?: string;
+  registerType?: string;
+  parcelQty?: number;
+}>;
 export type RegistersListResponse = MeestResponse<RegistersListResult>;
 export interface RegistersListRequest {
   path: RegistersListPathParams;
@@ -964,25 +1056,25 @@ export type AddressSearchRequestBody = {
 };
 /** Result payload */
 export type AddressSearchResult = Array<{
-    addressID?: string;
-    addressDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    latitude?: number;
-    longitude?: number;
-    cityID?: string;
-    viewCity?: string;
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    Localization?: string;
-  }>;
+  addressID?: string;
+  addressDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  latitude?: number;
+  longitude?: number;
+  cityID?: string;
+  viewCity?: string;
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  Localization?: string;
+}>;
 export type AddressSearchResponse = MeestResponse<AddressSearchResult>;
 export interface AddressSearchRequest {
   body?: AddressSearchRequestBody;
@@ -995,24 +1087,24 @@ export type AddressSearchByCoordRequestBody = {
 };
 /** Result payload */
 export type AddressSearchByCoordResult = Array<{
-    geoPoint?: {
-      lat?: string;
-      lon?: string;
-      display_name?: string;
-    };
-    address?: {
-      country?: string;
-      postcode?: string;
-      region?: string;
-      city?: string;
-      /** county */
-      county?: string;
-    };
-    addressUID?: {
-      UIDcity?: string;
-      UIDstreet?: string;
-    };
-  }>;
+  geoPoint?: {
+    lat?: string;
+    lon?: string;
+    display_name?: string;
+  };
+  address?: {
+    country?: string;
+    postcode?: string;
+    region?: string;
+    city?: string;
+    /** county */
+    county?: string;
+  };
+  addressUID?: {
+    UIDcity?: string;
+    UIDstreet?: string;
+  };
+}>;
 export type AddressSearchByCoordResponse = MeestResponse<AddressSearchByCoordResult>;
 export interface AddressSearchByCoordRequest {
   body?: AddressSearchByCoordRequestBody;
@@ -1038,7 +1130,7 @@ export type BranchSearchRequestBody = {
     CheckoutEPS?: boolean;
   };
   getCobranding?: boolean;
-  "\u0441obrandingCode"?: string;
+  '\u0441obrandingCode'?: string;
   in?: boolean;
   test?: boolean;
   includeInboundRestriction?: boolean;
@@ -1046,130 +1138,130 @@ export type BranchSearchRequestBody = {
 };
 /** Result payload */
 export type BranchSearchResult = Array<{
-    branchID?: string;
-    branchIDref?: string;
-    branchNo?: number;
-    branchCode?: string;
-    branchNumber?: string;
-    branchType?: string;
-    isBranchOpen?: boolean;
-    isBranchClosed?: boolean;
-    branchTypeID?: string;
-    branchTypeDescr?: string;
-    branchTypeAPP?: string;
-    branchTypeIDClient?: string;
-    ClientTypeSubdivision?: string;
-    ClientTypeSubdivisionID?: string;
-    ShortName?: string;
-    FullName?: string;
-    cash?: boolean;
-    networkDepartment?: boolean;
-    networkPartner?: string;
-    networkPartnerCode?: string;
-    branchDescr?: {
-      descrUA?: string;
-      descrLoc?: string;
-      descrSearchUA?: string;
-      descrSearchLoc?: string;
-    };
-    addressID?: string;
-    addressDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    addressMoreInformation?: string;
-    cityID?: string;
-    viewCity?: string;
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    districtID?: string;
-    districtDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    regionID?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-      descrLoc?: string;
-    };
-    workingHours?: string;
-    building?: string;
-    zipCode?: string;
-    latitude?: number;
-    longitude?: number;
-    branchWorkTime?: Array<{
-        day?: string;
-        timeFrom?: string;
-        timeTo?: string;
-        LunchBreakFrom?: string;
-        LunchBreakTo?: string;
-      }>;
-    phone?: string;
-    address?: string;
-    paymentTypes?: string;
-    branchLimits?: {
-      weightTotalMax?: number;
-      volumeTotalMax?: number;
-      insuranceTotalMax?: number;
-      weightPlaceMax?: number;
-      volumePlaceMax?: number;
-      quantityPlacesMax?: number;
-      gabaritesMax?: {
-        length?: number;
-        width?: number;
-        height?: number;
-        weightMax?: number;
-      };
-      formatLimit?: boolean;
-      cashPayUnavailible?: boolean;
-      sendingOnly?: boolean;
-      receivingOnly?: boolean;
-      receiverCellPhoneRequired?: boolean;
-      terminalCash?: boolean;
-    };
-    Localization?: string;
-    CheckoutEPS?: boolean;
-    overloaded?: boolean;
-    favourite?: boolean;
-    reserve?: boolean;
-    InboundRestriction?: boolean;
-    InboundRestrictionStartDate?: string;
-    InboundRestrictionEndDate?: string;
-    ResponseArrayRecordNumber?: number;
-    paymentMethods?: Array<{
-        uid?: string;
-        nameUkr?: string;
-      }>;
-    customerIdentification?: Array<{
-        uid?: string;
-        nameUkr?: string;
-      }>;
-    PartnerServices?: Array<Record<string, unknown>>;
-    Services?: Array<{
-        uid?: string;
-        nameUkr?: string;
-        "\u043aeflectMAP"?: boolean;
-      }>;
-    ScheduleLoadDepartments?: Array<{
-        Time_Range?: string;
-        Received_from_couriers?: number;
-        Picked_up_by_couriers?: number;
-        Received_by_clients?: number;
-        Percentage_Received_from_couriers?: number;
-        Percentage_Picked_up_by_couriers?: number;
-        Percentage_Received_by_clients?: number;
-      }>;
+  branchID?: string;
+  branchIDref?: string;
+  branchNo?: number;
+  branchCode?: string;
+  branchNumber?: string;
+  branchType?: string;
+  isBranchOpen?: boolean;
+  isBranchClosed?: boolean;
+  branchTypeID?: string;
+  branchTypeDescr?: string;
+  branchTypeAPP?: string;
+  branchTypeIDClient?: string;
+  ClientTypeSubdivision?: string;
+  ClientTypeSubdivisionID?: string;
+  ShortName?: string;
+  FullName?: string;
+  cash?: boolean;
+  networkDepartment?: boolean;
+  networkPartner?: string;
+  networkPartnerCode?: string;
+  branchDescr?: {
+    descrUA?: string;
+    descrLoc?: string;
+    descrSearchUA?: string;
+    descrSearchLoc?: string;
+  };
+  addressID?: string;
+  addressDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  addressMoreInformation?: string;
+  cityID?: string;
+  viewCity?: string;
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  districtID?: string;
+  districtDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  regionID?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+    descrLoc?: string;
+  };
+  workingHours?: string;
+  building?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  branchWorkTime?: Array<{
+    day?: string;
+    timeFrom?: string;
+    timeTo?: string;
+    LunchBreakFrom?: string;
+    LunchBreakTo?: string;
   }>;
+  phone?: string;
+  address?: string;
+  paymentTypes?: string;
+  branchLimits?: {
+    weightTotalMax?: number;
+    volumeTotalMax?: number;
+    insuranceTotalMax?: number;
+    weightPlaceMax?: number;
+    volumePlaceMax?: number;
+    quantityPlacesMax?: number;
+    gabaritesMax?: {
+      length?: number;
+      width?: number;
+      height?: number;
+      weightMax?: number;
+    };
+    formatLimit?: boolean;
+    cashPayUnavailible?: boolean;
+    sendingOnly?: boolean;
+    receivingOnly?: boolean;
+    receiverCellPhoneRequired?: boolean;
+    terminalCash?: boolean;
+  };
+  Localization?: string;
+  CheckoutEPS?: boolean;
+  overloaded?: boolean;
+  favourite?: boolean;
+  reserve?: boolean;
+  InboundRestriction?: boolean;
+  InboundRestrictionStartDate?: string;
+  InboundRestrictionEndDate?: string;
+  ResponseArrayRecordNumber?: number;
+  paymentMethods?: Array<{
+    uid?: string;
+    nameUkr?: string;
+  }>;
+  customerIdentification?: Array<{
+    uid?: string;
+    nameUkr?: string;
+  }>;
+  PartnerServices?: Array<Record<string, unknown>>;
+  Services?: Array<{
+    uid?: string;
+    nameUkr?: string;
+    '\u043aeflectMAP'?: boolean;
+  }>;
+  ScheduleLoadDepartments?: Array<{
+    Time_Range?: string;
+    Received_from_couriers?: number;
+    Picked_up_by_couriers?: number;
+    Received_by_clients?: number;
+    Percentage_Received_from_couriers?: number;
+    Percentage_Picked_up_by_couriers?: number;
+    Percentage_Received_by_clients?: number;
+  }>;
+}>;
 export type BranchSearchResponse = MeestResponse<BranchSearchResult>;
 export interface BranchSearchRequest {
   body?: BranchSearchRequestBody;
@@ -1177,81 +1269,81 @@ export interface BranchSearchRequest {
 
 // search :: GET /branchSearchGeo/{latitude}/{longitude}/{radius}
 export interface BranchSearchGeoPathParams {
-    latitude: number;
-    longitude: number;
-    radius: number;
+  latitude: number;
+  longitude: number;
+  radius: number;
 }
 /** Result payload */
 export type BranchSearchGeoResult = Array<{
-    branchID?: string;
-    branchNo?: number;
-    branchType?: string;
-    branchTypeID?: string;
-    "branchTypeDes\u0441r"?: string;
-    branchTypeAPP?: string;
-    isAvailable?: boolean;
-    isClosed?: boolean;
-    isDeleted?: boolean;
-    branchDescr?: {
-      descrUA?: string;
-      descrSearchUA?: string;
+  branchID?: string;
+  branchNo?: number;
+  branchType?: string;
+  branchTypeID?: string;
+  'branchTypeDes\u0441r'?: string;
+  branchTypeAPP?: string;
+  isAvailable?: boolean;
+  isClosed?: boolean;
+  isDeleted?: boolean;
+  branchDescr?: {
+    descrUA?: string;
+    descrSearchUA?: string;
+  };
+  addressID?: string;
+  addressDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  addressMoreInformation?: string;
+  cityID?: string;
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  regionID?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  districtID?: string;
+  districtDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  workingHours?: string;
+  building?: string;
+  zipCode?: string;
+  latitude?: number;
+  longitude?: number;
+  favourite?: boolean;
+  reserve?: boolean;
+  mylatitude?: number;
+  mylongitude?: number;
+  distance?: number;
+  radius?: number;
+  branchLimits?: {
+    weightTotalMax?: number;
+    volumeTotalMax?: number;
+    insuranceTotalMax?: number;
+    weightPlaceMax?: number;
+    quantityPlacesMax?: number;
+    storageDays?: number;
+    gabaritesMax?: {
+      length?: number;
+      width?: number;
+      height?: number;
     };
-    addressID?: string;
-    addressDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    addressMoreInformation?: string;
-    cityID?: string;
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    regionID?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    districtID?: string;
-    districtDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    workingHours?: string;
-    building?: string;
-    zipCode?: string;
-    latitude?: number;
-    longitude?: number;
-    favourite?: boolean;
-    reserve?: boolean;
-    mylatitude?: number;
-    mylongitude?: number;
-    distance?: number;
-    radius?: number;
-    branchLimits?: {
-      weightTotalMax?: number;
-      volumeTotalMax?: number;
-      insuranceTotalMax?: number;
-      weightPlaceMax?: number;
-      quantityPlacesMax?: number;
-      storageDays?: number;
-      gabaritesMax?: {
-        length?: number;
-        width?: number;
-        height?: number;
-      };
-      formatLimit?: boolean;
-      cashPayUnavailible?: boolean;
-      sendingOnly?: boolean;
-      receivingOnly?: boolean;
-      receiverCellPhoneRequired?: boolean;
-      terminalCash?: boolean;
-    };
-  }>;
+    formatLimit?: boolean;
+    cashPayUnavailible?: boolean;
+    sendingOnly?: boolean;
+    receivingOnly?: boolean;
+    receiverCellPhoneRequired?: boolean;
+    terminalCash?: boolean;
+  };
+}>;
 export type BranchSearchGeoResponse = MeestResponse<BranchSearchGeoResult>;
 export interface BranchSearchGeoRequest {
   path: BranchSearchGeoPathParams;
@@ -1260,34 +1352,32 @@ export interface BranchSearchGeoRequest {
 // search :: GET /branchTypes
 /** Result payload */
 export type BranchTypesResult = Array<{
-    branchTypeID?: string;
-    branchTypeDescr?: {
-      descrUA?: string;
-      type?: string;
-      typeAPP?: string;
+  branchTypeID?: string;
+  branchTypeDescr?: {
+    descrUA?: string;
+    type?: string;
+    typeAPP?: string;
+  };
+  branchLimits?: {
+    weightTotalMax?: number;
+    weightPlaceMax?: number;
+    volumeTotalMax?: number;
+    quantityPlacesMax?: number;
+    insuranceTotalMax?: number;
+    storageDays?: number;
+    gabaritesMax?: {
+      length?: number;
+      width?: number;
+      height?: number;
     };
-    branchLimits?: {
-      weightTotalMax?: number;
-      weightPlaceMax?: number;
-      volumeTotalMax?: number;
-      quantityPlacesMax?: number;
-      insuranceTotalMax?: number;
-      storageDays?: number;
-      gabaritesMax?: {
-        length?: number;
-        width?: number;
-        height?: number;
-      };
-    };
-    ClientTypeSubdivisionID?: string;
-    ClientTypeSubdivision?: string;
-    ClientTypeDepartmentNameMini?: string;
-    ClientTypeDepartmentDescription?: string;
-  }>;
+  };
+  ClientTypeSubdivisionID?: string;
+  ClientTypeSubdivision?: string;
+  ClientTypeDepartmentNameMini?: string;
+  ClientTypeDepartmentDescription?: string;
+}>;
 export type BranchTypesResponse = MeestResponse<BranchTypesResult>;
-export interface BranchTypesRequest {
-  // no parameters
-}
+export type BranchTypesRequest = Record<string, never>;
 
 // search :: POST /citySearch
 export type CitySearchRequestBody = {
@@ -1307,55 +1397,55 @@ export type CitySearchRequestBody = {
 };
 /** Result payload */
 export type CitySearchResult = Array<{
-    cityID?: string;
-    viewCity?: string;
-    cityKATUU?: string;
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    districtID?: string;
-    districtDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    regionID?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    countryID?: string;
-    isBranchInCity?: boolean;
-    isDeliveryInCity?: boolean;
-    deliveryZone?: number;
-    deliveryDays?: {
-      Mon?: boolean;
-      Tue?: boolean;
-      Wed?: boolean;
-      Thu?: boolean;
-      Fri?: boolean;
-      Sat?: boolean;
-      Sun?: boolean;
-    };
-    latitude?: string;
-    longitude?: string;
-    Localization?: string;
-    isAvailableDoorService?: boolean;
-    cityLimitsDoorService?: {
-      disabledDoorService?: boolean;
-      weightPlaceMax?: number;
-      weightTotalMax?: number;
-      volumeTotalMax?: number;
-      insuranceTotalMax?: number;
-      quantityPlacesMax?: number;
-      gabaritesMaxlength?: number;
-      gabaritesMaxwidth?: number;
-      gabaritesMaxheight?: number;
-    };
-  }>;
+  cityID?: string;
+  viewCity?: string;
+  cityKATUU?: string;
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  districtID?: string;
+  districtDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  regionID?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  countryID?: string;
+  isBranchInCity?: boolean;
+  isDeliveryInCity?: boolean;
+  deliveryZone?: number;
+  deliveryDays?: {
+    Mon?: boolean;
+    Tue?: boolean;
+    Wed?: boolean;
+    Thu?: boolean;
+    Fri?: boolean;
+    Sat?: boolean;
+    Sun?: boolean;
+  };
+  latitude?: string;
+  longitude?: string;
+  Localization?: string;
+  isAvailableDoorService?: boolean;
+  cityLimitsDoorService?: {
+    disabledDoorService?: boolean;
+    weightPlaceMax?: number;
+    weightTotalMax?: number;
+    volumeTotalMax?: number;
+    insuranceTotalMax?: number;
+    quantityPlacesMax?: number;
+    gabaritesMaxlength?: number;
+    gabaritesMaxwidth?: number;
+    gabaritesMaxheight?: number;
+  };
+}>;
 export type CitySearchResponse = MeestResponse<CitySearchResult>;
 export interface CitySearchRequest {
   body?: CitySearchRequestBody;
@@ -1370,14 +1460,14 @@ export type CountrySearchRequestBody = {
 };
 /** Result payload */
 export type CountrySearchResult = Array<{
-    countryID?: string;
-    countryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    alfaCode2?: string;
-  }>;
+  countryID?: string;
+  countryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  alfaCode2?: string;
+}>;
 export type CountrySearchResponse = MeestResponse<CountrySearchResult>;
 export interface CountrySearchRequest {
   body?: CountrySearchRequestBody;
@@ -1395,20 +1485,20 @@ export type DistrictSearchRequestBody = {
 };
 /** Result payload */
 export type DistrictSearchResult = Array<{
-    districtID?: string;
-    districtKATUU?: string;
-    districtDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    regionID?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  districtID?: string;
+  districtKATUU?: string;
+  districtDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  regionID?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type DistrictSearchResponse = MeestResponse<DistrictSearchResult>;
 export interface DistrictSearchRequest {
   body?: DistrictSearchRequestBody;
@@ -1416,36 +1506,36 @@ export interface DistrictSearchRequest {
 
 // search :: GET /payTerminalSearch/{latitude}/{longitude}/{radius}
 export interface PayTerminalSearchPathParams {
-    latitude: number;
-    longitude: number;
-    radius: number;
+  latitude: number;
+  longitude: number;
+  radius: number;
 }
 /** Result payload */
 export type PayTerminalSearchResult = Array<{
-    type?: string;
-    longitude?: string;
-    latitude?: string;
-    payTerminalDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-    };
-    workingHours?: {
-      descrUA?: string;
-      descrRU?: string;
-    };
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-    };
-    addressDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-    };
-    addressMoreInformationDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-    };
-  }>;
+  type?: string;
+  longitude?: string;
+  latitude?: string;
+  payTerminalDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+  };
+  workingHours?: {
+    descrUA?: string;
+    descrRU?: string;
+  };
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+  };
+  addressDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+  };
+  addressMoreInformationDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+  };
+}>;
 export type PayTerminalSearchResponse = MeestResponse<PayTerminalSearchResult>;
 export interface PayTerminalSearchRequest {
   path: PayTerminalSearchPathParams;
@@ -1463,20 +1553,20 @@ export type RegionSearchRequestBody = {
 };
 /** Result payload */
 export type RegionSearchResult = Array<{
-    regionID?: string;
-    regionKATUU?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    countryID?: string;
-    countryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  regionID?: string;
+  regionKATUU?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  countryID?: string;
+  countryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type RegionSearchResponse = MeestResponse<RegionSearchResult>;
 export interface RegionSearchRequest {
   body?: RegionSearchRequestBody;
@@ -1484,42 +1574,42 @@ export interface RegionSearchRequest {
 
 // search :: GET /zipCodeSearch/{zipCode}
 export interface ZipCodeSearchPathParams {
-    zipCode: string;
+  zipCode: string;
 }
 /** Result payload */
 export type ZipCodeSearchResult = Array<{
-    zipCode?: string;
-    cityID?: string;
-    cityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    districtID?: string;
-    districtDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    regionID?: string;
-    regionDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    countryID?: string;
-    isBranchInCity?: boolean;
-    deliveryZone?: number;
-    deliveryDays?: {
-      Mon?: boolean;
-      Tue?: boolean;
-      Wed?: boolean;
-      Thu?: boolean;
-      Fri?: boolean;
-      Sat?: boolean;
-      Sun?: boolean;
-    };
-  }>;
+  zipCode?: string;
+  cityID?: string;
+  cityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  districtID?: string;
+  districtDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  regionID?: string;
+  regionDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  countryID?: string;
+  isBranchInCity?: boolean;
+  deliveryZone?: number;
+  deliveryDays?: {
+    Mon?: boolean;
+    Tue?: boolean;
+    Wed?: boolean;
+    Thu?: boolean;
+    Fri?: boolean;
+    Sat?: boolean;
+    Sun?: boolean;
+  };
+}>;
 export type ZipCodeSearchResponse = MeestResponse<ZipCodeSearchResult>;
 export interface ZipCodeSearchRequest {
   path: ZipCodeSearchPathParams;
@@ -1527,32 +1617,32 @@ export interface ZipCodeSearchRequest {
 
 // tracking :: GET /parcelInfoTracking/{parcelID}
 export interface ParcelInfoTrackingPathParams {
-    parcelID: string;
+  parcelID: string;
 }
 /** Result payload */
 export type ParcelInfoTrackingResult = Array<{
-    parcelID?: string;
-    parcelIDref?: string;
-    parcelNumber?: string;
-    barCode?: string;
-    PDD?: string;
-    JIT0?: string;
-    sender?: {
-      name?: string;
-      phone?: string;
-      cityUA?: string;
-    };
-    receiver?: {
-      name?: string;
-      phone?: string;
-      cityUA?: string;
-    };
-    DetailingParcelItems?: Array<{
-        formatName?: string;
-        weight?: number;
-        insurance?: number;
-      }>;
+  parcelID?: string;
+  parcelIDref?: string;
+  parcelNumber?: string;
+  barCode?: string;
+  PDD?: string;
+  JIT0?: string;
+  sender?: {
+    name?: string;
+    phone?: string;
+    cityUA?: string;
+  };
+  receiver?: {
+    name?: string;
+    phone?: string;
+    cityUA?: string;
+  };
+  DetailingParcelItems?: Array<{
+    formatName?: string;
+    weight?: number;
+    insurance?: number;
   }>;
+}>;
 export type ParcelInfoTrackingResponse = MeestResponse<ParcelInfoTrackingResult>;
 export interface ParcelInfoTrackingRequest {
   path: ParcelInfoTrackingPathParams;
@@ -1560,38 +1650,38 @@ export interface ParcelInfoTrackingRequest {
 
 // tracking :: GET /tracking/{trackNumber}
 export interface TrackingPathParams {
-    trackNumber: string;
+  trackNumber: string;
 }
 /** Result payload */
 export type TrackingResult = Array<{
-    parcelNumber?: string;
-    barCode?: string;
-    eventDateTime?: string;
-    eventCode?: number;
-    /** event Code. UPU standard */
-    eventCodeUPU?: string;
-    eventPlaces?: string;
-    eventCountryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventCityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDetailDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  parcelNumber?: string;
+  barCode?: string;
+  eventDateTime?: string;
+  eventCode?: number;
+  /** event Code. UPU standard */
+  eventCodeUPU?: string;
+  eventPlaces?: string;
+  eventCountryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventCityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDetailDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type TrackingResponse = MeestResponse<TrackingResult>;
 export interface TrackingRequest {
   path: TrackingPathParams;
@@ -1599,37 +1689,37 @@ export interface TrackingRequest {
 
 // tracking :: GET /trackingByDate/{searchDate}
 export interface TrackingByDatePathParams {
-    searchDate: string;
+  searchDate: string;
 }
 /** Result payload */
 export type TrackingByDateResult = Array<{
-    parcelNumber?: string;
-    barCode?: string;
-    eventDateTime?: string;
-    eventCode?: number;
-    /** event Code. UPU standard */
-    eventCodeUPU?: string;
-    eventCountryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventCityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDetailDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  parcelNumber?: string;
+  barCode?: string;
+  eventDateTime?: string;
+  eventCode?: number;
+  /** event Code. UPU standard */
+  eventCodeUPU?: string;
+  eventCountryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventCityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDetailDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type TrackingByDateResponse = MeestResponse<TrackingByDateResult>;
 export interface TrackingByDateRequest {
   path: TrackingByDatePathParams;
@@ -1637,38 +1727,38 @@ export interface TrackingByDateRequest {
 
 // tracking :: GET /trackingByPeriod/{dateFrom}/{dateTo}
 export interface TrackingByPeriodPathParams {
-    dateFrom: string;
-    dateTo: string;
+  dateFrom: string;
+  dateTo: string;
 }
 /** Result payload */
 export type TrackingByPeriodResult = Array<{
-    parcelNumber?: string;
-    barCode?: string;
-    eventDateTime?: string;
-    eventCode?: number;
-    /** event Code. UPU standard */
-    eventCodeUPU?: string;
-    eventCountryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventCityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventDetailDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  parcelNumber?: string;
+  barCode?: string;
+  eventDateTime?: string;
+  eventCode?: number;
+  /** event Code. UPU standard */
+  eventCodeUPU?: string;
+  eventCountryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventCityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventDetailDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type TrackingByPeriodResponse = MeestResponse<TrackingByPeriodResult>;
 export interface TrackingByPeriodRequest {
   path: TrackingByPeriodPathParams;
@@ -1676,26 +1766,26 @@ export interface TrackingByPeriodRequest {
 
 // tracking :: GET /trackingDelivered/{dateFrom}/{dateTo}/{page}
 export interface TrackingDeliveredPathParams {
-    dateFrom: string;
-    dateTo: string;
-    page: number;
+  dateFrom: string;
+  dateTo: string;
+  page: number;
 }
 /** Result payload */
 export type TrackingDeliveredResult = Array<{
-    parcelNumber?: string;
-    barCode?: string;
-    eventDateTime?: string;
-    eventCountryDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-    eventCityDescr?: {
-      descrUA?: string;
-      descrRU?: string;
-      descrEN?: string;
-    };
-  }>;
+  parcelNumber?: string;
+  barCode?: string;
+  eventDateTime?: string;
+  eventCountryDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+  eventCityDescr?: {
+    descrUA?: string;
+    descrRU?: string;
+    descrEN?: string;
+  };
+}>;
 export type TrackingDeliveredResponse = MeestResponse<TrackingDeliveredResult>;
 export interface TrackingDeliveredRequest {
   path: TrackingDeliveredPathParams;

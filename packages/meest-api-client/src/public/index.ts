@@ -36,7 +36,10 @@ export function createMeestPublicClient(config: Partial<MeestPublicConfig> = {})
   });
   const ctx: PublicContext = {
     http,
-    config: { ...(config.cache ? { cache: config.cache } : {}), cacheTtlSec: config.cacheTtlSec ?? DEFAULT_CACHE_TTL_SEC },
+    config: {
+      ...(config.cache ? { cache: config.cache } : {}),
+      cacheTtlSec: config.cacheTtlSec ?? DEFAULT_CACHE_TTL_SEC,
+    },
   };
   return createClient<PublicContext>(ctx).use(new GeoService()).use(new BranchesService());
 }

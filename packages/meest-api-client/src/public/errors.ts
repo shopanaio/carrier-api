@@ -29,7 +29,9 @@ export function envelopeError(response: HttpResponse<unknown>): CarrierError {
   return new CarrierError({
     carrier: MEEST_PUBLIC_CARRIER,
     code: code !== undefined ? String(code) : 'UNKNOWN',
-    message: env?.msg?.en || env?.msg?.ua || env?.msg?.ru || 'Meest public API returned an error',
+    message:
+      [env?.msg?.en, env?.msg?.ua, env?.msg?.ru].find(m => typeof m === 'string' && m !== '') ??
+      'Meest public API returned an error',
     category,
     httpStatus: response.status,
     raw: response.data,

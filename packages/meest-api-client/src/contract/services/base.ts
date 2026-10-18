@@ -1,5 +1,6 @@
 // code and comments in English
 import type { BinaryData, ClientContext, QueryParams, ResponseType } from '@shopana/carrier-core';
+import type { RequestOptions } from '../../shared';
 
 /** Login and refresh calls, made without the token strategy so a 401 there never recurses into login. */
 export interface MeestAuthApi {
@@ -20,9 +21,9 @@ export interface MeestContractContextConfig {
 
 export type ContractContext = ClientContext<MeestContractContextConfig>;
 
-export type { BinaryData };
+export type { BinaryData, RequestOptions };
 
-interface CallOptions {
+interface CallOptions extends RequestOptions {
   path: string;
   pathParams?: Record<string, string | number>;
   query?: QueryParams;

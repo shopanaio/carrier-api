@@ -1,10 +1,5 @@
 // code and comments in English
-import {
-  createClient,
-  createFetchTransport,
-  createHttpClient,
-  tokenAuth,
-} from '@shopana/carrier-core';
+import { createClient, createFetchTransport, createHttpClient, tokenAuth } from '@shopana/carrier-core';
 import type { HttpTransport, RateLimitOptions, RateLimiter } from '@shopana/carrier-core';
 import { MEEST_CONTRACT_BASE_URL, MEEST_DEFAULT_RATE_LIMIT } from './config';
 import type { MeestContractConfig } from './config';
@@ -30,8 +25,9 @@ export { ParcelsService } from './services/parcelsService';
 export type { ParcelReturnMode, ParcelSearchBy } from './services/parcelsService';
 export { PricingService } from './services/pricingService';
 export { PrintService } from './services/printService';
-export type { PrintFormat } from './services/printService';
+export type { PrintFormat, Sticker100A4Options, Sticker100Options } from './services/printService';
 export { RegistersService } from './services/registersService';
+export type { TimeSlotType, TimeSlotsQuery } from './services/registersService';
 export { SearchService } from './services/searchService';
 export { TrackingService } from './services/trackingService';
 export type { MeestInfo, MeestResponse } from './types/envelope';
@@ -73,7 +69,12 @@ export function createMeestContractClient(config: MeestContractConfig) {
       ),
     refresh: async (refreshToken, signal) =>
       toTokens(
-        await authHttp.request<AuthResult>({ method: 'POST', path: '/refreshToken', json: { refreshToken }, ...(signal ? { signal } : {}) }),
+        await authHttp.request<AuthResult>({
+          method: 'POST',
+          path: '/refreshToken',
+          json: { refreshToken },
+          ...(signal ? { signal } : {}),
+        }),
       ),
   };
 
@@ -100,8 +101,14 @@ export function createMeestContractClient(config: MeestContractConfig) {
     baseUrl,
     transport,
     auth,
-    ...(config.retry !== undefined ? { retry: config.retry } : config.clock || config.sleep ? { retry: { clock: config.clock, sleep: config.sleep } } : {}),
-    ...(config.rateLimit === false ? {} : { rateLimit: withTime(config.rateLimit ?? MEEST_DEFAULT_RATE_LIMIT, config) }),
+    ...(config.retry !== undefined
+      ? { retry: config.retry }
+      : config.clock || config.sleep
+        ? { retry: { clock: config.clock, sleep: config.sleep } }
+        : {}),
+    ...(config.rateLimit === false
+      ? {}
+      : { rateLimit: withTime(config.rateLimit ?? MEEST_DEFAULT_RATE_LIMIT, config) }),
     ...(config.timeoutMs ? { timeoutMs: config.timeoutMs } : {}),
     ...(config.logger ? { logger: config.logger } : {}),
     unwrap,
@@ -129,7 +136,11 @@ async function resolve(secret: MeestContractConfig['username']): Promise<string>
 /** Plain limiter options pick up the virtual clock and sleep; a ready-made limiter is used as is. */
 function withTime(limit: RateLimiter | RateLimitOptions, config: MeestContractConfig): RateLimiter | RateLimitOptions {
   if ('acquire' in limit || (!config.clock && !config.sleep)) return limit;
-  return { ...limit, ...(config.clock ? { clock: config.clock } : {}), ...(config.sleep ? { sleep: config.sleep } : {}) };
+  return {
+    ...limit,
+    ...(config.clock ? { clock: config.clock } : {}),
+    ...(config.sleep ? { sleep: config.sleep } : {}),
+  };
 }
 
 /** Short SHA-256 digest of the login: tells accounts apart in a shared token store without storing the login itself. */

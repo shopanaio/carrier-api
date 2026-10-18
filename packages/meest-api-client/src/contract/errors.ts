@@ -15,7 +15,9 @@ interface LooseEnvelope {
 }
 
 export function isEnvelope(data: unknown): data is LooseEnvelope {
-  return typeof data === 'object' && data !== null && !Array.isArray(data) && 'status' in data && !('contentType' in data);
+  return (
+    typeof data === 'object' && data !== null && !Array.isArray(data) && 'status' in data && !('contentType' in data)
+  );
 }
 
 export function isOk(env: LooseEnvelope): boolean {
@@ -28,7 +30,11 @@ function describe(env: LooseEnvelope): { fieldName?: string; message?: string; d
   const fieldName = info?.fieldName ?? env.fieldName ?? undefined;
   const message = info?.message ?? env.message ?? (typeof env.info === 'string' ? env.info : undefined) ?? undefined;
   const details = info?.messageDetails ?? env.messageDetails;
-  return { ...(fieldName ? { fieldName } : {}), ...(message ? { message } : {}), ...(details ? { details } : {}) };
+  return {
+    ...(fieldName ? { fieldName } : {}),
+    ...(message ? { message } : {}),
+    ...(details !== undefined && details !== null && details !== '' ? { details } : {}),
+  };
 }
 
 /** Meest publishes no error catalog, so the category comes from the HTTP status and a few field hints. */

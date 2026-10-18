@@ -35,7 +35,10 @@ describe('geo', () => {
     const { client } = make(() => fail(10401, 'Could not find region'));
     expect(await client.geo.regions({ searchFull: 'Atlantis' })).toEqual([]);
     const broken = make(() => fail(10999, 'Boom'));
-    expect(await rejection(broken.client.geo.regions())).toMatchObject({ code: '10999', category: CarrierErrorCategory.BusinessLogic });
+    expect(await rejection(broken.client.geo.regions())).toMatchObject({
+      code: '10999',
+      category: CarrierErrorCategory.BusinessLogic,
+    });
   });
 
   it('unwraps { data } of localities and passes district_id', async () => {
@@ -64,7 +67,10 @@ describe('branches', () => {
   it('joins filters, including several types', async () => {
     const { client, calls } = make(() => ok(branches));
     await client.branches.list({ city: 'Tern', type: ['poshtomat', 'minibranch'], lang: 'en', viewdata: 'full' });
-    expect(calls[0]).toMatchObject({ path: '/branches', query: { city: 'Tern', type: 'poshtomat,minibranch', lang: 'en', viewdata: 'full' } });
+    expect(calls[0]).toMatchObject({
+      path: '/branches',
+      query: { city: 'Tern', type: 'poshtomat,minibranch', lang: 'en', viewdata: 'full' },
+    });
   });
 
   it('returns [] when no branch matches', async () => {
@@ -72,15 +78,25 @@ describe('branches', () => {
   });
 
   it('gets one branch by number or id and throws not_found otherwise', async () => {
-    const { client, calls } = make(call => (call.path.endsWith('/0') ? fail(10111, 'Could not find branch') : ok([branches[0]])));
+    const { client, calls } = make(call =>
+      call.path.endsWith('/0') ? fail(10111, 'Could not find branch') : ok([branches[0]]),
+    );
     expect(await client.branches.get(8382, { lang: 'ua' })).toMatchObject({ br_id: 'b1' });
     expect(calls[0]).toMatchObject({ path: '/branches/8382', query: { lang: 'ua' } });
-    expect(await rejection(client.branches.get(0))).toMatchObject({ carrier: 'meest', code: '10111', category: CarrierErrorCategory.NotFound, httpStatus: 200 });
+    expect(await rejection(client.branches.get(0))).toMatchObject({
+      carrier: 'meest',
+      code: '10111',
+      category: CarrierErrorCategory.NotFound,
+      httpStatus: 200,
+    });
   });
 
   it('throws not_found when the API answers with an empty list for one branch', async () => {
     const { client } = make(() => ok([]));
-    expect(await rejection(client.branches.get(1))).toMatchObject({ code: 'EMPTY_RESULT', category: CarrierErrorCategory.NotFound });
+    expect(await rejection(client.branches.get(1))).toMatchObject({
+      code: 'EMPTY_RESULT',
+      category: CarrierErrorCategory.NotFound,
+    });
   });
 
   it('calls the locator with coordinates or an encoded address', async () => {
@@ -134,6 +150,9 @@ describe('resilience', () => {
 
   it('maps gateway failures through the generic status mapping', async () => {
     const { client } = make(() => ({ status: 502, data: 'Bad gateway' }));
-    expect(await rejection(client.branches.list())).toMatchObject({ category: CarrierErrorCategory.Server, httpStatus: 502 });
+    expect(await rejection(client.branches.list())).toMatchObject({
+      category: CarrierErrorCategory.Server,
+      httpStatus: 502,
+    });
   });
 });

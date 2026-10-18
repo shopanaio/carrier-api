@@ -5,7 +5,9 @@ import type { Call, Reply } from './mock';
 
 export const BASE = 'https://api.meest.com/v3.0/openAPI';
 
-export const ok = (result: unknown): Reply => ({ data: { status: 'OK', info: { fieldName: '', message: '', messageDetails: '' }, result } });
+export const ok = (result: unknown): Reply => ({
+  data: { status: 'OK', info: { fieldName: '', message: '', messageDetails: '' }, result },
+});
 export const fail = (status: number, fieldName: string, message: string): Reply => ({
   status,
   data: { status: 'Error', info: { fieldName, message, messageDetails: '' }, result: null },
@@ -48,7 +50,13 @@ export function makeContract(options: Harness = {}) {
     ...options.client,
   });
   const apiCalls = () => mock.calls.filter(c => c.path !== '/auth' && c.path !== '/refreshToken');
-  return { ...mock, client, clock, apiCalls, tokenCalls: (path: '/auth' | '/refreshToken') => mock.calls.filter(c => c.path === path) };
+  return {
+    ...mock,
+    client,
+    clock,
+    apiCalls,
+    tokenCalls: (path: '/auth' | '/refreshToken') => mock.calls.filter(c => c.path === path),
+  };
 }
 
 export const rejection = async (p: Promise<unknown>) => {

@@ -21,8 +21,17 @@ describe('dates', () => {
 
 describe('error mapping', () => {
   it('reads both envelope spellings and keeps details', () => {
-    const nested = toMeestError(400, { status: 'Error', info: { fieldName: 'receiver.phone', message: 'Bad phone', messageDetails: 'x' }, result: null });
-    expect(nested).toMatchObject({ code: '400:receiver.phone', field: 'receiver.phone', message: 'Bad phone', category: CarrierErrorCategory.Validation });
+    const nested = toMeestError(400, {
+      status: 'Error',
+      info: { fieldName: 'receiver.phone', message: 'Bad phone', messageDetails: 'x' },
+      result: null,
+    });
+    expect(nested).toMatchObject({
+      code: '400:receiver.phone',
+      field: 'receiver.phone',
+      message: 'Bad phone',
+      category: CarrierErrorCategory.Validation,
+    });
     expect((nested.raw as { details: unknown }).details).toBe('x');
 
     const flat = toMeestError(401, { status: 'Error', fieldName: 'token', message: 'Expired', result: null });

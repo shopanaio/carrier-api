@@ -1,5 +1,6 @@
 // code and comments in English
 import type { ClientContext } from '@shopana/carrier-core';
+import type { RequestOptions } from '../../shared';
 import type { MeestPublicContextConfig } from '../config';
 import { isMeestNotFound } from '../errors';
 
@@ -12,14 +13,30 @@ export abstract class PublicService {
     this.ctx = ctx;
   }
 
-  protected getJson<T>(path: string, query?: Record<string, string | number | undefined>, pathParams?: Record<string, string>): Promise<T> {
-    return this.ctx.http.request<T>({ method: 'GET', path, ...(query ? { query } : {}), ...(pathParams ? { pathParams } : {}) });
+  protected getJson<T>(
+    path: string,
+    query?: Record<string, string | number | undefined>,
+    pathParams?: Record<string, string>,
+    options?: RequestOptions,
+  ): Promise<T> {
+    return this.ctx.http.request<T>({
+      method: 'GET',
+      path,
+      ...(query ? { query } : {}),
+      ...(pathParams ? { pathParams } : {}),
+      ...(options?.signal ? { signal: options.signal } : {}),
+    });
   }
 
   /** "Nothing found" is an error in the API, but an empty list for callers. */
-  protected async listJson<T>(path: string, query?: Record<string, string | number | undefined>, pathParams?: Record<string, string>): Promise<T[]> {
+  protected async listJson<T>(
+    path: string,
+    query?: Record<string, string | number | undefined>,
+    pathParams?: Record<string, string>,
+    options?: RequestOptions,
+  ): Promise<T[]> {
     try {
-      return (await this.getJson<T[] | null>(path, query, pathParams)) ?? [];
+      return (await this.getJson<T[] | null>(path, query, pathParams, options)) ?? [];
     } catch (error) {
       if (isMeestNotFound(error)) return [];
       throw error;

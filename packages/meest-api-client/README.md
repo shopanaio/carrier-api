@@ -2,10 +2,10 @@
 
 Typed clients for Meest (Meest Express, Ukraine) on top of [`@shopana/carrier-core`](../carrier-core).
 
-| API | Base URL | Auth | Status |
-| --- | --- | --- | --- |
-| Public (`createMeestPublicClient`) | `https://publicapi.meest.com` | none | ready |
-| Contract openAPI v3.0 (`createMeestContractClient`) | `https://api.meest.com/v3.0/openAPI` | login + password -> `token` header | ready (all 48 operations) |
+| API                                                 | Base URL                             | Auth                               | Status                    |
+| --------------------------------------------------- | ------------------------------------ | ---------------------------------- | ------------------------- |
+| Public (`createMeestPublicClient`)                  | `https://publicapi.meest.com`        | none                               | ready                     |
+| Contract openAPI v3.0 (`createMeestContractClient`) | `https://api.meest.com/v3.0/openAPI` | login + password -> `token` header | ready (all 52 operations of the current Swagger) |
 
 ## Public API
 
@@ -17,7 +17,7 @@ import { createMeestPublicClient, createMemoryReferenceCache } from '@shopana/me
 const meest = createMeestPublicClient({ cache: createMemoryReferenceCache() });
 
 const lockers = await meest.branches.list({ city: 'Ternopil', type: 'poshtomat', lang: 'en' });
-const branch = await meest.branches.get(8382);                        // by showcase number or br_id
+const branch = await meest.branches.get(8382); // by showcase number or br_id
 const near = await meest.branches.nearestByCoords({ lat: 49.547, lng: 25.589 }, { type: 'poshtomat' });
 const streets = await meest.geo.streets({ cityId: '80f55c6a-749b-11df-b112-00215aee3ebe' });
 ```
@@ -37,20 +37,27 @@ Needs the login and password Meest issues with the contract (and the `contractID
 ```ts
 import { createMeestContractClient } from '@shopana/meest-api-client';
 
-const meest = createMeestContractClient({ username: process.env.MEEST_USERNAME!, password: process.env.MEEST_PASSWORD! });
+const meest = createMeestContractClient({
+  username: process.env.MEEST_USERNAME!,
+  password: process.env.MEEST_PASSWORD!,
+});
 
 const [quote] = await meest.pricing.calculate({
   sender: { branchID, cityID, service: 'Branch' },
   receiver: { branchID: lockerId, cityID: lockerCityId, service: 'Branch' },
   placesItems: [{ quantity: 1, weight: 1.5 }],
 });
-const parcel = await meest.parcels.create({ /* see CreateParcel in the Swagger */ } as ParcelRequestBody);
-const sticker = await meest.print.sticker100(parcel.parcelID!);              // { contentType: 'application/pdf', data: Uint8Array }
+const parcel = await meest.parcels.create({
+  /* see CreateParcel in the Swagger */
+} as ParcelRequestBody);
+const sticker = await meest.print.sticker100(parcel.parcelID!); // { contentType: 'application/pdf', data: Uint8Array }
 const events = await meest.tracking.byNumber(parcel.barCode!);
 ```
 
 Namespaces: `auth`, `search`, `parcels`, `pricing`, `print`, `tracking`, `registers`, `misc`. Request and result types are generated from the Swagger snapshot (`yarn generate:types`).
 
+- **Cancellation.** Every method of both clients takes a trailing `{ signal }` (`AbortSignal`) that cancels the call, its retries and the wait for a rate-limit slot.
+- **Forms.** `print.declaration` and `print.cn23` use the current `declarationForm`/`cn23Form` endpoints, which need the phone number of the parcel's sender or recipient. `registers.availableTimeSlots` takes `{ type: 'PickUp' | 'Delivery', streetId | cityId }`.
 - **Token.** Logs in on the first call, sends it in the `token` header, renews it ahead of expiry and once after a 401 (refresh first, then a full login). Pass `tokenStore` to share tokens between processes.
 - **Limits.** 100 requests a minute per user: the client throttles itself. 429 and 5xx are retried for reads; `POST /parcel` is **never** repeated automatically, check `parcels.get(number, 'parcelNumber')` before retrying yourself.
 - **Errors.** Everything throws `CarrierError` (`carrier: 'meest'`, `code` is `HTTP status:fieldName`, `field`, `category`). Meest publishes no error catalog, so the category comes from the HTTP status.

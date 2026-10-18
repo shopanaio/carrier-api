@@ -1,40 +1,76 @@
 // code and comments in English
 import type { BinaryData } from '@shopana/carrier-core';
 import { ContractService, encodeIds } from './base';
+import type { RequestOptions } from './base';
 
 export type PrintFormat = 'pdf' | 'html';
 
 type Ids = string | readonly string[];
 
+export interface Sticker100Options extends RequestOptions {
+  /** Contract id; required when printing by `parcelNumber` or `barCode`, optional by `parcelID`. */
+  agent?: string;
+  /** Page to print; all pages when omitted. */
+  page?: number;
+}
+
+export interface Sticker100A4Options extends RequestOptions {
+  /** Start position on the A4 sheet (up to 6 stickers). Default 1. */
+  position?: number;
+}
+
 /** Print forms. `pdf` resolves to bytes, `html` to markup. */
 export class PrintService extends ContractService {
   readonly namespace = 'print' as const;
 
-  declaration(ids: Ids, format: 'pdf'): Promise<BinaryData>;
-  declaration(ids: Ids, format: 'html'): Promise<string>;
-  declaration(ids: Ids, format: PrintFormat): Promise<BinaryData | string> {
-    return this.form('/print/declaration/{printValue}/{contentType}', ids, format);
+  /**
+   * Cargo declaration (`/print/declarationForm`). Meest requires the phone number of the sender or recipient
+   * of the parcel next to its id.
+   */
+  declaration(ids: Ids, phone: string, format: 'pdf', options?: RequestOptions): Promise<BinaryData>;
+  declaration(ids: Ids, phone: string, format: 'html', options?: RequestOptions): Promise<string>;
+  declaration(
+    ids: Ids,
+    phone: string,
+    format: PrintFormat,
+    options: RequestOptions = {},
+  ): Promise<BinaryData | string> {
+    return this.httpGet({
+      signal: options.signal,
+      path: `/print/declarationForm/${encodeIds(ids)}/${encodeURIComponent(requirePhone(phone))}/{contentType}`,
+      pathParams: { contentType: format },
+      responseType: format === 'pdf' ? 'binary' : 'text',
+    });
   }
 
-  cn23(ids: Ids, format: 'pdf'): Promise<BinaryData>;
-  cn23(ids: Ids, format: 'html'): Promise<string>;
-  cn23(ids: Ids, format: PrintFormat): Promise<BinaryData | string> {
-    return this.form('/print/cn23/{printValue}/{contentType}', ids, format);
+  /** Customs form CN23 as PDF (`/print/cn23Form`); needs the phone number like `declaration`. */
+  cn23(ids: Ids, phone: string, options: RequestOptions = {}): Promise<BinaryData> {
+    return this.httpGet({
+      signal: options.signal,
+      path: `/print/cn23Form/${encodeIds(ids)}/${encodeURIComponent(requirePhone(phone))}`,
+      responseType: 'binary',
+    });
   }
 
   /** Register of parcels (receipt for a hand-over). */
-  register(ids: Ids, format: 'pdf'): Promise<BinaryData>;
-  register(ids: Ids, format: 'html'): Promise<string>;
-  register(ids: Ids, format: PrintFormat): Promise<BinaryData | string> {
-    return this.form('/print/register/{printValue}/{contentType}', ids, format);
+  register(ids: Ids, format: 'pdf', options?: RequestOptions): Promise<BinaryData>;
+  register(ids: Ids, format: 'html', options?: RequestOptions): Promise<string>;
+  register(ids: Ids, format: PrintFormat, options: RequestOptions = {}): Promise<BinaryData | string> {
+    return this.httpGet({
+      signal: options.signal,
+      path: `/print/register/${encodeIds(ids)}/{contentType}`,
+      pathParams: { contentType: format },
+      responseType: format === 'pdf' ? 'binary' : 'text',
+    });
   }
 
   /**
    * Sticker 100x100 mm (PDF). Print by `parcelID`, or by `parcelNumber`/`barCode` together with `agent`
    * (the contract id). Without `page` all pages are returned.
    */
-  sticker100(ids: Ids, options: { agent?: string; page?: number } = {}): Promise<BinaryData> {
+  sticker100(ids: Ids, options: Sticker100Options = {}): Promise<BinaryData> {
     return this.httpGet({
+      signal: options.signal,
       path: `/print/sticker100/${encodeIds(ids)}`,
       query: { agent: options.agent, page: options.page },
       responseType: 'binary',
@@ -42,19 +78,17 @@ export class PrintService extends ContractService {
   }
 
   /** Up to 6 stickers 100x100 on an A4 sheet, starting at `position` (default 1). */
-  sticker100A4(ids: Ids, options: { position?: number } = {}): Promise<BinaryData> {
+  sticker100A4(ids: Ids, options: Sticker100A4Options = {}): Promise<BinaryData> {
     return this.httpGet({
+      signal: options.signal,
       path: `/print/sticker100A4/${encodeIds(ids)}`,
       query: { position: options.position ?? 1 },
       responseType: 'binary',
     });
   }
+}
 
-  private form(path: string, ids: Ids, format: PrintFormat): Promise<BinaryData | string> {
-    return this.httpGet({
-      path: path.replace('{printValue}', encodeIds(ids)),
-      pathParams: { contentType: format },
-      responseType: format === 'pdf' ? 'binary' : 'text',
-    });
-  }
+function requirePhone(phone: string): string {
+  if (!phone) throw new TypeError('A phone number is required by the Meest form endpoints');
+  return phone;
 }
