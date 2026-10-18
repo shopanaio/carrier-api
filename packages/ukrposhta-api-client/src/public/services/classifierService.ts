@@ -37,9 +37,9 @@ type Id = string | number;
 /**
  * Address classifier (`/address-classifier-ws`, v3.22), authorized with the eCom bearer. Every method is a GET that
  * asks for JSON (the service answers XML by default) and returns the service's answer as it is: the
- * `{ Entries: { Entry } }` envelope, where `Entry` is one object for a single hit and an array for several. Use
- * `entriesOf` to get a list. Search operations need at least one filter; without one the service answers an empty
- * body. The service limits the request rate (see the documentation, section 1.1).
+ * `{ Entries: { Entry } }` envelope, where `Entry` is one object for a single hit and an array for several, and
+ * the answer is empty for none. Search operations need at least one filter; without one the service answers an
+ * empty body. The service limits the request rate (see the documentation, section 1.1).
  */
 export class ClassifierService {
   readonly namespace = 'classifier' as const;
@@ -302,14 +302,4 @@ export class ClassifierService {
       signal: options.signal,
     });
   }
-}
-
-/**
- * The records of a classifier answer as a list. This is a helper for the caller; the service methods return the
- * answer untouched. No hits give `[]`, one hit `[hit]`.
- */
-export function entriesOf<T>(answer: ClassifierEntries<T> | null | undefined): T[] {
-  const entry = answer?.Entries?.Entry;
-  if (entry === undefined || entry === null) return [];
-  return Array.isArray(entry) ? entry : [entry];
 }

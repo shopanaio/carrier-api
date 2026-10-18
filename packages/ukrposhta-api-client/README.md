@@ -12,6 +12,7 @@ Each service takes its own bearer:
 | ------------------ | -------------------------------- | --------------------------------- |
 | Status tracking    | tracking bearer                  | `createUkrposhtaTrackingClient`   |
 | Address classifier | eCom bearer                      | `createUkrposhtaClassifierClient` |
+| Tracking + classifier | tracking bearer and eCom bearer | `createUkrposhtaPublicClient`   |
 | eCom and forms     | eCom bearer + counterparty token | `createUkrposhtaContractClient`   |
 
 The environment defaults to `production`: pass `environment: 'sandbox'` (host `dev.ukrposhta.ua`, its own bearer and token) for tests. The documentation names no sandbox for tracking and the classifier; pass `baseUrl` if you have one. The eCom client adds the token (`?token=`) only to operations that take it. Secrets are strings or functions (`() => string | Promise<string>`) and are masked in logs. `transport` is optional and defaults to the fetch transport of carrier-core.
@@ -44,6 +45,21 @@ await client.letters.getLetter({ uuidOrBarcode: '...' });
 
 Things the API enforces and the client does not check: a shipment is deleted only while it is `CREATED`; a group closes when its shipments are registered; cash on delivery of a sole proprietor or company goes to a bank account only; Express and Standard are priced by volume and need all three sizes. A shipment creation is never repeated automatically after a server error or a lost connection: the carrier may have created it.
 
+## Public services
+
+`createUkrposhtaPublicClient` mounts tracking and the address classifier on one client: `{ tracking, classifier }`. The two services take different bearers, so the config has `trackingBearer` and `classifierBearer` (optional; a service without one sends no `Authorization` header and Ukrposhta answers 401) and per-service `trackingBaseUrl` / `classifierBaseUrl`. `environment`, `transport`, `retry`, `timeoutMs` and `logger` are shared. The single-service factories below take one `bearer` and remain for callers that need only one service.
+
+```ts
+import { createUkrposhtaPublicClient } from '@shopana/ukrposhta-api-client/public';
+
+const ukrposhta = createUkrposhtaPublicClient({
+  trackingBearer: process.env.UKRPOSHTA_TRACKING_BEARER!,
+  classifierBearer: process.env.UKRPOSHTA_ECOM_BEARER!,
+});
+const events = await ukrposhta.tracking.getStatuses('0500100031143');
+const offices = await ukrposhta.classifier.getPostOffices({ postIndex: '01001' });
+```
+
 ## Tracking
 
 ```ts
@@ -58,14 +74,13 @@ Batches take up to 50 barcodes for all statuses and 100 for last statuses (`TRAC
 ## Address classifier
 
 ```ts
-import { createUkrposhtaClassifierClient, entriesOf } from '@shopana/ukrposhta-api-client/public';
+import { createUkrposhtaClassifierClient } from '@shopana/ukrposhta-api-client/public';
 
 const classifier = createUkrposhtaClassifierClient({ bearer: process.env.UKRPOSHTA_ECOM_BEARER! });
 const answer = await classifier.classifier.getPostOffices({ postIndex: '01001' });
-const offices = entriesOf(answer);
 ```
 
-Methods return the XML-derived JSON envelope as it is: `Entries.Entry` is one object for a single hit, an array for several, and the whole answer is empty for none. `entriesOf` is a helper that turns any of these into a list. Each endpoint has its own record type with the fields of the documentation (values are strings or null). Search operations need at least one filter, otherwise the service answers an empty body; it also limits the request rate.
+Methods return the XML-derived JSON envelope as it is: `Entries.Entry` is one object for a single hit, an array for several, and the whole answer is empty for none. Each endpoint has its own record type with the fields of the documentation (values are strings or null). Search operations need at least one filter, otherwise the service answers an empty body; it also limits the request rate.
 
 ## Errors
 

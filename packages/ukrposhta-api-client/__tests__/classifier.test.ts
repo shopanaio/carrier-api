@@ -1,6 +1,6 @@
 import { CarrierErrorCategory } from '@shopana/carrier-core';
-import { createUkrposhtaClassifierClient } from '../src';
-import { entriesOf } from '../src';
+import { createUkrposhtaClassifierClient, createUkrposhtaPublicClient } from '../src';
+import type { ClassifierLocalityPostOffice } from '../src';
 import { createMockTransport, fail, ok } from './helpers/mock';
 
 const BASE = '/address-classifier-ws';
@@ -57,7 +57,7 @@ describe('ClassifierService', () => {
       respond: entries({ ID: '2700', POSTINDEX: '01001', PO_SHORT: 'Kyiv 1' }),
     });
     const answer = await client.classifier.getPostOffices({ postIndex: '01001' });
-    expect(entriesOf(answer)).toEqual([{ ID: '2700', POSTINDEX: '01001', PO_SHORT: 'Kyiv 1' }]);
+    expect(answer).toEqual({ Entries: { Entry: { ID: '2700', POSTINDEX: '01001', PO_SHORT: 'Kyiv 1' } } });
     expect(mock.last().query).toEqual({ pi: '01001' });
   });
 
@@ -69,7 +69,7 @@ describe('ClassifierService', () => {
       respond: call => entries({ IS_COURIERAREA: '1', postindex: String(call.query.postindex) }),
     });
     const answer = await client.classifier.getCourierArea('02223');
-    expect(entriesOf(answer)[0]).toEqual({ IS_COURIERAREA: '1', postindex: '02223' });
+    expect(answer).toEqual({ Entries: { Entry: { IS_COURIERAREA: '1', postindex: '02223' } } });
   });
 
   it('sends exactly the filters it is given, even none', async () => {
@@ -86,7 +86,8 @@ describe('ClassifierService', () => {
       path: `${BASE}/get_postoffices_by_postcode_cityid_cityvpzid`,
       respond: entries({ POSTOFFICE_ID: '811136', POSTOFFICE_UA: '05305 Brovary', POSTINDEX: '05305' }),
     });
-    const [office] = entriesOf(await client.classifier.getPostOfficesByLocality({ postcode: '05305' }));
+    const answer = await client.classifier.getPostOfficesByLocality({ postcode: '05305' });
+    const office = answer.Entries?.Entry as ClassifierLocalityPostOffice;
     // The type has POSTOFFICE_ID and POSTOFFICE_UA, not the ID and PO_SHORT of the other endpoint.
     expect(office!.POSTOFFICE_ID).toBe('811136');
     expect(office!.POSTOFFICE_UA).toBe('05305 Brovary');
@@ -108,14 +109,27 @@ describe('ClassifierService', () => {
   });
 });
 
-describe('entriesOf', () => {
-  it('lists the records of every answer shape, and never invents any', () => {
-    expect(entriesOf(undefined)).toEqual([]);
-    expect(entriesOf(null)).toEqual([]);
-    expect(entriesOf({})).toEqual([]);
-    expect(entriesOf({ Entries: null })).toEqual([]);
-    expect(entriesOf({ Entries: {} })).toEqual([]);
-    expect(entriesOf({ Entries: { Entry: { a: 1 } } })).toEqual([{ a: 1 }]);
-    expect(entriesOf({ Entries: { Entry: [{ a: 1 }, { a: 2 }] } })).toHaveLength(2);
+describe('createUkrposhtaPublicClient', () => {
+  it('mounts tracking and the classifier, each with its own bearer', async () => {
+    const mock = createMockTransport();
+    mock.on({ method: 'GET', path: '/status-tracking/0.0.1/statuses', respond: ok([]) });
+    mock.on({ method: 'GET', path: `${BASE}/get_regions_by_region_ua`, respond: ok({}) });
+    const client = createUkrposhtaPublicClient({
+      transport: mock.transport,
+      trackingBearer: 'tracking-bearer',
+      classifierBearer: 'ecom-bearer',
+      retry: false,
+    });
+    await client.tracking.getStatuses('B1');
+    await client.classifier.getRegions({ regionName: 'a' });
+    expect(mock.calls.map(c => c.headers.authorization)).toEqual(['Bearer tracking-bearer', 'Bearer ecom-bearer']);
+  });
+
+  it('sends no Authorization header for a service without a bearer', async () => {
+    const mock = createMockTransport();
+    mock.on({ method: 'GET', path: '/status-tracking/0.0.1/statuses', respond: ok([]) });
+    const client = createUkrposhtaPublicClient({ transport: mock.transport, retry: false });
+    await client.tracking.getStatuses('B1');
+    expect(mock.last().headers.authorization).toBeUndefined();
   });
 });
