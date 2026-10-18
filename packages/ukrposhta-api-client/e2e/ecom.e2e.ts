@@ -1,11 +1,4 @@
-import {
-  AddressesService,
-  ClientsService,
-  LabelsService,
-  PricingService,
-  ShipmentsService,
-  createUkrposhtaContractClient,
-} from '../src';
+import { createUkrposhtaContractClient } from '../src';
 import { describeIf, env, transport } from './env';
 
 describeIf(env.bearer && env.token)('Ukrposhta sandbox: eCom', () => {
@@ -14,12 +7,7 @@ describeIf(env.bearer && env.token)('Ukrposhta sandbox: eCom', () => {
     environment: 'sandbox',
     bearer: env.bearer!,
     counterpartyToken: env.token!,
-  })
-    .use(new AddressesService())
-    .use(new ClientsService())
-    .use(new ShipmentsService())
-    .use(new PricingService())
-    .use(new LabelsService());
+  });
 
   it('creates a shipment, prints its sticker and deletes it', async () => {
     const from = await client.addresses.create({

@@ -11,17 +11,12 @@ import type {
   PostPayRecipientLink,
   ProhibitedPhone,
 } from '../types/client';
-import type { UkrposhtaContractContext } from './base';
+import { ClientsOperations } from '../generated/operations';
 import { WITH_TOKEN } from './base';
 
 /** Clients (`/clients`): senders, recipients and postpay recipients of the counterparty. */
-export class ClientsService {
+export class ClientsService extends ClientsOperations {
   readonly namespace = 'clients' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `POST /clients`. */
   create(client: ClientInput, options?: CallOptions): Promise<Client>;
@@ -85,18 +80,17 @@ export class ClientsService {
   }
 
   /**
-   * `GET /clients/phone`. The Swagger declares a list, the documentation a single client: both are accepted
-   * and the result is always a list.
+   * `GET /clients/phone`. The Swagger declares a list, the documentation one client: the type admits both and the
+   * answer is returned as the service sent it.
    */
-  async getByPhone(phoneNumber: string, countryISO3166 = 'UA', options: CallOptions = {}): Promise<Client[]> {
-    const answer = await this.ctx.http.request<Client | Client[]>({
+  getByPhone(phoneNumber: string, countryISO3166: string, options: CallOptions = {}): Promise<Client | Client[]> {
+    return this.ctx.http.request<Client | Client[]>({
       method: 'GET',
       path: '/clients/phone',
       query: { countryISO3166, phoneNumber },
       meta: WITH_TOKEN,
       signal: options.signal,
     });
-    return Array.isArray(answer) ? answer : [answer];
   }
 
   /** `GET /client-addresses?clientUuid=`. */

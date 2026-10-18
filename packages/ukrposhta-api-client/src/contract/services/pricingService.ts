@@ -1,17 +1,12 @@
 // code and comments in English
 import type { CallOptions } from '../types/common';
 import type { DeliveryPrice, DeliveryPriceRequest, Tariff } from '../types/pricing';
-import type { UkrposhtaContractContext } from './base';
+import { PricingOperations } from '../generated/operations';
 import { WITHOUT_TOKEN } from './base';
 
 /** Tariffs and price calculation (`/dictionaries/tariffs`, `/domestic/delivery-price`). Neither takes the counterparty token. */
-export class PricingService {
+export class PricingService extends PricingOperations {
   readonly namespace = 'pricing' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `GET /dictionaries/tariffs`. */
   listTariffs(options: CallOptions = {}): Promise<Tariff[]> {

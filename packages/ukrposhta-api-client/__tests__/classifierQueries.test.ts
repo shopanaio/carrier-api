@@ -15,11 +15,18 @@ function setup() {
   return { client, last };
 }
 
+const base = '/address-classifier-ws';
+
 describe('ClassifierService queries', () => {
   it('maps every operation to its documented path and parameters', async () => {
     const { client, last } = setup();
     const c = client.classifier;
-    const base = '/address-classifier-ws';
+
+    await c.getRegions({ regionName: 'Kyiv', regionNameEn: 'Kyiv' });
+    expect(last()).toEqual({
+      path: `${base}/get_regions_by_region_ua`,
+      query: { region_name: 'Kyiv', region_name_en: 'Kyiv' },
+    });
 
     await c.getDistricts({ regionId: 286, districtName: 'Podil' });
     expect(last()).toEqual({
@@ -27,8 +34,11 @@ describe('ClassifierService queries', () => {
       query: { region_id: 286, district_ua: 'Podil' },
     });
 
-    await c.getCities({ koatuu: '8000000000' });
-    expect(last().query).toEqual({ koatuu: '8000000000' });
+    await c.getCities({ koatuu: '8000000000', katottg: 'UA1' });
+    expect(last()).toEqual({
+      path: `${base}/get_city_by_region_id_and_district_id_and_city_ua`,
+      query: { koatuu: '8000000000', katottg: 'UA1' },
+    });
 
     await c.getStreets({ cityId: 5, streetName: 'Khoryva' });
     expect(last()).toEqual({
@@ -39,22 +49,13 @@ describe('ClassifierService queries', () => {
     await c.getHouses({ streetId: 9, houseNumber: '40' });
     expect(last()).toEqual({ path: `${base}/get_addr_house_by_street_id`, query: { street_id: 9, housenumber: '40' } });
 
-    await c.getPostOfficesByCity({ regionId: 286, cityId: 1 });
-    expect(last()).toEqual({
-      path: `${base}/get_postoffices_by_city_id`,
-      query: { region_id: 286, city_id: 1 },
-    });
+    await c.getCourierArea('02223');
+    expect(last()).toEqual({ path: `${base}/get_courierarea_by_postindex`, query: { postindex: '02223' } });
 
-    await c.getPostOfficesByLocality({ cityKoatuu: '1', postcode: '01001' });
+    await c.getPostOffices({ postIndex: '01001', cityAdditionalId: 1, districtAdditionalId: 2, regionAdditionalId: 3 });
     expect(last()).toEqual({
-      path: `${base}/get_postoffices_by_postcode_cityid_cityvpzid`,
-      query: { city_koatuu: '1', postcode: '01001' },
-    });
-
-    await c.getNearestPostOffices({ latitude: 50.45, longitude: 30.52, maxDistanceKm: 3 });
-    expect(last()).toEqual({
-      path: `${base}/get_postoffices_by_geolocation`,
-      query: { lat: 50.45, long: 30.52, maxdistance: 3 },
+      path: `${base}/get_postoffices_by_postindex`,
+      query: { pi: '01001', pdCityId: 1, pdDistrictId: 2, pdRegionId: 3 },
     });
 
     await c.getPostOfficeOpenHours({ postcode: '01001', postOfficeId: 5 });
@@ -63,13 +64,31 @@ describe('ClassifierService queries', () => {
       query: { pc: '01001', id: 5 },
     });
 
+    await c.getPostOfficeOpenHoursById({ postOfficeId: 10283 });
+    expect(last()).toEqual({ path: `${base}/get_postoffices_openhours_by_id`, query: { id: 10283 } });
+
     await c.getMobilePostOfficeOpenHours({ techIndex: '12345' });
     expect(last()).toEqual({
       path: `${base}/get_postoffices_mobile_openhours_by_postindex`,
       query: { techindex: '12345' },
     });
 
-    await c.getCityDetailsByPostcode('01001');
+    await c.getNearestPostOffices({ latitude: 50.45, longitude: 30.52, maxDistanceKm: 3 });
+    expect(last()).toEqual({
+      path: `${base}/get_postoffices_by_geolocation`,
+      query: { lat: 50.45, long: 30.52, maxdistance: 3 },
+    });
+
+    await c.getPostOfficesByCity({ regionId: 286, cityId: 1 });
+    expect(last()).toEqual({ path: `${base}/get_postoffices_by_city_id`, query: { region_id: 286, city_id: 1 } });
+
+    await c.getPostOfficesByLocality({ cityKoatuu: '1', postcode: '01001' });
+    expect(last()).toEqual({
+      path: `${base}/get_postoffices_by_postcode_cityid_cityvpzid`,
+      query: { city_koatuu: '1', postcode: '01001' },
+    });
+
+    await c.getCityDetailsByPostcode('01001', 'UA');
     expect(last()).toEqual({
       path: `${base}/get_city_details_by_postcode`,
       query: { postcode: '01001', lang: 'UA' },
@@ -81,22 +100,25 @@ describe('ClassifierService queries', () => {
     await c.getPostcodeByCity(7);
     expect(last()).toEqual({ path: `${base}/get_postcode_by_city_id`, query: { city_id: 7 } });
 
-    await c.searchDistricts({ regionId: 1, name: 'Ky', fuzzy: true });
+    await c.getSubfilialTypes();
+    expect(last()).toEqual({ path: `${base}/get_subfilialtype`, query: {} });
+
+    await c.searchDistricts({ regionId: 1, name: 'Ky', lang: 'UA', fuzzy: true });
     expect(last()).toEqual({
       path: `${base}/get_district_by_name`,
       query: { region_id: 1, district_name: 'Ky', lang: 'UA', fuzzy: 1 },
     });
 
-    await c.searchCities({ regionId: 1, districtId: 2, name: 'Bro', lang: 'RU' });
+    await c.searchCities({ regionId: 1, districtId: 2, name: 'Bro', lang: 'RU', fuzzy: false });
     expect(last()).toEqual({
       path: `${base}/get_city_by_name`,
       query: { region_id: 1, district_id: 2, city_name: 'Bro', lang: 'RU', fuzzy: 0 },
     });
 
-    await c.searchStreets({ cityId: 3, name: 'Khor' });
+    await c.searchStreets({ cityId: 3, name: 'Kho', lang: 'UA', fuzzy: false });
     expect(last()).toEqual({
       path: `${base}/get_street_by_name`,
-      query: { city_id: 3, street_name: 'Khor', lang: 'UA', fuzzy: 0 },
+      query: { city_id: 3, street_name: 'Kho', lang: 'UA', fuzzy: 0 },
     });
   });
 });

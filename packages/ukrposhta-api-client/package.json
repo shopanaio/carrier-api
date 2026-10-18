@@ -1,7 +1,7 @@
 {
   "name": "@shopana/ukrposhta-api-client",
   "version": "0.0.0",
-  "description": "Typed Ukrposhta API client (eCom, status tracking, address classifier) with a carrier-contracts adapter",
+  "description": "Typed Ukrposhta API client: eCom, status tracking and address classifier",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
@@ -14,10 +14,11 @@
   "scripts": {
     "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
     "clean": "rm -rf dist",
-    "type-check": "tsc --noEmit -p tsconfig.json",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc -p tsconfig.tests.json",
     "test": "jest",
     "test:coverage": "jest --coverage",
-    "test:e2e": "jest --config jest.e2e.config.js --passWithNoTests"
+    "test:e2e": "jest --config jest.e2e.config.js --passWithNoTests",
+    "generate": "node scripts/generate-contract.mjs && prettier --write \"src/contract/generated/*.ts\""
   },
   "keywords": [
     "carrier",
@@ -39,8 +40,7 @@
   },
   "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/ukrposhta-api-client#readme",
   "dependencies": {
-    "@shopana/carrier-core": "^0.0.1",
-    "@shopana/carrier-contracts": "^0.0.1"
+    "@shopana/carrier-core": "^0.0.1"
   },
   "exports": {
     ".": {
@@ -57,11 +57,6 @@
       "types": "./dist/contract/index.d.ts",
       "import": "./dist/contract/index.mjs",
       "require": "./dist/contract/index.cjs"
-    },
-    "./adapter": {
-      "types": "./dist/adapter/index.d.ts",
-      "import": "./dist/adapter/index.mjs",
-      "require": "./dist/adapter/index.cjs"
     },
     "./package.json": "./package.json"
   },

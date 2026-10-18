@@ -1,5 +1,5 @@
 // code and comments in English
-import { bearer, createClient, createHttpClient } from '@shopana/carrier-core';
+import { bearer, createClient, createFetchTransport, createHttpClient } from '@shopana/carrier-core';
 import type { UkrposhtaPublicConfig } from './config';
 import { ukrposhtaBaseUrls } from '../config';
 import { mapUkrposhtaError } from '../errors';
@@ -19,10 +19,11 @@ function createPublicHttp(config: UkrposhtaPublicConfig, baseUrl: string) {
   return createHttpClient({
     carrier: 'ukrposhta',
     baseUrl: config.baseUrl ?? baseUrl,
-    transport: config.transport,
+    transport: config.transport ?? createFetchTransport(),
     auth: bearer(config.bearer),
     retry: config.retry,
     timeoutMs: config.timeoutMs,
+    logger: config.logger,
     mapError: mapUkrposhtaError,
   });
 }

@@ -1,5 +1,5 @@
 // code and comments in English
-import type { CallOptions } from '../types/common';
+import type { CallOptions, UkrposhtaMessage } from '../types/common';
 import type { PostPayDivideShare } from '../types/reference';
 import type {
   ParcelInput,
@@ -9,17 +9,12 @@ import type {
   ShipmentLifecycleInfo,
   ShipmentPatch,
 } from '../types/shipment';
-import type { UkrposhtaContractContext } from './base';
+import { ShipmentsOperations } from '../generated/operations';
 import { WITHOUT_TOKEN, WITH_TOKEN } from './base';
 
 /** Shipments (`/shipments`). */
-export class ShipmentsService {
+export class ShipmentsService extends ShipmentsOperations {
   readonly namespace = 'shipments' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /**
    * `POST /shipments`. The price is calculated on creation and returned as `deliveryPrice`.
@@ -133,16 +128,15 @@ export class ShipmentsService {
     });
   }
 
-  /** `GET /shipments/barcode/{barcode}/isPriceChangedInPostOffice`: whether the post office corrected the price. */
-  async isPriceChangedInPostOffice(barcode: string, options: CallOptions = {}): Promise<boolean> {
-    const answer = await this.ctx.http.request<{ message: string }>({
+  /** `GET /shipments/barcode/{barcode}/isPriceChangedInPostOffice`: answers `{ message: 'isPriceChangedInPostOffice: true|false' }`. */
+  isPriceChangedInPostOffice(barcode: string, options: CallOptions = {}): Promise<UkrposhtaMessage> {
+    return this.ctx.http.request<UkrposhtaMessage>({
       method: 'GET',
       path: '/shipments/barcode/{barcode}/isPriceChangedInPostOffice',
       pathParams: { barcode },
       meta: WITH_TOKEN,
       signal: options.signal,
     });
-    return /true/i.test(answer.message);
   }
 
   /** Shipments of a sender whose price changed in a post office within `[from, to]` (`YYYY-MM-DD`): barcodes or uuids. */

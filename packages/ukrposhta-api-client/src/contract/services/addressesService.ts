@@ -1,17 +1,12 @@
 // code and comments in English
 import type { Address, AddressInput, RouteAvailability } from '../types/address';
 import type { CallOptions } from '../types/common';
-import type { UkrposhtaContractContext } from './base';
+import { AddressesOperations } from '../generated/operations';
 import { WITHOUT_TOKEN } from './base';
 
 /** Addresses (`/addresses`). Addresses are created first and referenced by id from clients and shipments. */
-export class AddressesService {
+export class AddressesService extends AddressesOperations {
   readonly namespace = 'addresses' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `POST /addresses`. The postcode is checked against the post office registry. */
   create(address: AddressInput, options: CallOptions = {}): Promise<Address> {

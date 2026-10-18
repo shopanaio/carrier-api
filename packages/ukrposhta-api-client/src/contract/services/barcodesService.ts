@@ -2,19 +2,14 @@
 import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
 import type { CallOptions } from '../types/common';
 import type { BarcodeInfo } from '../types/reference';
-import type { UkrposhtaContractContext } from './base';
+import { BarcodesOperations } from '../generated/operations';
 import { WITH_TOKEN } from './base';
 
 export const BARCODES_MAX_PER_REQUEST = 100;
 
 /** Barcode types (`/barcodes`): a shipment, a letter, a delivery notification or a document-back shipment. */
-export class BarcodesService {
+export class BarcodesService extends BarcodesOperations {
   readonly namespace = 'barcodes' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `GET /barcodes/{barcode}`. */
   get(barcode: string, options: CallOptions = {}): Promise<BarcodeInfo> {

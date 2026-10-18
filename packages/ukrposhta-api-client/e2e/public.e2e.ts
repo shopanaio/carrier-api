@@ -1,4 +1,4 @@
-import { createUkrposhtaClassifierClient, createUkrposhtaTrackingClient } from '../src';
+import { createUkrposhtaClassifierClient, createUkrposhtaTrackingClient, entriesOf } from '../src';
 import { describeIf, env, transport } from './env';
 
 describeIf(env.trackingBearer && env.knownBarcode)('Ukrposhta: status tracking', () => {
@@ -23,7 +23,7 @@ describeIf(env.bearer)('Ukrposhta: address classifier', () => {
   });
 
   it('finds the post office 01001', async () => {
-    const offices = await client.classifier.getPostOffices({ postIndex: '01001' });
+    const offices = entriesOf(await client.classifier.getPostOffices({ postIndex: '01001' }));
     expect(offices.map(office => office.POSTINDEX)).toContain('01001');
   });
 });

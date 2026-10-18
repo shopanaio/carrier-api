@@ -1,6 +1,7 @@
 // code and comments in English
 import type { BinaryData } from '@shopana/carrier-core';
 import type { CallOptions, StickerSize } from '../types/common';
+import { LabelsOperations } from '../generated/operations';
 import type { UkrposhtaContractContext } from './base';
 import { WITH_TOKEN } from './base';
 
@@ -23,12 +24,10 @@ export interface Form103aOptions extends CallOptions {
   hideDeclaredPrice?: boolean;
 }
 
-export interface Form119Pdf extends CallOptions {
-  /** `page_10x10` for a thermal printer, `page_a4` for A4. */
-  pageSize?: 'page_10x10' | 'page_a4';
-  /** `shipment` (default) or `letter`. */
-  dispatch?: 'shipment' | 'letter';
-}
+/** `page_10x10` for a thermal printer, `page_a4` for A4. */
+export type Form119PageSize = 'page_10x10' | 'page_a4';
+/** `shipment` for shipments, `letter` for domestic letters. */
+export type Form119Dispatch = 'shipment' | 'letter';
 
 const flag = (value: boolean | undefined) => (value === undefined ? undefined : value ? 1 : 0);
 
@@ -44,13 +43,8 @@ function hideQuery(options: StickerHideOptions) {
  * Stickers and printed forms (`/forms/ecom/0.0.1`). Every method resolves with the file as `{ contentType, data }`
  * (a PDF; form 119e / 20e may come as a ZIP archive).
  */
-export class LabelsService {
+export class LabelsService extends LabelsOperations {
   readonly namespace = 'labels' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `GET /shipments/{uuidOrBarcode}/sticker`. */
   getSticker(uuidOrBarcode: string, options: StickerOptions = {}): Promise<BinaryData> {
@@ -152,33 +146,41 @@ export class LabelsService {
     });
   }
 
-  /** `POST /form2-service/sticker-form119`: the updated form 119 of one shipment or delivery notification. */
-  getUpdatedForm119(barcode: string, options: Form119Pdf & { fromNotification?: boolean } = {}): Promise<BinaryData> {
+  /**
+   * `POST /form2-service/sticker-form119`: the updated form 119 of one shipment or delivery notification.
+   * `parent` is true when `barcode` is the primary shipment, false for the delivery notification.
+   */
+  getUpdatedForm119(
+    params: { barcode: string; parent: boolean; pageSize: Form119PageSize; dispatch: Form119Dispatch },
+    options: CallOptions = {},
+  ): Promise<BinaryData> {
     return this.file({
       method: 'POST',
       path: '/form2-service/sticker-form119',
       query: {
-        barcode,
-        // `parent=true`: the barcode is the primary shipment; `false`: the delivery notification.
-        parent: !(options.fromNotification ?? false),
-        pagesize: options.pageSize ?? 'page_10x10',
-        dispatch: options.dispatch ?? 'shipment',
+        barcode: params.barcode,
+        parent: params.parent,
+        pagesize: params.pageSize,
+        dispatch: params.dispatch,
       },
       idempotent: true,
       signal: options.signal,
     });
   }
 
-  /** `POST /form2-service/sticker-form119-group`. */
-  getUpdatedGroupForm119(groupUuid: string, options: Form119Pdf = {}): Promise<BinaryData> {
+  /** `POST /form2-service/sticker-form119-group`: the updated form 119 of a group (`barcode` is the group uuid). */
+  getUpdatedGroupForm119(
+    params: { groupUuid: string; pageSize: Form119PageSize; dispatch: Form119Dispatch; asPdf: boolean },
+    options: CallOptions = {},
+  ): Promise<BinaryData> {
     return this.file({
       method: 'POST',
       path: '/form2-service/sticker-form119-group',
       query: {
-        asPdf: true,
-        barcode: groupUuid,
-        pagesize: options.pageSize ?? 'page_10x10',
-        dispatch: options.dispatch ?? 'shipment',
+        asPdf: params.asPdf,
+        barcode: params.groupUuid,
+        pagesize: params.pageSize,
+        dispatch: params.dispatch,
       },
       idempotent: true,
       signal: options.signal,

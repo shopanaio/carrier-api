@@ -3,7 +3,8 @@ import type { HttpLogger, HttpTransport, RetryOptions, Secret } from '@shopana/c
 import type { UkrposhtaEnvironment } from '../config';
 
 export interface UkrposhtaContractConfig {
-  transport: HttpTransport;
+  /** Defaults to the fetch transport of carrier-core. */
+  transport?: HttpTransport;
   environment?: UkrposhtaEnvironment;
   /** eCom bearer (`PRODUCTION_BEARER_eCom` / `SANDBOX_BEARER_eCom`). */
   bearer: Secret;

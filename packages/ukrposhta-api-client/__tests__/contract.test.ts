@@ -1,17 +1,6 @@
 import type { HttpRequest, HttpResponse, HttpTransport } from '@shopana/carrier-core';
 import { CarrierErrorCategory, isCarrierError } from '@shopana/carrier-core';
-import {
-  AddressesService,
-  BarcodesService,
-  ClientsService,
-  LabelsService,
-  PricingService,
-  ReferenceService,
-  ShipmentGroupsService,
-  ShipmentsService,
-  TransfersService,
-  createUkrposhtaContractClient,
-} from '../src';
+import { createUkrposhtaContractClient } from '../src';
 
 type Answer = Partial<HttpResponse<unknown>> | ((request: HttpRequest) => Partial<HttpResponse<unknown>>);
 
@@ -28,13 +17,7 @@ function setup(answer: Answer = { data: {} }, config: { environment?: 'productio
     counterpartyToken: 'cp-token',
     retry: false,
     ...config,
-  })
-    .use(new AddressesService())
-    .use(new ClientsService())
-    .use(new ShipmentsService())
-    .use(new PricingService())
-    .use(new ShipmentGroupsService())
-    .use(new LabelsService());
+  });
   const last = () => {
     const request = requests[requests.length - 1]!;
     const url = new URL(request.url);
@@ -132,7 +115,7 @@ describe('clients', () => {
     expect(last()).toMatchObject({ method: 'PUT', path: '/ecom/0.0.1/clients/u1' });
     await client.clients.getByExternalId('ext-1');
     expect(last().path).toBe('/ecom/0.0.1/clients/external-id/ext-1');
-    await client.clients.getByPhone('0671231234');
+    await client.clients.getByPhone('0671231234', 'UA');
     expect(last()).toMatchObject({
       path: '/ecom/0.0.1/clients/phone',
       query: { countryISO3166: 'UA', phoneNumber: '0671231234', token: 'cp-token' },
@@ -201,7 +184,7 @@ describe('shipments', () => {
       bearer: 'b',
       counterpartyToken: 't',
       retry: { sleep: async () => undefined },
-    }).use(new ShipmentsService());
+    });
     await expect(client.shipments.create(input)).rejects.toMatchObject({ httpStatus: 503 });
     expect(calls).toHaveLength(1);
   });
@@ -224,11 +207,11 @@ describe('shipments', () => {
     expect(last()).toMatchObject({ method: 'PUT', path: '/ecom/0.0.1/shipments' });
   });
 
-  it('reads the price-change flag', async () => {
+  it('returns the price-change answer as the service sends it', async () => {
     const { client } = setup({ data: { message: 'isPriceChangedInPostOffice: true' } });
-    await expect(client.shipments.isPriceChangedInPostOffice('B1')).resolves.toBe(true);
-    const { client: other } = setup({ data: { message: 'isPriceChangedInPostOffice: false' } });
-    await expect(other.shipments.isPriceChangedInPostOffice('B1')).resolves.toBe(false);
+    await expect(client.shipments.isPriceChangedInPostOffice('B1')).resolves.toEqual({
+      message: 'isPriceChangedInPostOffice: true',
+    });
   });
 
   it('lists price changes within a period', async () => {
@@ -334,17 +317,6 @@ describe('shipment groups', () => {
       query: { status: 'CREATED' },
     });
   });
-
-  it('walks all pages of a group', async () => {
-    const pages: Record<string, unknown[]> = { 1: [{ uuid: 'a' }, { uuid: 'b' }], 2: [{ uuid: 'c' }] };
-    const { client, requests } = setup(request => ({ data: pages[String(request.query?.page)] ?? [] }));
-    const seen: string[] = [];
-    for await (const shipment of client.shipmentGroups.iterateShipments('g1', { size: 2 })) {
-      seen.push((shipment as { uuid: string }).uuid);
-    }
-    expect(seen).toEqual(['a', 'b', 'c']);
-    expect(requests).toHaveLength(2);
-  });
 });
 
 describe('labels', () => {
@@ -396,13 +368,18 @@ describe('labels', () => {
 
   it('requests the updated form 119', async () => {
     const { client, last } = setup({ data: pdf });
-    await client.labels.getUpdatedForm119('B1', { fromNotification: true, pageSize: 'page_a4' });
+    await client.labels.getUpdatedForm119({ barcode: 'B1', parent: false, pageSize: 'page_a4', dispatch: 'shipment' });
     expect(last()).toMatchObject({
       method: 'POST',
       path: '/forms/ecom/0.0.1/form2-service/sticker-form119',
       query: { barcode: 'B1', parent: false, pagesize: 'page_a4', dispatch: 'shipment' },
     });
-    await client.labels.getUpdatedGroupForm119('g1');
+    await client.labels.getUpdatedGroupForm119({
+      groupUuid: 'g1',
+      asPdf: true,
+      pageSize: 'page_10x10',
+      dispatch: 'shipment',
+    });
     expect(last()).toMatchObject({
       path: '/forms/ecom/0.0.1/form2-service/sticker-form119-group',
       query: { asPdf: true, barcode: 'g1', pagesize: 'page_10x10' },
@@ -431,7 +408,7 @@ describe('errors', () => {
       bearer: 'secret-bearer',
       counterpartyToken: 'secret-token',
       logger: event => events.push(JSON.stringify(event)),
-    }).use(new ShipmentsService());
+    });
     await client.shipments.get('u1');
     expect(events.length).toBeGreaterThan(0);
     expect(events.join('')).not.toContain('secret-bearer');
@@ -446,12 +423,7 @@ describe('reference data, barcodes and transfers', () => {
       requests.push(request);
       return { status: 200, headers: {}, data: [] };
     }) as HttpTransport;
-    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false })
-      .use(new ReferenceService())
-      .use(new BarcodesService())
-      .use(new TransfersService())
-      .use(new ShipmentsService())
-      .use(new ShipmentGroupsService());
+    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false });
     const last = () => {
       const request = requests[requests.length - 1]!;
       return { path: new URL(request.url).pathname, query: request.query };
@@ -485,11 +457,7 @@ describe('reference data, barcodes and transfers', () => {
       queries.push(request.query);
       return { status: 200, headers: {}, data: {} };
     }) as HttpTransport;
-    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false })
-      .use(new ReferenceService())
-      .use(new TransfersService())
-      .use(new ShipmentsService())
-      .use(new BarcodesService());
+    const client = createUkrposhtaContractClient({ transport, bearer: 'b', counterpartyToken: 't', retry: false });
     await client.reference.listBanks();
     await client.transfers.getPostPayStatus('B1');
     await client.shipments.getLifecycle('B1');

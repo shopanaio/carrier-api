@@ -1,8 +1,8 @@
 // code and comments in English
-import { CarrierError, CarrierErrorCategory } from '@shopana/carrier-core';
 import type { ClientContext } from '@shopana/carrier-core';
 import type { UkrposhtaPublicConfig } from '../config';
 import type {
+  UkrposhtaExtendedStatusEvent,
   UkrposhtaLanguage,
   UkrposhtaPhoneStatusRequest,
   UkrposhtaRoute,
@@ -18,7 +18,7 @@ export interface TrackingCallOptions {
   signal?: AbortSignal;
 }
 
-/** Documented limits per request. */
+/** Documented limits per request. The client does not enforce them: the service answers an error. */
 export const TRACKING_MAX_BARCODES_ALL_STATUSES = 50;
 export const TRACKING_MAX_BARCODES_LAST_STATUS = 100;
 
@@ -51,9 +51,8 @@ export class TrackingService {
     });
   }
 
-  /** `POST /statuses` — every event of up to 50 shipments, flat and ordered by barcode. */
+  /** `POST /statuses` — every event of up to 50 shipments, as one flat list. */
   getStatusesBatch(barcodes: string[], options: TrackingCallOptions = {}): Promise<UkrposhtaStatusEvent[]> {
-    assertBarcodes(barcodes, TRACKING_MAX_BARCODES_ALL_STATUSES);
     return this.post<UkrposhtaStatusEvent[]>('/statuses', barcodes, options);
   }
 
@@ -62,13 +61,11 @@ export class TrackingService {
     barcodes: string[],
     options: TrackingCallOptions = {},
   ): Promise<UkrposhtaStatusesWithNotFound> {
-    assertBarcodes(barcodes, TRACKING_MAX_BARCODES_ALL_STATUSES);
     return this.post<UkrposhtaStatusesWithNotFound>('/statuses/with-not-found', barcodes, options);
   }
 
   /** `POST /statuses/last` — the latest event of up to 100 shipments. */
   getLastStatusesBatch(barcodes: string[], options: TrackingCallOptions = {}): Promise<UkrposhtaStatusEvent[]> {
-    assertBarcodes(barcodes, TRACKING_MAX_BARCODES_LAST_STATUS);
     return this.post<UkrposhtaStatusEvent[]>('/statuses/last', barcodes, options);
   }
 
@@ -77,8 +74,20 @@ export class TrackingService {
     barcodes: string[],
     options: TrackingCallOptions = {},
   ): Promise<UkrposhtaStatusesWithNotFound> {
-    assertBarcodes(barcodes, TRACKING_MAX_BARCODES_LAST_STATUS);
     return this.post<UkrposhtaStatusesWithNotFound>('/statuses/last/with-not-found', barcodes, options);
+  }
+
+  /** `GET /extra-statuses/inside/last` — the latest event by barcode and phone, with sizes, weight and payment data. */
+  getLastStatusInsideByPhone(
+    request: UkrposhtaPhoneStatusRequest,
+    options: Pick<TrackingCallOptions, 'signal'> = {},
+  ): Promise<UkrposhtaExtendedStatusEvent> {
+    return this.ctx.http.request<UkrposhtaExtendedStatusEvent>({
+      method: 'GET',
+      path: '/extra-statuses/inside/last',
+      query: { barcode: request.barcode, recipientPhoneNumber: request.recipientPhoneNumber },
+      signal: options.signal,
+    });
   }
 
   /** `GET /extra-statuses/last` — the latest event by barcode and the recipient's phone number. */
@@ -99,7 +108,6 @@ export class TrackingService {
     requests: UkrposhtaPhoneStatusRequest[],
     options: Pick<TrackingCallOptions, 'signal'> = {},
   ): Promise<UkrposhtaStatusEvent[]> {
-    if (requests.length === 0) throw validationError('At least one barcode and phone pair is required');
     return this.ctx.http.request<UkrposhtaStatusEvent[]>({
       method: 'POST',
       path: '/extra-statuses/last',
@@ -131,18 +139,4 @@ export class TrackingService {
       signal: options.signal,
     });
   }
-}
-
-function assertBarcodes(barcodes: string[], max: number): void {
-  if (barcodes.length === 0) throw validationError('At least one barcode is required');
-  if (barcodes.length > max) throw validationError(`At most ${max} barcodes per request, got ${barcodes.length}`);
-}
-
-function validationError(message: string): CarrierError {
-  return new CarrierError({
-    carrier: 'ukrposhta',
-    code: 'INVALID_REQUEST',
-    message,
-    category: CarrierErrorCategory.Validation,
-  });
 }

@@ -1,7 +1,7 @@
 // code and comments in English
 import type { CallOptions } from '../types/common';
 import type { CourierOrder, CourierOrderInput, CourierOrderStatusEntry } from '../types/courier';
-import type { UkrposhtaContractContext } from './base';
+import { CourierOperations } from '../generated/operations';
 import { WITH_TOKEN } from './base';
 
 /**
@@ -9,13 +9,8 @@ import { WITH_TOKEN } from './base';
  * The operator calls the sender to confirm; hand the shipments and their documents to the courier.
  * A DOCUMENT shipment with a list of enclosed items cannot be ordered for pickup.
  */
-export class CourierService {
+export class CourierService extends CourierOperations {
   readonly namespace = 'courier' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `POST /courier-service/orders`. */
   createOrder(order: CourierOrderInput, options: CallOptions = {}): Promise<CourierOrder> {

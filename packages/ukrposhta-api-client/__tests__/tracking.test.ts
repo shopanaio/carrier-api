@@ -1,5 +1,11 @@
 import { CarrierErrorCategory, isCarrierError } from '@shopana/carrier-core';
-import { createUkrposhtaTrackingClient, effectiveEventCode, lifecycleStatusOf } from '../src';
+import {
+  TRACKING_MAX_BARCODES_ALL_STATUSES,
+  TRACKING_MAX_BARCODES_LAST_STATUS,
+  createUkrposhtaTrackingClient,
+  effectiveEventCode,
+  lifecycleStatusOf,
+} from '../src';
 import { statusEvent } from './helpers/fixtures';
 import { createMockTransport, fail, ok } from './helpers/mock';
 
@@ -146,15 +152,39 @@ describe('TrackingService', () => {
     expect(batchAttempts).toBe(2);
   });
 
-  it('rejects empty and oversized batches before sending', () => {
+  it('reads the extended status by barcode and phone', async () => {
     const { mock, client } = setup();
-    expect(() => client.tracking.getStatusesBatch([])).toThrow(/At least one barcode/);
-    expect(() => client.tracking.getStatusesBatch(Array.from({ length: 51 }, (_, i) => `B${i}`))).toThrow(/At most 50/);
-    expect(() => client.tracking.getLastStatusesBatch(Array.from({ length: 101 }, (_, i) => `B${i}`))).toThrow(
-      /At most 100/,
+    const extended = {
+      ...statusEvent('B1', '41000'),
+      height: 17,
+      length: 32,
+      weight: 7650,
+      width: 31,
+      payment: 0,
+      sendingPaymentSum: 8646,
+      sendingPayerCode: 6,
+      indexFrom: '20701',
+      indexTo: '20701',
+      addresseePhoneNum: '0973467698',
+    };
+    mock.on({ method: 'GET', path: `${BASE}/extra-statuses/inside/last`, respond: ok(extended) });
+    expect(
+      await client.tracking.getLastStatusInsideByPhone({ barcode: 'B1', recipientPhoneNumber: '380973467698' }),
+    ).toEqual(extended);
+    expect(mock.last().query).toEqual({ barcode: 'B1', recipientPhoneNumber: '380973467698' });
+  });
+
+  it('does not check batch sizes: the service answers for them', async () => {
+    const { mock, client } = setup();
+    mock.on({ method: 'POST', path: `${BASE}/statuses`, respond: fail(400, 'UPE01002', 'Too many barcodes') });
+    await expect(client.tracking.getStatusesBatch(Array.from({ length: 51 }, (_, i) => `B${i}`))).rejects.toMatchObject(
+      {
+        code: 'UPE01002',
+      },
     );
-    expect(() => client.tracking.getStatusesByPhoneBatch([])).toThrow(/At least one/);
-    expect(mock.calls).toHaveLength(0);
+    expect(mock.calls).toHaveLength(1);
+    expect(TRACKING_MAX_BARCODES_ALL_STATUSES).toBe(50);
+    expect(TRACKING_MAX_BARCODES_LAST_STATUS).toBe(100);
   });
 });
 

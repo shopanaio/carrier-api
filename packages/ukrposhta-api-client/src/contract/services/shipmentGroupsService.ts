@@ -8,20 +8,15 @@ import type {
   ShipmentGroupInput,
 } from '../types/group';
 import type { Shipment, ShipmentInput } from '../types/shipment';
-import type { UkrposhtaContractContext } from './base';
+import { ShipmentGroupsOperations } from '../generated/operations';
 import { WITH_TOKEN } from './base';
 
 /**
  * Shipment groups (`/shipment-groups`): the register of form 103a. A group closes when its shipments are registered
  * at a post office; shipments can be added and removed only before that. A group holds up to 500 shipments.
  */
-export class ShipmentGroupsService {
+export class ShipmentGroupsService extends ShipmentGroupsOperations {
   readonly namespace = 'shipmentGroups' as const;
-  private ctx!: UkrposhtaContractContext;
-
-  attach(ctx: UkrposhtaContractContext) {
-    this.ctx = ctx;
-  }
 
   /** `POST /shipment-groups`. */
   create(group: ShipmentGroupInput, options?: CallOptions): Promise<ShipmentGroup>;
@@ -189,20 +184,6 @@ export class ShipmentGroupsService {
       meta: WITH_TOKEN,
       signal: options.signal,
     });
-  }
-
-  /** Walks every page of a group's shipments. */
-  async *iterateShipments(
-    groupUuid: string,
-    query: Omit<GroupShipmentsQuery, 'page'> = {},
-    options: CallOptions = {},
-  ): AsyncGenerator<Shipment> {
-    const size = query.size ?? 100;
-    for (let page = 1; ; page += 1) {
-      const shipments = await this.listShipments(groupUuid, { ...query, size, page }, options);
-      yield* shipments;
-      if (shipments.length < size) return;
-    }
   }
 }
 

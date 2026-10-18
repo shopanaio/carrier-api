@@ -1,10 +1,31 @@
 // code and comments in English
-import { bearer, composeAuth, createClient, createHttpClient, queryParam, when } from '@shopana/carrier-core';
+import {
+  bearer,
+  composeAuth,
+  createClient,
+  createFetchTransport,
+  createHttpClient,
+  queryParam,
+  when,
+} from '@shopana/carrier-core';
 import type { AuthStrategy, HttpClient } from '@shopana/carrier-core';
 import { ukrposhtaBaseUrls } from '../config';
 import { mapUkrposhtaError } from '../errors';
 import type { UkrposhtaContractConfig } from './config';
+import { AddressesService } from './services/addressesService';
 import type { UkrposhtaContractContext } from './services/base';
+import { BarcodesService } from './services/barcodesService';
+import { ClientsService } from './services/clientsService';
+import { CourierService } from './services/courierService';
+import { DeliveryNotificationsService } from './services/deliveryNotificationsService';
+import { LabelsService } from './services/labelsService';
+import { ManagementService } from './services/managementService';
+import { PricingService } from './services/pricingService';
+import { ReferenceService } from './services/referenceService';
+import { ShipmentGroupsService } from './services/shipmentGroupsService';
+import { ShipmentsService } from './services/shipmentsService';
+import { TransfersService } from './services/transfersService';
+import { CountriesOperations, DocumentBackOperations, LettersOperations } from './generated/operations';
 
 export * from './config';
 export type { UkrposhtaContractContext } from './services/base';
@@ -19,6 +40,10 @@ export * from './services/managementService';
 export * from './services/transfersService';
 export * from './services/barcodesService';
 export * from './services/referenceService';
+export * from './services/deliveryNotificationsService';
+export { GENERATED_OPERATIONS } from './generated/operations';
+export type { OperationInfo } from './generated/operations';
+export * as ApiTypes from './generated/types';
 export * from './types/common';
 export * from './types/address';
 export * from './types/client';
@@ -44,7 +69,7 @@ function createHttp(config: UkrposhtaContractConfig, baseUrl: string): HttpClien
   return createHttpClient({
     carrier: 'ukrposhta',
     baseUrl,
-    transport: config.transport,
+    transport: config.transport ?? createFetchTransport(),
     auth: createAuth(config),
     retry: config.retry,
     timeoutMs: config.timeoutMs,
@@ -57,8 +82,10 @@ function createHttp(config: UkrposhtaContractConfig, baseUrl: string): HttpClien
 }
 
 /**
- * Client for the credentialed eCom API and the forms service. Add the services you need with `.use(...)`:
- * `createUkrposhtaContractClient(config).use(new ShipmentsService()).use(new LabelsService())`.
+ * Client for the credentialed eCom API and the forms service, with every service mounted:
+ * `addresses`, `clients`, `shipments`, `pricing`, `shipmentGroups`, `labels`, `courier`, `management`, `transfers`,
+ * `barcodes`, `reference`, `deliveryNotifications`, `documentBack`, `letters`, `countries`.
+ * Uses the fetch transport of carrier-core unless `transport` is given.
  */
 export function createUkrposhtaContractClient(config: UkrposhtaContractConfig) {
   const urls = ukrposhtaBaseUrls(config.environment ?? 'production');
@@ -67,5 +94,22 @@ export function createUkrposhtaContractClient(config: UkrposhtaContractConfig) {
     forms: createHttp(config, config.formsBaseUrl ?? urls.forms),
     config,
   };
-  return createClient(ctx);
+  return createClient(ctx)
+    .use(new AddressesService())
+    .use(new ClientsService())
+    .use(new ShipmentsService())
+    .use(new PricingService())
+    .use(new ShipmentGroupsService())
+    .use(new LabelsService())
+    .use(new CourierService())
+    .use(new ManagementService())
+    .use(new TransfersService())
+    .use(new BarcodesService())
+    .use(new ReferenceService())
+    .use(new DeliveryNotificationsService())
+    .use(new DocumentBackOperations())
+    .use(new LettersOperations())
+    .use(new CountriesOperations());
 }
+
+export type UkrposhtaContractClient = ReturnType<typeof createUkrposhtaContractClient>;

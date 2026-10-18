@@ -1,4 +1,5 @@
 // code and comments in English
+import type { InternationalDataDto, PackageType, ParcelItemDto } from '../generated/types';
 import type { Client } from './client';
 import type {
   DeliveryType,
@@ -33,12 +34,30 @@ export interface ParcelInput {
   parcelNumber?: number;
   /** Cash on delivery of this parcel in a multi-parcel shipment; the sum must equal the shipment's `postPay`. */
   postPay?: number;
+  /** Packaging by the post office. */
+  properties?: ParcelProperties;
+  /** International shipments and DOCUMENT shipments with a description of the contents. */
+  parcelItems?: ParcelItemDto[] | null;
+  contentsType?: 'DOCS' | 'GOODS';
+}
+
+/** Packaging data of a parcel (documentation of 02.09.2026, section 4, packaging examples). */
+export interface ParcelProperties {
+  /** Packaging price in UAH. */
+  packagingPrice?: number;
+  /** Packaging material code (KMAT) from the carrier's packaging list. */
+  KMAT?: string;
+}
+
+/** Shipment-level properties. */
+export interface ShipmentProperties {
+  /** True: the recipient pays for the packaging. */
+  packagingPaidByRecipient?: boolean;
 }
 
 export interface Parcel extends ParcelInput {
   uuid: string;
   barcode: string;
-  parcelItems: unknown[] | null;
   autoSortingLine?: boolean | null;
 }
 
@@ -96,6 +115,13 @@ export interface ShipmentInput {
   ascentToTheFloor?: boolean;
   listOfEnclosedItems?: boolean;
   shipmentGroupUuid?: string;
+  properties?: ShipmentProperties;
+  /** International shipments (see the international documentation): package type, currency and customs data. */
+  packageType?: PackageType;
+  international?: boolean;
+  internationalData?: InternationalDataDto;
+  currencyCode?: string;
+  postPayCurrencyCode?: string;
 }
 
 /** Body of `PUT /shipments/{uuid}`: any subset of the creation fields; a parcel is addressed by `uuid` or `barcode`. */

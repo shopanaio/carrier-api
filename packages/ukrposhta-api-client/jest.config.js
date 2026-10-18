@@ -8,7 +8,7 @@ module.exports = {
   },
   moduleNameMapper: {
     // Platform packages are tested from source, so no build is needed before `jest`.
-    '^@shopana/(carrier-core|carrier-contracts)$': '<rootDir>/../$1/src',
+    '^@shopana/(carrier-core)$': '<rootDir>/../$1/src',
   },
   collectCoverageFrom: ['src/**/*.ts', '!src/**/index.ts'],
   coverageDirectory: 'coverage',

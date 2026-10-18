@@ -21,6 +21,22 @@ export interface UkrposhtaStatusEvent {
   indexOrder: number | null;
 }
 
+/** Answer of `GET /extra-statuses/inside/last`: the event plus sizes (cm), weight (g) and payment data of the shipment. */
+export interface UkrposhtaExtendedStatusEvent extends UkrposhtaStatusEvent {
+  height: number | null;
+  length: number | null;
+  weight: number | null;
+  width: number | null;
+  /** Amount paid for the shipment. */
+  payment: number | null;
+  sendingPaymentSum: number | null;
+  /** Who pays for sending: a payer code of the carrier. */
+  sendingPayerCode: number | null;
+  indexFrom: string | null;
+  indexTo: string | null;
+  addresseePhoneNum: string | null;
+}
+
 export interface UkrposhtaStatusesWithNotFound {
   found: Record<string, UkrposhtaStatusEvent[]>;
   notFound: string[];

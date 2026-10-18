@@ -8,7 +8,7 @@ module.exports = {
     '^.+\\.ts$': ['ts-jest', { tsconfig: { module: 'commonjs', esModuleInterop: true, isolatedModules: true } }],
   },
   moduleNameMapper: {
-    '^@shopana/(carrier-core|carrier-contracts)$': '<rootDir>/../$1/src',
+    '^@shopana/(carrier-core)$': '<rootDir>/../$1/src',
   },
   testTimeout: 60000,
 };
