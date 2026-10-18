@@ -28,7 +28,7 @@
     "changeset": "changeset",
     "changeset:check": "node tools/validate-changesets.mjs",
     "version:packages": "changeset version",
-    "release:stable": "yarn build && yarn pack:dry-run && node tools/assert-stable-release.mjs && changeset publish --tag latest",
+    "release": "node tools/release.mjs",
     "lint": "eslint \"packages/*/src/**/*.ts\" && yarn workspace @shopana/novaposhta-mcp-server lint",
     "lint:fix": "eslint \"packages/*/src/**/*.ts\" --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",

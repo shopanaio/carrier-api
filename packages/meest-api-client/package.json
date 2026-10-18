@@ -1,6 +1,6 @@
 {
   "name": "@shopana/meest-api-client",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "Typed Meest (Meest Express, Ukraine) API clients: no-auth public API (branches, geo) and contract openAPI v3.0, built on @shopana/carrier-core",
   "main": "dist/index.cjs",
   "module": "dist/index.mjs",
@@ -42,7 +42,7 @@
   },
   "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/meest-api-client#readme",
   "dependencies": {
-    "@shopana/carrier-core": "^0.0.1"
+    "@shopana/carrier-core": "^1.0.0"
   },
   "exports": {
     ".": {

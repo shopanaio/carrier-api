@@ -1,5 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 
+// Majors are only valid while a Changesets pre-release (e.g. the 2.0 line) is being prepared.
+const allowMajor = existsSync('.changeset/pre.json');
 const minimumSummaryLength = 20;
 const forbiddenSummaryPattern = /\b(todo|tbd|wip|placeholder)\b/i;
 
@@ -80,7 +82,7 @@ function validateChangeset(changesetPath, contents, knownPackages, validationErr
   if (!releases) {
     validationErrors.push({
       path: changesetPath,
-      message: 'Changeset frontmatter must contain package names with patch or minor release types.',
+      message: 'Changeset frontmatter must contain package names with patch, minor or major release types.',
     });
     return [];
   }
@@ -93,7 +95,7 @@ function validateChangeset(changesetPath, contents, knownPackages, validationErr
       });
     }
 
-    if (release.type === 'major') {
+    if (release.type === 'major' && !allowMajor) {
       validationErrors.push({
         path: changesetPath,
         message: 'Major changesets are not allowed. Use patch or minor.',
@@ -118,7 +120,7 @@ function validateChangeset(changesetPath, contents, knownPackages, validationErr
   }
 
   return releases
-    .filter(release => release.type !== 'major' && knownPackages.has(release.name))
+    .filter(release => (allowMajor || release.type !== 'major') && knownPackages.has(release.name))
     .map(release => release.name);
 }
 

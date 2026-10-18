@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - release/2.0
     paths:
       - '.changeset/**'
       - 'packages/**/package.json'
@@ -113,9 +114,10 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn version:packages
-          publish: yarn release:stable
+          publish: yarn release
           title: "chore: version packages"
           commit: "chore: version packages"
           createGithubReleases: true
         env:
           GITHUB_TOKEN: ${{ secrets.CHANGESETS_TOKEN || secrets.GITHUB_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
