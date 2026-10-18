@@ -1,0 +1,90 @@
+{
+  "name": "@shopana/ukrposhta-api-client",
+  "version": "0.0.0",
+  "description": "Typed Ukrposhta API client with a carrier-contracts adapter and a contract simulator",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "contracts/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "carrier",
+    "carrier-api",
+    "shipping",
+    "logistics",
+    "ukrposhta",
+    "typescript"
+  ],
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/ukrposhta-api-client"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/ukrposhta-api-client#readme",
+  "dependencies": {
+    "@shopana/carrier-core": "^0.0.1",
+    "@shopana/carrier-contracts": "^0.0.1"
+  },
+  "peerDependencies": {
+    "@shopana/carrier-testing": ">=0.0.1 <1.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@shopana/carrier-testing": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@shopana/carrier-testing": "^0.0.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./public": {
+      "types": "./dist/public/index.d.ts",
+      "import": "./dist/public/index.mjs",
+      "require": "./dist/public/index.cjs"
+    },
+    "./contract": {
+      "types": "./dist/contract/index.d.ts",
+      "import": "./dist/contract/index.mjs",
+      "require": "./dist/contract/index.cjs"
+    },
+    "./adapter": {
+      "types": "./dist/adapter/index.d.ts",
+      "import": "./dist/adapter/index.mjs",
+      "require": "./dist/adapter/index.cjs"
+    },
+    "./simulator": {
+      "types": "./dist/simulator/index.d.ts",
+      "import": "./dist/simulator/index.mjs",
+      "require": "./dist/simulator/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
