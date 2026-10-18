@@ -14,6 +14,7 @@ import {
 } from '../src';
 import type { ClientInput } from '../src';
 import { createUkrposhtaAdapter, kyivLocalToIso, ukrposhtaStatusMap } from '../src/adapter';
+import { samePhone } from '../src/adapter/mapping';
 import { addressFrom, clientFrom, shipmentFrom, statusEvent } from './helpers/fixtures';
 import { createMockTransport, fail, ok } from './helpers/mock';
 import type { MockCall } from './helpers/mock';
@@ -192,6 +193,18 @@ describe('tracking', () => {
 
   it('keeps unknown codes as unknown', () => {
     expect(ukrposhtaStatusMap('12345')).toBe('unknown');
+  });
+});
+
+describe('phone comparison', () => {
+  it('keeps the country code', () => {
+    expect(samePhone('+380671234567', '0671234567')).toBe(true);
+    expect(samePhone('380671234567', '+38 (067) 123-45-67')).toBe(true);
+    expect(samePhone('+380671234567', '671234567')).toBe(true);
+    expect(samePhone('+380671234567', '+48671234567')).toBe(false);
+    expect(samePhone('+48671234567', '+48671234567')).toBe(true);
+    expect(samePhone('', '')).toBe(false);
+    expect(samePhone(undefined, '0671234567')).toBe(false);
   });
 });
 
@@ -554,6 +567,120 @@ describe('createShipment', () => {
     mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
     const { adapter } = build(mock);
     await adapter.createShipment(shipmentInput);
+    expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)).toHaveLength(0);
+  });
+
+  it('pays cash on delivery of a sole proprietor to the bank account', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await adapter.createShipment({
+      ...shipmentInput,
+      options: {
+        cashOnDelivery: { amount: money(300, 'UAH') },
+        extra: { senderBankAccount: 'UA073808050000000026000439806' },
+      },
+    });
+    expect(mock.callsTo('POST', `${ECOM}/clients`)[0]!.body).toMatchObject({
+      type: 'PRIVATE_ENTREPRENEUR',
+      bankAccount: 'UA073808050000000026000439806',
+    });
+    expect(bodyOf(mock.last())).toMatchObject({ postPay: 300, transferPostPayToBankAccount: true });
+  });
+
+  it('refuses cash on delivery for a sole proprietor without a bank account, before writing', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    await expect(
+      adapter.createShipment({ ...shipmentInput, options: { cashOnDelivery: { amount: money(300, 'UAH') } } }),
+    ).rejects.toMatchObject({ field: 'options.extra.senderBankAccount' });
+    // The sender is looked up by external id (a read), and nothing is created.
+    expect(mock.calls.filter(call => call.method !== 'GET')).toHaveLength(0);
+  });
+
+  it('saves a given IBAN on a known client that has none, then ships', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
+    const known = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '0671231234',
+        externalId: 'co-1',
+        type: 'COMPANY',
+        name: 'TOV Limon',
+        edrpou: '40145721',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/co-1`, respond: ok(known) });
+    mock.on({
+      method: 'PUT',
+      path: `${ECOM}/clients/{uuid}`,
+      respond: ok({ ...known, bankAccount: 'UA073808050000000026000439806' }),
+    });
+    const { adapter } = build(mock);
+    await adapter.createShipment({
+      ...shipmentInput,
+      sender: {
+        ...sender,
+        externalId: 'co-1',
+        contact: { company: 'TOV Limon', phone: '0671231234' },
+        taxId: '40145721',
+      },
+      options: {
+        cashOnDelivery: { amount: money(100, 'UAH') },
+        extra: { senderBankAccount: 'UA073808050000000026000439806' },
+      },
+    });
+    expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)[0]!.body).toEqual({
+      bankAccount: 'UA073808050000000026000439806',
+    });
+    expect(bodyOf(mock.last())).toMatchObject({ transferPostPayToBankAccount: true });
+  });
+
+  it('checks the bank account after the sender lookup and before any write, also with an external id', async () => {
+    const mock = ecomMock();
+    const { adapter } = build(mock);
+    const company = { ...sender, contact: { company: 'TOV Limon', phone: '0671231234' }, taxId: '40145721' };
+    await expect(
+      adapter.createShipment({
+        ...shipmentInput,
+        sender: company,
+        options: { cashOnDelivery: { amount: money(100, 'UAH') } },
+      }),
+    ).rejects.toMatchObject({ field: 'options.extra.senderBankAccount' });
+    expect(mock.callsTo('GET', `${ECOM}/clients/external-id/{id}`).length).toBeGreaterThan(0);
+    expect(mock.calls.filter(call => call.method !== 'GET')).toHaveLength(0);
+  });
+
+  it('treats a phone of another country as a different phone', async () => {
+    const mock = ecomMock();
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
+    const existing = clientFrom(
+      {
+        addressId: address.id,
+        phoneNumber: '+380671234567',
+        externalId: 'shop-1',
+        type: 'PRIVATE_ENTREPRENEUR',
+        firstName: 'Petro',
+        lastName: 'Petrenko',
+        tin: '4201030327',
+      },
+      address,
+    );
+    mock.on({ method: 'GET', path: `${ECOM}/clients/external-id/shop-1`, respond: ok(existing) });
+    mock.on({ method: 'PUT', path: `${ECOM}/clients/{uuid}`, respond: ok(existing) });
+    const { adapter } = build(mock);
+    await adapter.createShipment({
+      ...shipmentInput,
+      sender: { ...sender, contact: { ...sender.contact, phone: '+48671234567' } },
+    });
+    expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)[0]!.body).toEqual({ phoneNumber: '+48671234567' });
+    mock.calls.length = 0;
+    // The same Ukrainian number in local format is not a change.
+    await adapter.createShipment({
+      ...shipmentInput,
+      sender: { ...sender, contact: { ...sender.contact, phone: '0671234567' } },
+    });
     expect(mock.callsTo('PUT', `${ECOM}/clients/{uuid}`)).toHaveLength(0);
   });
 

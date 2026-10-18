@@ -218,10 +218,22 @@ export type { Client };
 
 const digits = (value: string | null | undefined) => (value ?? '').replace(/\D/g, '');
 
-/** Whether two phone numbers are the same subscriber (the last nine digits agree). */
+/**
+ * A phone number with its country code: digits only; a Ukrainian local number (`0671234567`, or without the leading
+ * zero) gets `380`. Numbers of other countries keep their own code, so `+48...` never equals `+380...`.
+ */
+export function normalizePhone(value: string | null | undefined): string {
+  const all = digits(value);
+  if (all.startsWith('380') && all.length === 12) return all;
+  if (all.length === 10 && all.startsWith('0')) return `38${all}`;
+  if (all.length === 9) return `380${all}`;
+  return all;
+}
+
+/** Whether two phone numbers are the same subscriber, country code included. */
 export function samePhone(a: string | null | undefined, b: string | null | undefined): boolean {
-  const x = digits(a).slice(-9);
-  return x !== '' && x === digits(b).slice(-9);
+  const x = normalizePhone(a);
+  return x !== '' && x === normalizePhone(b);
 }
 
 /**
@@ -245,5 +257,15 @@ export function contactChanges(client: Client, wanted: ClientInput): Partial<Cli
     changes.phoneNumber = wanted.phoneNumber;
   }
   if (wanted.email !== undefined && norm(client.email) !== norm(wanted.email)) changes.email = wanted.email;
+  if (wanted.bankAccount !== undefined && norm(client.bankAccount) !== norm(wanted.bankAccount)) {
+    changes.bankAccount = wanted.bankAccount;
+  }
   return changes;
+}
+
+/** Companies and sole proprietors receive cash on delivery on a bank account only. */
+export function receivesCodOnBankAccount(party: Party, known?: Client): boolean {
+  if (known) return known.type === 'COMPANY' || known.type === 'PRIVATE_ENTREPRENEUR';
+  if (party.contact.company) return true;
+  return party.taxId !== undefined && /^\d{10}$/.test(party.taxId);
 }

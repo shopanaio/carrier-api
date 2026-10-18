@@ -28,6 +28,7 @@ import {
   findAddress,
   lifecycleToTrackingStatus,
   postcodeOf,
+  receivesCodOnBankAccount,
   samePhone,
   shipmentTypeOf,
   toAddressInput,
@@ -42,29 +43,37 @@ interface Resolved {
   client: Client;
 }
 
-/** Finds or creates the client and address a party stands for, reusing what the consumer already gave Ukrposhta. */
+function refsOf(party: Party) {
+  return party.point.type === 'door'
+    ? party.point.address.carrierRefs?.ukrposhta
+    : party.point.address?.carrierRefs?.ukrposhta;
+}
+
+/** Reads the client a party stands for, if the carrier already has one. Writes nothing. */
+async function findClient(ecom: UkrposhtaEcomClient, party: Party, options: CallOptions): Promise<Client | undefined> {
+  const refs = refsOf(party);
+  if (refs?.clientUuid) return ecom.clients.get(refs.clientUuid, options);
+  if (party.externalId) {
+    return ecom.clients.getByExternalId(party.externalId, options).catch((error: unknown) => {
+      if (isNotFound(error)) return undefined;
+      throw error;
+    });
+  }
+  return undefined;
+}
+
+/** Uses the client found for a party or creates it, with its address, reusing what the consumer already gave Ukrposhta. */
 async function resolveParty(
   ecom: UkrposhtaEcomClient,
   party: Party,
   field: string,
   options: CallOptions,
+  found: Client | undefined,
   bankAccount?: string,
 ): Promise<Resolved> {
-  const refs =
-    party.point.type === 'door'
-      ? party.point.address.carrierRefs?.ukrposhta
-      : party.point.address?.carrierRefs?.ukrposhta;
+  const refs = refsOf(party);
   const wanted = toAddressInput(party, `${field}.point`);
-
-  let client: Client | undefined;
-  if (refs?.clientUuid) {
-    client = await ecom.clients.get(refs.clientUuid, options);
-  } else if (party.externalId) {
-    client = await ecom.clients.getByExternalId(party.externalId, options).catch((error: unknown) => {
-      if (isNotFound(error)) return undefined;
-      throw error;
-    });
-  }
+  let client = found;
 
   if (!client) {
     const addressId = refs?.addressId ? Number(refs.addressId) : (await ecom.addresses.create(wanted, options)).id;
@@ -75,7 +84,7 @@ async function resolveParty(
 
   // A party with an external id (or a known client) is the same person, but the contact may have changed since:
   // the latest contact the consumer gives wins and is written to the client before it is used.
-  const changes = contactChanges(client, toClientInput(party, client.addressId, field));
+  const changes = contactChanges(client, toClientInput(party, client.addressId, field, bankAccount));
   if (Object.keys(changes).length > 0) client = await ecom.clients.update(client.uuid, changes, options);
 
   let address: ClientAddress | undefined = refs?.addressId
@@ -90,6 +99,8 @@ async function resolveParty(
   if (!address) throw invalidInput('The address could not be attached to the client', `${field}.point`);
   return { clientUuid: client.uuid, addressId: address.addressId, client };
 }
+
+const bankPayee = (type: Client['type']) => type === 'COMPANY' || type === 'PRIVATE_ENTREPRENEUR';
 
 /** The sender's IBAN for a new company client, from `options.extra.senderBankAccount`. */
 function bankAccountOf(extra: Record<string, unknown> | undefined): string | undefined {
@@ -141,22 +152,6 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
       assertCodCovered(parcels, cod);
 
       const senderBankAccount = bankAccountOf(input.options?.extra);
-      const senderRefs =
-        input.sender.point.type === 'door'
-          ? input.sender.point.address.carrierRefs?.ukrposhta
-          : input.sender.point.address?.carrierRefs?.ukrposhta;
-      if (
-        cod !== undefined &&
-        input.sender.contact.company &&
-        senderBankAccount === undefined &&
-        !input.sender.externalId &&
-        !senderRefs?.clientUuid
-      ) {
-        throw invalidInput(
-          'A company receives cash on delivery to a bank account: give options.extra.senderBankAccount (an IBAN)',
-          'options.extra.senderBankAccount',
-        );
-      }
       // Validate everything that can be validated locally before the first request, so a bad input leaves nothing behind.
       for (const [party, field] of [
         [input.sender, 'sender'],
@@ -169,16 +164,25 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
         throw invalidInput('reference is at most 64 characters (it becomes the shipment externalId)', 'reference');
       }
 
-      const sender = await resolveParty(ecom, input.sender, 'sender', options, senderBankAccount);
-      const recipient = await resolveParty(ecom, input.recipient, 'recipient', options);
-
-      // A company receives cash on delivery on its bank account, which must be on file.
-      if (cod !== undefined && sender.client.type === 'COMPANY' && !sender.client.bankAccount) {
+      // Read both clients first; nothing is written until the cash-on-delivery payee is known to be payable.
+      const [foundSender, foundRecipient] = await Promise.all([
+        findClient(ecom, input.sender, options),
+        findClient(ecom, input.recipient, options),
+      ]);
+      if (
+        cod !== undefined &&
+        receivesCodOnBankAccount(input.sender, foundSender) &&
+        senderBankAccount === undefined &&
+        !foundSender?.bankAccount
+      ) {
         throw invalidInput(
-          'A company receives cash on delivery to a bank account: give options.extra.senderBankAccount (an IBAN) or use a client that has one',
+          'A company or sole proprietor receives cash on delivery to a bank account: give options.extra.senderBankAccount (an IBAN) or use a client that has one',
           'options.extra.senderBankAccount',
         );
       }
+
+      const sender = await resolveParty(ecom, input.sender, 'sender', options, foundSender, senderBankAccount);
+      const recipient = await resolveParty(ecom, input.recipient, 'recipient', options, foundRecipient);
 
       const body: ShipmentInput = {
         sender: { uuid: sender.clientUuid },
@@ -193,7 +197,7 @@ export function createShipmentsApi(ecom: UkrposhtaEcomClient) {
           ? {
               postPay: cod,
               postPayPaidByRecipient: (input.options?.cashOnDelivery?.payer ?? 'recipient') === 'recipient',
-              ...(sender.client.type === 'COMPANY' ? { transferPostPayToBankAccount: true } : {}),
+              ...(bankPayee(sender.client.type) ? { transferPostPayToBankAccount: true } : {}),
             }
           : {}),
         ...(input.reference ? { externalId: input.reference } : {}),

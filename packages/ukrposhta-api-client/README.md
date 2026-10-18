@@ -108,7 +108,7 @@ How the adapter maps the model:
 - **Dimensions.** Every parcel needs length, width and height: Express and Standard are priced by volume and the adapter does not guess them.
 - **Country.** Only Ukrainian addresses are accepted (`country: 'UA'`); anything else is rejected before a request.
 - **Known parties.** For a party found by `externalId` or `carrierRefs.ukrposhta.clientUuid`, the contact you pass now wins: a changed name, phone or e-mail is written to the stored client before the shipment is created (a field you leave out is never cleared).
-- **Company cash on delivery.** It is paid to a bank account: pass `options.extra.senderBankAccount` (an IBAN) when the company is created by the adapter, or use a client that already has one.
+- **Company and sole-proprietor cash on delivery.** It is paid to a bank account: pass `options.extra.senderBankAccount` (an IBAN) when the company is created by the adapter, or use a client that already has one.
 - **Delivery type.** A door point is `D`, a carrier location `W` (the location id is the post office index): `D2D`, `D2W`, `W2D`, `W2W`.
 - **Service.** `options.service` is `EXPRESS` (default), `STANDARD`, `DOCUMENT` or `CARGO`. Rates without a service return Express and Standard.
 - **Money.** Everything is UAH; another currency is rejected before any request. Cash on delivery must not exceed the declared value of the parcels; the adapter rejects it instead of raising the declared value (which changes the fee).

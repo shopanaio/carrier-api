@@ -244,6 +244,10 @@ describe('schedulePickup', () => {
     await expect(
       adapter.schedulePickup({ ...base, address: { country: 'UA' }, contact: { phone: '0990000000' } }),
     ).rejects.toMatchObject({ field: 'contact.phone' });
+    // The same subscriber digits under another country code is another phone.
+    await expect(
+      adapter.schedulePickup({ ...base, address: { country: 'UA' }, contact: { phone: '+48672802273' } }),
+    ).rejects.toMatchObject({ field: 'contact.phone' });
     expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(0);
     await adapter.schedulePickup({ ...base, address: { country: 'UA', postalCode: '04071', street: 'khoryva' } });
     expect(mock.callsTo('POST', `${ECOM}/courier-service/orders`)).toHaveLength(1);
