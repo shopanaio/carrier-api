@@ -129,6 +129,14 @@ export function createUkrposhtaTrackingSimulator(options: UkrposhtaSimulatorOpti
   return Object.assign(sim, { seed });
 }
 
+function distanceKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+  const rad = (degrees: number) => (degrees * Math.PI) / 180;
+  const a =
+    Math.sin(rad(lat2 - lat1) / 2) ** 2 +
+    Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lng2 - lng1) / 2) ** 2;
+  return 6371 * 2 * Math.asin(Math.sqrt(a));
+}
+
 /** Simulator of the address classifier (`/address-classifier-ws`). Seed rows with `seed`. */
 export function createUkrposhtaClassifierSimulator(options: UkrposhtaSimulatorOptions = {}) {
   const clock = options.clock ?? new SimClock();
@@ -170,7 +178,52 @@ export function createUkrposhtaClassifierSimulator(options: UkrposhtaSimulatorOp
         if (!hasFilter(ctx)) return entries([]);
         const pi = q(ctx, 'pi');
         const pc = q(ctx, 'pc');
-        return entries(postOffices.filter(o => (!pi || o.POSTINDEX === pi) && (!pc || o.POSTCODE === pc)));
+        const city = q(ctx, 'poCityId');
+        return entries(
+          postOffices.filter(
+            o => (!pi || o.POSTINDEX === pi) && (!pc || o.POSTCODE === pc) && (!city || o.POCITY_ID === city),
+          ),
+        );
+      },
+      getNearestPostOffices: ctx => {
+        const lat = Number(q(ctx, 'lat'));
+        const lng = Number(q(ctx, 'long'));
+        const maxKm = Number(q(ctx, 'maxdistance'));
+        const near = postOffices
+          .list()
+          .map(office => ({ office, km: distanceKm(lat, lng, Number(office.LATTITUDE), Number(office.LONGITUDE)) }))
+          .filter(item => Number.isFinite(item.km) && item.km <= maxKm)
+          .sort((a, b) => a.km - b.km);
+        return entries(
+          near.map(({ office, km }) => ({
+            CITYNAME: office.CITY_UA ?? '',
+            DISTANCE: String(Math.round(km)),
+            POSTCODE: office.POSTCODE ?? '',
+            LONGITUDE: office.LONGITUDE ?? '',
+            ADDRESS: office.ADDRESS ?? '',
+            POSTINDEX: office.POSTINDEX ?? '',
+            ID: office.ID ?? '',
+            LATITUDE: office.LATTITUDE ?? '',
+            POSTFILIALNAME: office.PO_SHORT ?? '',
+          })),
+        );
+      },
+      getCityDetailsByPostcode: ctx => {
+        const postcode = q(ctx, 'postcode');
+        return entries(
+          cities
+            .filter(city => city.POSTCODE === postcode)
+            .map(city => ({
+              REGION_ID: city.REGION_ID ?? '',
+              POSTCODE: city.POSTCODE ?? '',
+              DISTRICT_ID: city.DISTRICT_ID ?? '',
+              CITY_ID: city.CITY_ID ?? '',
+              REGION_NAME: city.REGION_UA ?? '',
+              DISTRICT_NAME: city.DISTRICT_UA ?? '',
+              CITY_NAME: city.CITY_UA ?? '',
+              CITYTYPE_NAME: 'м.',
+            })),
+        );
       },
       isCourierArea: ctx => {
         const postindex = String(ctx.query.postindex);

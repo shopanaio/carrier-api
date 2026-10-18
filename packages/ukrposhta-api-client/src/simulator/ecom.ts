@@ -505,6 +505,9 @@ export function createUkrposhtaEcomSimulator(options: UkrposhtaSimulatorOptions 
 
   const addToGroup = (group: ShipmentGroup, shipment: Shipment): Shipment => {
     if (shipment.shipmentGroupUuid === group.uuid) return shipment;
+    if (shipment.lifecycle.status !== 'CREATED') {
+      throw badState('A shipment can be added to a group only until it is registered at a post office');
+    }
     assertCanJoin(group, shipment.type);
     return shipments.upsert(shipment.uuid, { ...shipment, shipmentGroupUuid: group.uuid });
   };

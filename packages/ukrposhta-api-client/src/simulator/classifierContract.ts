@@ -44,6 +44,20 @@ export const ukrposhtaClassifierContract = defineContract({
       responses: ok,
     },
     {
+      id: 'getNearestPostOffices',
+      method: 'GET',
+      path: '/get_postoffices_by_geolocation',
+      params: { query: { ...strings('lat', 'long', 'maxdistance'), required: ['lat', 'long', 'maxdistance'] } },
+      responses: ok,
+    },
+    {
+      id: 'getCityDetailsByPostcode',
+      method: 'GET',
+      path: '/get_city_details_by_postcode',
+      params: { query: { ...strings('postcode', 'lang'), required: ['postcode'] } },
+      responses: ok,
+    },
+    {
       id: 'isCourierArea',
       method: 'GET',
       path: '/get_courierarea_by_postindex',
