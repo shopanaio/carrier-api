@@ -31,10 +31,10 @@ export interface PriceParcel {
   width?: number;
   height?: number;
   declaredPrice?: number;
-  /** Packaging by the post office, paid by the recipient. */
-  packagingPaidByRecipient?: boolean;
-  /** Packaging price in UAH. */
+  /** Packaging price of the parcel in UAH (non-negative, decimal point). */
   packagingPrice?: number;
+  /** The same flag as on the request, for this parcel. */
+  packagingPaidByRecipient?: boolean;
 }
 
 export interface PriceDiscount {
@@ -56,6 +56,8 @@ export interface DeliveryPriceRequest {
   height?: number;
   parcels?: PriceParcel[];
   declaredPrice?: number;
+  /** True: the packaging is paid by the recipient and left out of the price. Allowed on the request or on a parcel. */
+  packagingPaidByRecipient?: boolean;
   postPay?: number;
   transferPostPayToCard?: boolean;
   discounts?: PriceDiscount[];

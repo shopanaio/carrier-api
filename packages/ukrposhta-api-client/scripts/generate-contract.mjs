@@ -17,8 +17,9 @@ const outOps = join(root, 'src/contract/generated/operations.ts');
 
 // Enum values the documentation (09.03.2026 and later) lists and the snapshot lacks.
 const ENUM_ADD = {
-  ShipmentType: ['CARGO'],
-  ShipmentGroupShipmentType: ['CARGO'],
+  ShipmentType: ['CARGO', 'VALUABLE_LETTER'],
+  ShipmentGroupShipmentType: ['CARGO', 'VALUABLE_LETTER'],
+  PackageType: ['EMS', 'PRIME'],
   OnFailReceiveType: ['RETURN_AFTER_5_DAYS'],
   LifecycleStatus: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED'],
   Status1: ['IN_DEPARTMENT', 'STORAGE', 'CANCELED', 'DELETED'],

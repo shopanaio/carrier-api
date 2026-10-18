@@ -1,18 +1,22 @@
 // code and comments in English
+import type { PackageType } from '../generated/types';
 import type { LifecycleStatus, ShipmentType, UkrposhtaDateTime } from './common';
 
 export interface ShipmentGroupInput {
   name: string;
   /** Uuid of the sender client. */
   clientUuid?: string;
-  /** EXPRESS by default; a group holds shipments of one type. */
+  /** EXPRESS by default; a group holds shipments of one type. International groups use `INTERNATIONAL`. */
   type?: ShipmentType;
+  /** International groups: the package type of the shipments the group takes (`PARCEL` takes only parcels). */
+  packageType?: PackageType;
 }
 
 export interface ShipmentGroup {
   uuid: string;
   name: string;
   type: ShipmentType;
+  packageType?: PackageType | null;
   clientUuid: string;
   counterpartyUuid: string;
   counterpartyRegcode: string;

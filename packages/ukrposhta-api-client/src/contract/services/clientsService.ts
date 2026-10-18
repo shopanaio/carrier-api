@@ -1,5 +1,6 @@
 // code and comments in English
 import type { CallOptions, UkrposhtaMessage } from '../types/common';
+import type { FreeShipments } from '../types/extra';
 import type {
   Client,
   ClientAddress,
@@ -88,6 +89,21 @@ export class ClientsService extends ClientsOperations {
       method: 'GET',
       path: '/clients/phone',
       query: { countryISO3166, phoneNumber },
+      meta: WITH_TOKEN,
+      signal: options.signal,
+    });
+  }
+
+  /** `GET /clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}`: the bonus shipments of a client. */
+  getFreeShipments(
+    clientUuidOrPostId: string,
+    freeShipmentsType: string,
+    options: CallOptions = {},
+  ): Promise<FreeShipments[]> {
+    return this.ctx.http.request<FreeShipments[]>({
+      method: 'GET',
+      path: '/clients/{clientUuidOrPostId}/free-shipments/{freeShipmentsType}',
+      pathParams: { clientUuidOrPostId, freeShipmentsType },
       meta: WITH_TOKEN,
       signal: options.signal,
     });

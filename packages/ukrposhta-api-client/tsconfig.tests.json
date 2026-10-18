@@ -4,6 +4,7 @@
     "rootDir": ".",
     "noEmit": true,
     "types": ["jest", "node"],
+    "resolveJsonModule": true,
     "declaration": false,
     "declarationMap": false
   },

@@ -25,7 +25,10 @@ import { ReferenceService } from './services/referenceService';
 import { ShipmentGroupsService } from './services/shipmentGroupsService';
 import { ShipmentsService } from './services/shipmentsService';
 import { TransfersService } from './services/transfersService';
-import { CountriesOperations, DocumentBackOperations, LettersOperations } from './generated/operations';
+import { DocumentBackOperations } from './generated/operations';
+import { CountriesService } from './services/countriesService';
+import { LettersService } from './services/lettersService';
+import { PaymentsService } from './services/paymentsService';
 
 export * from './config';
 export type { UkrposhtaContractContext } from './services/base';
@@ -41,6 +44,9 @@ export * from './services/transfersService';
 export * from './services/barcodesService';
 export * from './services/referenceService';
 export * from './services/deliveryNotificationsService';
+export * from './services/lettersService';
+export * from './services/countriesService';
+export * from './services/paymentsService';
 export { GENERATED_OPERATIONS } from './generated/operations';
 export type { OperationInfo } from './generated/operations';
 export * as ApiTypes from './generated/types';
@@ -53,6 +59,7 @@ export * from './types/group';
 export * from './types/reference';
 export * from './types/courier';
 export * from './types/management';
+export * from './types/extra';
 
 /**
  * Bearer in the header; the counterparty token in the query of the operations that take it
@@ -84,7 +91,7 @@ function createHttp(config: UkrposhtaContractConfig, baseUrl: string): HttpClien
 /**
  * Client for the credentialed eCom API and the forms service, with every service mounted:
  * `addresses`, `clients`, `shipments`, `pricing`, `shipmentGroups`, `labels`, `courier`, `management`, `transfers`,
- * `barcodes`, `reference`, `deliveryNotifications`, `documentBack`, `letters`, `countries`.
+ * `barcodes`, `reference`, `deliveryNotifications`, `documentBack`, `letters`, `countries`, `payments`.
  * Uses the fetch transport of carrier-core unless `transport` is given.
  */
 export function createUkrposhtaContractClient(config: UkrposhtaContractConfig) {
@@ -108,8 +115,9 @@ export function createUkrposhtaContractClient(config: UkrposhtaContractConfig) {
     .use(new ReferenceService())
     .use(new DeliveryNotificationsService())
     .use(new DocumentBackOperations())
-    .use(new LettersOperations())
-    .use(new CountriesOperations());
+    .use(new LettersService())
+    .use(new CountriesService())
+    .use(new PaymentsService());
 }
 
 export type UkrposhtaContractClient = ReturnType<typeof createUkrposhtaContractClient>;

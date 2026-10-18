@@ -1763,7 +1763,7 @@ export type OnFailReceiveType = 'RETURN' | 'RETURN_AFTER_7_DAYS' | 'PROCESS_AS_R
 export type Package = 'LETTER' | 'BANDEROLE' | 'SMALL_BAG' | 'PARCEL' | 'DECLARED_VALUE';
 
 /** Package type */
-export type PackageType = 'LETTER' | 'BANDEROLE' | 'SMALL_BAG' | 'PARCEL' | 'DECLARED_VALUE';
+export type PackageType = 'LETTER' | 'BANDEROLE' | 'SMALL_BAG' | 'PARCEL' | 'DECLARED_VALUE' | 'EMS' | 'PRIME';
 
 /** Delivery notification parent type */
 export type ParentType = 'BELONG_TO_SHIPMENT' | 'BELONG_TO_LETTER';
@@ -1789,7 +1789,8 @@ export type ShipmentType =
   | 'DOCUMENT_BACK'
   | 'INTERNATIONAL_CONSIGNMENT'
   | 'DOCUMENT'
-  | 'CARGO';
+  | 'CARGO'
+  | 'VALUABLE_LETTER';
 
 export type Status = 'RESERVED' | 'USED';
 
@@ -1860,7 +1861,8 @@ export type ShipmentGroupShipmentType =
   | 'DOCUMENT_BACK'
   | 'INTERNATIONAL_CONSIGNMENT'
   | 'DOCUMENT'
-  | 'CARGO';
+  | 'CARGO'
+  | 'VALUABLE_LETTER';
 
 /** Free shipment granted type */
 export type FreeShipmentsGrantedType = 'FREE_SHIPMENTS_GRANTED_AUTOMATICALLY' | 'FREE_SHIPMENTS_GRANTED_MANUALLY';

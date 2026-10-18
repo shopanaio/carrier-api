@@ -34,25 +34,43 @@ export interface ParcelInput {
   parcelNumber?: number;
   /** Cash on delivery of this parcel in a multi-parcel shipment; the sum must equal the shipment's `postPay`. */
   postPay?: number;
-  /** Packaging by the post office. */
-  properties?: ParcelProperties;
+  /** Packaging of this parcel. */
+  parcels_properties?: ParcelsProperties;
   /** International shipments and DOCUMENT shipments with a description of the contents. */
   parcelItems?: ParcelItemDto[] | null;
   contentsType?: 'DOCS' | 'GOODS';
 }
 
-/** Packaging data of a parcel (documentation of 02.09.2026, section 4, packaging examples). */
-export interface ParcelProperties {
-  /** Packaging price in UAH. */
-  packagingPrice?: number;
-  /** Packaging material code (KMAT) from the carrier's packaging list. */
-  KMAT?: string;
+/**
+ * Packaging of one parcel (`parcels[].parcels_properties`, documentation of 02.09.2026, section 4). Added to the
+ * delivery price before discounts unless `properties.packagingPaidByRecipient` is true; ignored for CARGO.
+ */
+export interface ParcelsProperties {
+  /** Non-negative decimal with a dot, kept as given: `"10.50"`. Zero, null or absent adds nothing. */
+  packagingPrice?: string | null;
+  /** Packaging material code, e.g. `PACK02`. */
+  KMAT?: string | null;
 }
 
-/** Shipment-level properties. */
+/** Extended payment and tariff parameters of a shipment (`properties`); all optional. */
 export interface ShipmentProperties {
-  /** True: the recipient pays for the packaging. */
+  /** True: the recipient pays for the packaging separately and it is not part of `deliveryPrice`. */
   packagingPaidByRecipient?: boolean;
+  /** Buyer commission in UAH, zero or more. */
+  buyer_commission?: number;
+  /** Seller commission in UAH, zero or more. */
+  seller_commission?: number;
+  /** `2026-06-09T14:24:47`. */
+  recalculationDate?: string;
+  /** Uuid of an existing client the recalculation is for. */
+  recalculationClient?: string;
+  /** `ThirdPerson` or null. */
+  payerType?: 'ThirdPerson' | null;
+  /** `SUBS`. */
+  tariffType?: 'SUBS';
+  counterpartyRegcode?: string;
+  /** For example `CASHLESS`. */
+  availablePaymentTypes?: string;
 }
 
 export interface Parcel extends ParcelInput {

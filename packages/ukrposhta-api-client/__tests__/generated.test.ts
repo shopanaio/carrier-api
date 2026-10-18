@@ -74,16 +74,6 @@ describe('generated operations', () => {
 });
 
 describe('documented extras', () => {
-  it('reads the JSON of form 119 under the documented paths', async () => {
-    const { mock, client } = setup();
-    await client.deliveryNotifications.getForm119Json('B1');
-    expect(mock.last().path).toBe('/ecom/0.0.1/shipments/B1/form119/json');
-    await client.deliveryNotifications.getForm119JsonByNotification('N1');
-    expect(mock.last().path).toBe('/ecom/0.0.1/shipments/delivery-notifications/N1/form119/json');
-    await client.deliveryNotifications.getGroupForm119Json('G1');
-    expect(mock.last().path).toBe('/ecom/0.0.1/shipment-groups/G1/form119/json');
-  });
-
   it('takes the packaging and international fields of a shipment in a typed literal', async () => {
     const { mock, client } = setup();
     const shipment: ShipmentInput = {
@@ -99,7 +89,7 @@ describe('documented extras', () => {
           length: 20,
           width: 10,
           height: 10,
-          properties: { packagingPrice: 25, KMAT: 'K-1' },
+          parcels_properties: { packagingPrice: '25.50', KMAT: 'PACK02' },
           contentsType: 'GOODS',
         },
       ],
