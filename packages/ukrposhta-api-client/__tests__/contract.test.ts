@@ -96,11 +96,11 @@ describe('authorization', () => {
 describe('addresses', () => {
   it('creates, reads, checks a route and updates the description', async () => {
     const { client, last } = setup();
-    await client.addresses.create({ postcode: '04071', city: 'Київ' });
+    await client.addresses.create({ postcode: '04071', city: 'Kyiv' });
     expect(last()).toMatchObject({
       method: 'POST',
       path: '/ecom/0.0.1/addresses',
-      body: { postcode: '04071', city: 'Київ' },
+      body: { postcode: '04071', city: 'Kyiv' },
     });
     await client.addresses.checkRoute('04071', '47743');
     expect(last().path).toBe('/ecom/0.0.1/addresses/availability-checking/from/04071/to/47743');
@@ -116,9 +116,9 @@ describe('addresses', () => {
 describe('clients', () => {
   it('creates one client or many', async () => {
     const { client, last } = setup();
-    await client.clients.create({ name: 'ТОВ', addressId: 1, phoneNumber: '0671231234', type: 'COMPANY' });
+    await client.clients.create({ name: 'TOV', addressId: 1, phoneNumber: '0671231234', type: 'COMPANY' });
     expect(last().method).toBe('POST');
-    expect(last().body).toMatchObject({ name: 'ТОВ' });
+    expect(last().body).toMatchObject({ name: 'TOV' });
     await client.clients.create([
       { name: 'A', addressId: 1, phoneNumber: '1' },
       { name: 'B', addressId: 1, phoneNumber: '2' },

@@ -24,24 +24,24 @@ describeIf(env.bearer && env.token)('Ukrposhta sandbox: eCom', () => {
   it('creates a shipment, prints its sticker and deletes it', async () => {
     const from = await client.addresses.create({
       postcode: '04071',
-      city: 'Київ',
-      street: 'Хорива',
+      city: 'Kyiv',
+      street: 'Khoryva',
       houseNumber: '40',
     });
-    const to = await client.addresses.create({ postcode: '79000', city: 'Львів' });
+    const to = await client.addresses.create({ postcode: '79000', city: 'Lviv' });
     const sender = await client.clients.create({
       type: 'INDIVIDUAL',
-      firstName: 'Тест',
-      lastName: 'Відправник',
-      middleName: 'Тестович',
+      firstName: 'Test',
+      lastName: 'Vidpravnyk',
+      middleName: 'Testovych',
       addressId: from.id,
       phoneNumber: '0671231234',
     });
     const recipient = await client.clients.create({
       type: 'INDIVIDUAL',
-      firstName: 'Тест',
-      lastName: 'Отримувач',
-      middleName: 'Тестович',
+      firstName: 'Test',
+      lastName: 'Otrymuvach',
+      middleName: 'Testovych',
       addressId: to.id,
       phoneNumber: '0501231234',
     });

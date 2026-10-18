@@ -23,11 +23,11 @@ describe('ClassifierService', () => {
     mock.on({
       method: 'GET',
       path: `${BASE}/get_regions_by_region_ua`,
-      respond: entries({ REGION_ID: '286', REGION_UA: 'Київ' }),
+      respond: entries({ REGION_ID: '286', REGION_UA: 'Kyiv' }),
     });
-    await client.classifier.getRegions({ regionName: 'Киї' });
+    await client.classifier.getRegions({ regionName: 'Kyi' });
     expect(mock.last().headers).toMatchObject({ accept: 'application/json', authorization: 'Bearer ecom-bearer' });
-    expect(mock.last().query).toEqual({ region_name: 'Киї' });
+    expect(mock.last().query).toEqual({ region_name: 'Kyi' });
   });
 
   it('turns a single hit into an array and keeps many hits as they are', async () => {
@@ -53,10 +53,10 @@ describe('ClassifierService', () => {
     mock.on({
       method: 'GET',
       path: `${BASE}/get_postoffices_by_postindex`,
-      respond: entries({ ID: '2700', POSTINDEX: '01001', PO_SHORT: 'Київ 1' }),
+      respond: entries({ ID: '2700', POSTINDEX: '01001', PO_SHORT: 'Kyiv 1' }),
     });
     const [office] = await client.classifier.getPostOffices({ postIndex: '01001' });
-    expect(office).toMatchObject({ POSTINDEX: '01001', PO_SHORT: 'Київ 1' });
+    expect(office).toMatchObject({ POSTINDEX: '01001', PO_SHORT: 'Kyiv 1' });
     expect(mock.last().query).toEqual({ pi: '01001' });
   });
 

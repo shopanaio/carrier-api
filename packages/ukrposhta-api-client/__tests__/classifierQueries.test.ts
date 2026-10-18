@@ -21,19 +21,19 @@ describe('ClassifierService queries', () => {
     const c = client.classifier;
     const base = '/address-classifier-ws';
 
-    await c.getDistricts({ regionId: 286, districtName: 'Поділ' });
+    await c.getDistricts({ regionId: 286, districtName: 'Podil' });
     expect(last()).toEqual({
       path: `${base}/get_districts_by_region_id_and_district_ua`,
-      query: { region_id: 286, district_ua: 'Поділ' },
+      query: { region_id: 286, district_ua: 'Podil' },
     });
 
     await c.getCities({ koatuu: '8000000000' });
     expect(last().query).toEqual({ koatuu: '8000000000' });
 
-    await c.getStreets({ cityId: 5, streetName: 'Хорива' });
+    await c.getStreets({ cityId: 5, streetName: 'Khoryva' });
     expect(last()).toEqual({
       path: `${base}/get_street_by_region_id_and_district_id_and_city_id_and_street_ua`,
-      query: { city_id: 5, street_ua: 'Хорива' },
+      query: { city_id: 5, street_ua: 'Khoryva' },
     });
 
     await c.getHouses({ streetId: 9, houseNumber: '40' });
@@ -69,22 +69,22 @@ describe('ClassifierService queries', () => {
     await c.getPostcodeByCity(7);
     expect(last()).toEqual({ path: `${base}/get_postcode_by_city_id`, query: { city_id: 7 } });
 
-    await c.searchDistricts({ regionId: 1, name: 'Ки', fuzzy: true });
+    await c.searchDistricts({ regionId: 1, name: 'Ky', fuzzy: true });
     expect(last()).toEqual({
       path: `${base}/get_district_by_name`,
-      query: { region_id: 1, district_name: 'Ки', lang: 'UA', fuzzy: 1 },
+      query: { region_id: 1, district_name: 'Ky', lang: 'UA', fuzzy: 1 },
     });
 
-    await c.searchCities({ regionId: 1, districtId: 2, name: 'Бро', lang: 'RU' });
+    await c.searchCities({ regionId: 1, districtId: 2, name: 'Bro', lang: 'RU' });
     expect(last()).toEqual({
       path: `${base}/get_city_by_name`,
-      query: { region_id: 1, district_id: 2, city_name: 'Бро', lang: 'RU', fuzzy: 0 },
+      query: { region_id: 1, district_id: 2, city_name: 'Bro', lang: 'RU', fuzzy: 0 },
     });
 
-    await c.searchStreets({ cityId: 3, name: 'Хор' });
+    await c.searchStreets({ cityId: 3, name: 'Khor' });
     expect(last()).toEqual({
       path: `${base}/get_street_by_name`,
-      query: { city_id: 3, street_name: 'Хор', lang: 'UA', fuzzy: 0 },
+      query: { city_id: 3, street_name: 'Khor', lang: 'UA', fuzzy: 0 },
     });
   });
 });

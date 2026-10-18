@@ -24,22 +24,22 @@ const TRACKING = '/status-tracking/0.0.1';
 const CLASSIFIER = '/address-classifier-ws';
 const PDF = new Uint8Array([0x25, 0x50, 0x44, 0x46, 0x2d]);
 
-const senderAddress: Address = { country: 'UA', postalCode: '04071', city: 'Київ', street: 'Хорива', building: '40' };
+const senderAddress: Address = { country: 'UA', postalCode: '04071', city: 'Kyiv', street: 'Khoryva', building: '40' };
 const recipientAddress: Address = {
   country: 'UA',
   postalCode: '79000',
-  city: 'Львів',
-  street: 'Городоцька',
+  city: 'Lviv',
+  street: 'Horodotska',
   building: '1',
 };
 const sender: Party = {
-  contact: { firstName: 'Петро', lastName: 'Петренко', phone: '+380672802273' },
+  contact: { firstName: 'Petro', lastName: 'Petrenko', phone: '+380672802273' },
   point: { type: 'door', address: senderAddress },
   externalId: 'shop-1',
   taxId: '4201030327',
 };
 const recipient: Party = {
-  contact: { name: 'Іванов Іван Іванович', phone: '0982004113', email: 'ivan@example.com' },
+  contact: { name: 'Ivanov Ivan Ivanovych', phone: '0982004113', email: 'ivan@example.com' },
   point: { type: 'door', address: recipientAddress },
 };
 const shipmentInput: CreateShipmentInput = {
@@ -224,23 +224,23 @@ describe('createShipment', () => {
     expect(shipment.trackingNumber).toMatch(/^05\d{11}$/);
 
     expect(mock.callsTo('POST', `${ECOM}/addresses`).map(c => c.body)).toEqual([
-      { postcode: '04071', city: 'Київ', street: 'Хорива', houseNumber: '40' },
-      { postcode: '79000', city: 'Львів', street: 'Городоцька', houseNumber: '1' },
+      { postcode: '04071', city: 'Kyiv', street: 'Khoryva', houseNumber: '40' },
+      { postcode: '79000', city: 'Lviv', street: 'Horodotska', houseNumber: '1' },
     ]);
     const [senderBody, recipientBody] = mock.callsTo('POST', `${ECOM}/clients`).map(c => c.body);
     expect(senderBody).toMatchObject({
       type: 'PRIVATE_ENTREPRENEUR',
-      firstName: 'Петро',
-      lastName: 'Петренко',
+      firstName: 'Petro',
+      lastName: 'Petrenko',
       tin: '4201030327',
       externalId: 'shop-1',
       phoneNumber: '+380672802273',
     });
     expect(recipientBody).toMatchObject({
       type: 'INDIVIDUAL',
-      lastName: 'Іванов',
-      firstName: 'Іван',
-      middleName: 'Іванович',
+      lastName: 'Ivanov',
+      firstName: 'Ivan',
+      middleName: 'Ivanovych',
       email: 'ivan@example.com',
     });
     expect(bodyOf(mock.last())).toMatchObject({
@@ -255,15 +255,15 @@ describe('createShipment', () => {
 
   it('reuses a client found by external id and the address already on it', async () => {
     const mock = ecomMock();
-    const address = addressFrom({ postcode: '04071', street: 'Хорива', houseNumber: '40' });
+    const address = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '40' });
     const existing = clientFrom(
       {
         addressId: address.id,
         phoneNumber: '0672802273',
         externalId: 'shop-1',
         type: 'PRIVATE_ENTREPRENEUR',
-        firstName: 'Петро',
-        lastName: 'Петренко',
+        firstName: 'Petro',
+        lastName: 'Petrenko',
         tin: '4201030327',
       },
       address,
@@ -280,15 +280,15 @@ describe('createShipment', () => {
 
   it('attaches a new address to a reused client', async () => {
     const mock = ecomMock();
-    const old = addressFrom({ postcode: '04071', street: 'Хорива', houseNumber: '39' });
+    const old = addressFrom({ postcode: '04071', street: 'Khoryva', houseNumber: '39' });
     const existing = clientFrom(
       {
         addressId: old.id,
         phoneNumber: '0672802273',
         externalId: 'shop-1',
         type: 'PRIVATE_ENTREPRENEUR',
-        firstName: 'Петро',
-        lastName: 'Петренко',
+        firstName: 'Petro',
+        lastName: 'Petrenko',
         tin: '4201030327',
       },
       old,
@@ -365,7 +365,7 @@ describe('createShipment', () => {
         payer: 'recipient',
         cashOnDelivery: { amount: money(300, 'UAH'), payer: 'sender' },
       },
-      sender: { ...sender, contact: { company: 'ТОВ Лімон', phone: '0671231234' }, taxId: '40145721' },
+      sender: { ...sender, contact: { company: 'TOV Limon', phone: '0671231234' }, taxId: '40145721' },
     });
     expect(bodyOf(mock.last())).toMatchObject({
       type: 'STANDARD',
@@ -379,7 +379,7 @@ describe('createShipment', () => {
     });
     expect(mock.callsTo('POST', `${ECOM}/clients`)[0]!.body).toMatchObject({
       type: 'COMPANY',
-      name: 'ТОВ Лімон',
+      name: 'TOV Limon',
       edrpou: '40145721',
     });
   });
@@ -417,12 +417,12 @@ describe('createShipment', () => {
     ],
     [
       'a single-word name',
-      { ...shipmentInput, recipient: { ...recipient, contact: { name: 'Іванов', phone: '1' } } },
+      { ...shipmentInput, recipient: { ...recipient, contact: { name: 'Ivanov', phone: '1' } } },
       'recipient.contact',
     ],
     [
       'a company without a tax id',
-      { ...shipmentInput, sender: { ...sender, taxId: undefined, contact: { company: 'ТОВ', phone: '1' } } },
+      { ...shipmentInput, sender: { ...sender, taxId: undefined, contact: { company: 'TOV', phone: '1' } } },
       'sender.taxId',
     ],
     [
@@ -734,10 +734,10 @@ describe('locations and address validation', () => {
     ID: '2700',
     POSTINDEX: '01001',
     POSTCODE: '01001',
-    PO_SHORT: 'Київ 1',
-    PO_LONG: 'Відділення № 1',
-    CITY_UA: 'Київ',
-    REGION_UA: 'Київ',
+    PO_SHORT: 'Kyiv 1',
+    PO_LONG: 'Viddilennia № 1',
+    CITY_UA: 'Kyiv',
+    REGION_UA: 'Kyiv',
     LATTITUDE: '50.449855',
     LONGITUDE: '30.523063',
   };
@@ -759,7 +759,7 @@ describe('locations and address validation', () => {
     mock.on({
       method: 'GET',
       path: `${CLASSIFIER}/get_city_by_region_id_and_district_id_and_city_ua`,
-      respond: entries({ CITY_ID: '29713', CITY_UA: 'Київ' }),
+      respond: entries({ CITY_ID: '29713', CITY_UA: 'Kyiv' }),
     });
     mock.on({
       method: 'GET',
@@ -768,9 +768,9 @@ describe('locations and address validation', () => {
         ID: '2700',
         POSTINDEX: '01001',
         POSTCODE: '01001',
-        POSTFILIALNAME: 'Київ 1',
-        CITYNAME: 'Київ',
-        ADDRESS: 'вул. Хрещатик, 22',
+        POSTFILIALNAME: 'Kyiv 1',
+        CITYNAME: 'Kyiv',
+        ADDRESS: 'vul. Khreshchatyk, 22',
         DISTANCE: '0',
         LATITUDE: '50.449855',
         LONGITUDE: '30.523063',
@@ -782,7 +782,7 @@ describe('locations and address validation', () => {
       respond: call =>
         entries(
           ...(call.query.postcode === '01001'
-            ? [{ POSTCODE: '01001', REGION_NAME: 'Київ', DISTRICT_NAME: 'Київ', CITY_NAME: 'Київ' }]
+            ? [{ POSTCODE: '01001', REGION_NAME: 'Kyiv', DISTRICT_NAME: 'Kyiv', CITY_NAME: 'Kyiv' }]
             : []),
         ),
     });
@@ -796,22 +796,22 @@ describe('locations and address validation', () => {
       id: '01001',
       carrier: 'ukrposhta',
       type: 'branch',
-      name: 'Відділення № 1',
+      name: 'Viddilennia № 1',
       number: '01001',
     });
     expect(byCode!.address).toMatchObject({
       country: 'UA',
       postalCode: '01001',
-      city: 'Київ',
+      city: 'Kyiv',
       geo: { lat: 50.449855, lng: 30.523063 },
     });
     // The same office came back by index and by code: listed once.
     expect(await adapter.findLocations({ postalCode: '01001' })).toHaveLength(1);
     expect(await adapter.findLocations({ cityId: '29713' })).toHaveLength(1);
     expect(mock.last().query).toEqual({ poCityId: '29713' });
-    expect(await adapter.findLocations({ city: 'Київ' })).toHaveLength(1);
+    expect(await adapter.findLocations({ city: 'Kyiv' })).toHaveLength(1);
     const near = await adapter.findLocations({ near: { lat: 50.45, lng: 30.52, radiusKm: 3 } });
-    expect(near[0]).toMatchObject({ id: '01001', name: 'Київ 1' });
+    expect(near[0]).toMatchObject({ id: '01001', name: 'Kyiv 1' });
     expect(mock.last().query).toEqual({ lat: 50.45, long: 30.52, maxdistance: 3 });
     expect(await adapter.findLocations({ postalCode: '01001', type: 'locker' })).toEqual([]);
     expect(await adapter.findLocations({ postalCode: '01001', limit: 0 })).toEqual([]);
@@ -820,13 +820,13 @@ describe('locations and address validation', () => {
 
   it('validates an address against the classifier', async () => {
     const { mock, adapter } = classifierMock();
-    expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Київ' })).toMatchObject({
+    expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Kyiv' })).toMatchObject({
       valid: true,
-      normalized: { region: 'Київ', district: 'Київ', city: 'Київ' },
+      normalized: { region: 'Kyiv', district: 'Kyiv', city: 'Kyiv' },
     });
-    expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Львів' })).toMatchObject({
+    expect(await adapter.validateAddress({ country: 'UA', postalCode: '01001', city: 'Lviv' })).toMatchObject({
       valid: false,
-      messages: [expect.stringContaining('belongs to Київ')],
+      messages: [expect.stringContaining('belongs to Kyiv')],
     });
     expect(await adapter.validateAddress({ country: 'UA', postalCode: '99999' })).toMatchObject({ valid: false });
     const before = mock.calls.length;

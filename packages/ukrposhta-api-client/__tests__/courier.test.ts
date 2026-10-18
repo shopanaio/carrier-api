@@ -104,15 +104,15 @@ describe('courier service', () => {
 });
 
 describe('schedulePickup', () => {
-  const address = addressFrom({ postcode: '04071', street: 'Хорива' });
+  const address = addressFrom({ postcode: '04071', street: 'Khoryva' });
   const senderClient = {
     ...clientFrom(
       {
         addressId: address.id,
         phoneNumber: '0672802273',
         type: 'INDIVIDUAL',
-        firstName: 'Петро',
-        lastName: 'Петренко',
+        firstName: 'Petro',
+        lastName: 'Petrenko',
       },
       address,
     ),

@@ -96,14 +96,14 @@ describe('TrackingService', () => {
     mock.on({
       method: 'GET',
       path: `${BASE}/barcodes/{barcode}/route`,
-      respond: ok({ from: 'УКРАЇНА м.Київ', to: 'УКРАЇНА с.Біляни' }),
+      respond: ok({ from: 'UKRAINA m.Kyiv', to: 'UKRAINA s.Biliany' }),
     });
     mock.on({
       method: 'GET',
       path: `${BASE}/barcodes/{barcode}/route/in-lang/{lang}`,
       respond: ok({ from: 'UKRAINE Kyiv', to: 'UKRAINE Biliany' }),
     });
-    await expect(client.tracking.getRoute('B1')).resolves.toEqual({ from: 'УКРАЇНА м.Київ', to: 'УКРАЇНА с.Біляни' });
+    await expect(client.tracking.getRoute('B1')).resolves.toEqual({ from: 'UKRAINA m.Kyiv', to: 'UKRAINA s.Biliany' });
     await expect(client.tracking.getRoute('B1', { lang: 'en' })).resolves.toMatchObject({ from: 'UKRAINE Kyiv' });
     expect(mock.last().path).toBe(`${BASE}/barcodes/B1/route/in-lang/EN`);
     await client.tracking.getRoute('B1', { lang: 'ua' });

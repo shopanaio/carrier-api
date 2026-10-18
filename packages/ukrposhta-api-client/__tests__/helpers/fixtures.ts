@@ -15,7 +15,7 @@ export function addressFrom(input: AddressInput): Address {
     id,
     countryside: false,
     country: 'UA',
-    detailedInfo: `Україна, ${input.postcode}`,
+    detailedInfo: `Ukraina, ${input.postcode}`,
     created: '2026-01-01T09:00:00',
     lastModified: '2026-01-01T09:00:00',
   };
