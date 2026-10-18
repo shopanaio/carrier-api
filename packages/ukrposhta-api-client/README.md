@@ -69,7 +69,7 @@ const tracking = createUkrposhtaTrackingClient({ bearer: process.env.UKRPOSHTA_T
 const events = await tracking.tracking.getStatuses('0500100031143', { lang: 'en' });
 ```
 
-Batches take up to 50 barcodes for all statuses and 100 for last statuses (`TRACKING_MAX_BARCODES_*`); the service rejects more. A return to the sender arrives as event `41000` with `eventReason_id: 10`; `effectiveEventCode` turns it into `41010`, and `UKRPOSHTA_EVENT_LIFECYCLE` maps event codes to lifecycle statuses (Annex B).
+Batches take up to 50 barcodes for all statuses and 100 for last statuses (`TRACKING_MAX_BARCODES_*`); the service rejects more.
 
 ## Address classifier
 

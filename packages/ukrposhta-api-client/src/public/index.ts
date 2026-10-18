@@ -13,7 +13,6 @@ export * from './config';
 export * from './services/trackingService';
 export * from './services/classifierService';
 export * from './types/tracking';
-export * from './types/trackingEvents';
 export * from './types/classifier';
 
 type SharedConfig = Omit<UkrposhtaPublicConfig, 'bearer' | 'baseUrl'>;

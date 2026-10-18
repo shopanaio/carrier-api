@@ -3,8 +3,6 @@ import {
   TRACKING_MAX_BARCODES_ALL_STATUSES,
   TRACKING_MAX_BARCODES_LAST_STATUS,
   createUkrposhtaTrackingClient,
-  effectiveEventCode,
-  lifecycleStatusOf,
 } from '../src';
 import { statusEvent } from './helpers/fixtures';
 import { createMockTransport, fail, ok } from './helpers/mock';
@@ -185,19 +183,5 @@ describe('TrackingService', () => {
     expect(mock.calls).toHaveLength(1);
     expect(TRACKING_MAX_BARCODES_ALL_STATUSES).toBe(50);
     expect(TRACKING_MAX_BARCODES_LAST_STATUS).toBe(100);
-  });
-});
-
-describe('tracking event codes', () => {
-  it('treats 41000 with reason 10 as a return (41010)', () => {
-    expect(effectiveEventCode({ event: '41000', eventReason_id: 10 })).toBe('41010');
-    expect(effectiveEventCode({ event: 41000, eventReason_id: 2 })).toBe('41000');
-  });
-
-  it('maps events to lifecycle statuses', () => {
-    expect(lifecycleStatusOf({ event: 10100, eventReason_id: 1 })).toBe('REGISTERED');
-    expect(lifecycleStatusOf({ event: 21700, eventReason_id: 1 })).toBe('IN_DEPARTMENT');
-    expect(lifecycleStatusOf({ event: 41000, eventReason_id: 10 })).toBe('RETURNED');
-    expect(lifecycleStatusOf({ event: 99999, eventReason_id: 1 })).toBeUndefined();
   });
 });
