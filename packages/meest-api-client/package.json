@@ -1,0 +1,62 @@
+{
+  "name": "@shopana/meest-api-client",
+  "version": "0.0.1",
+  "description": "Typed Meest (Meest Express, Ukraine) API clients: no-auth public API (branches, geo) and contract openAPI v3.0, built on @shopana/carrier-core",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit -p tsconfig.json && tsc -p tsconfig.typetests.json",
+    "test": "jest --passWithNoTests",
+    "test:coverage": "jest --coverage --passWithNoTests",
+    "test:e2e": "jest -c jest.e2e.config.js",
+    "generate:types": "node scripts/generate-types.js && prettier --write src/contract/types/generated.ts type-tests/fields.generated.ts"
+  },
+  "keywords": [
+    "meest",
+    "meest-express",
+    "shipping",
+    "logistics",
+    "ukraine",
+    "tracking",
+    "api-client",
+    "carrier-api",
+    "typescript"
+  ],
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/meest-api-client"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/meest-api-client#readme",
+  "dependencies": {
+    "@shopana/carrier-core": "^0.0.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}
