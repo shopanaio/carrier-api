@@ -5,7 +5,7 @@
 
 import type { HttpTransport } from '../http/transport';
 import type { ClientContext } from '../core/client';
-import { toHttpTransport } from '../core/client';
+import { getContextApiKey, toHttpTransport } from '../core/client';
 import type {
   SaveContactPersonRequest,
   SaveContactPersonResponse,
@@ -40,7 +40,7 @@ export class ContactPersonService {
 
   attach(ctx: ClientContext) {
     this.transport = toHttpTransport(ctx);
-    this.apiKey = ctx.config.apiKey;
+    this.apiKey = getContextApiKey(ctx);
   }
 
   /**

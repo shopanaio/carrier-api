@@ -58,8 +58,18 @@
  */
 
 // Core client (flat API via use(new Service()))
-export { createClient, toHttpTransport, RATE_LIMIT_ERROR_CODE } from './core/client';
-export type { ClientContext, Client, ServiceAPI, NovaPoshtaClientConfig } from './core/client';
+export { createClient, toHttpTransport, resolveContext, RATE_LIMIT_ERROR_CODE } from './core/client';
+export type {
+  ClientContext,
+  CoreContext,
+  Client,
+  ServiceAPI,
+  NovaPoshtaClientConfig,
+  // Deprecated 0.x construction, still accepted by createClient()
+  LegacyClientContext,
+  HttpPostJsonTransport,
+  RateLimitRetryOptions,
+} from './core/client';
 export { createNovaPoshtaClient, createNovaPoshtaContext, NOVA_POSHTA_BASE_URL } from './config';
 export type { NovaPoshtaConfig, NovaPoshtaClient } from './config';
 

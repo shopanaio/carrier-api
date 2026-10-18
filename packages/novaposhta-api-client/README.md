@@ -360,6 +360,12 @@ API error `20000401501` means that requests are being sent too quickly. The clie
 
 ---
 
+## Migrating from the 0.x construction
+
+`createClient({ transport, baseUrl, apiKey, rateLimitRetry })` with a function-style transport (such as `createFetchHttpTransport()`) is deprecated but still supported and behaves as before. Prefer `createNovaPoshtaClient(config)` for new code.
+
+---
+
 ## 🛠️ Custom Transport
 
 The client is built on [`@shopana/carrier-core`](../carrier-core). A transport is a function `(HttpRequest) => Promise<HttpResponse>` that resolves for every HTTP status and rejects only when no response arrived. Pass your own through `transport`; retry, rate limiting, timeouts and logging are options of the same config:

@@ -2,7 +2,7 @@
 import { createFetchTransport, createHttpClient } from '@shopana/carrier-core';
 import type { HttpLogger, HttpTransport, RateLimitOptions, RateLimiter, RetryOptions } from '@shopana/carrier-core';
 import { RATE_LIMIT_ERROR_CODE } from './core/client';
-import type { ClientContext } from './core/client';
+import type { CoreContext } from './core/client';
 import type { NovaPoshtaResponse, System } from './types/base';
 import { AddressService } from './services/addressService';
 import { ContactPersonService } from './services/contactPersonService';
@@ -38,7 +38,7 @@ function isRateLimited(data: unknown): boolean {
 }
 
 /** Builds the carrier-core context used by every service. */
-export function createNovaPoshtaContext(config: NovaPoshtaConfig = {}): ClientContext {
+export function createNovaPoshtaContext(config: NovaPoshtaConfig = {}): CoreContext {
   const userRetry = config.retry === false ? undefined : config.retry;
   const retry: RetryOptions | false =
     config.retry === false
