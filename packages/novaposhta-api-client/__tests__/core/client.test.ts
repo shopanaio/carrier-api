@@ -1,75 +1,106 @@
-import { toHttpTransport, type ClientContext } from '../../src/core/client';
-import type { NovaPoshtaRequest, NovaPoshtaResponse } from '../../src/types/base';
+import { CarrierError } from '@shopana/carrier-core';
+import { createNovaPoshtaClient, createNovaPoshtaContext } from '../../src';
+import { toHttpTransport } from '../../src/core/client';
+import type { NovaPoshtaRequest } from '../../src/types/base';
+import { createMockTransport } from '../mocks/transport';
 
-describe('HTTP transport adapter', () => {
-  const request: NovaPoshtaRequest = {
-    modelName: 'AddressGeneral',
-    calledMethod: 'getWarehouses',
-    methodProperties: {},
-  };
+const baseUrl = 'https://api.novaposhta.ua/v2.0/json/';
+const request: NovaPoshtaRequest = {
+  modelName: 'AddressGeneral',
+  calledMethod: 'getWarehouses',
+  methodProperties: {},
+};
+const envelope = (extra: object) => ({
+  success: true,
+  data: [],
+  errors: [],
+  warnings: [],
+  info: [],
+  messageCodes: [],
+  errorCodes: [],
+  warningCodes: [],
+  infoCodes: [],
+  ...extra,
+});
 
-  it('retries Nova Poshta API rate-limit responses', async () => {
-    const rateLimited: NovaPoshtaResponse<never[]> = {
-      success: false,
-      data: [],
-      errors: ['Too many requests'],
-      warnings: [],
-      info: [],
-      messageCodes: [],
-      errorCodes: ['20000401501'],
-      warningCodes: [],
-      infoCodes: [],
-    };
-    const success: NovaPoshtaResponse<readonly [{ Ref: string }]> = {
-      success: true,
-      data: [{ Ref: 'result-ref' }],
-      errors: [],
-      warnings: [],
-      info: [],
-      messageCodes: [],
-      errorCodes: [],
-      warningCodes: [],
-      infoCodes: [],
-    };
-    const transport = jest.fn().mockResolvedValueOnce({ status: 200, data: rateLimited }).mockResolvedValueOnce({
-      status: 200,
-      data: success,
-    });
-    const context: ClientContext = {
-      transport,
-      baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-      rateLimitRetry: { maxRetries: 1, delayMs: 0 },
-    };
-    const response = await toHttpTransport(context).request(request);
+describe('carrier-core transport adapter', () => {
+  it('posts the JSON body to the base URL and returns the response as is', async () => {
+    const { transport, calls, setResponse } = createMockTransport();
+    const body = envelope({ data: [{ Ref: 'r' }] });
+    setResponse(body);
 
-    expect(response).toEqual(success);
-    expect(transport).toHaveBeenCalledTimes(2);
+    const ctx = createNovaPoshtaContext({ transport, apiKey: 'key', system: 'DevCentre' });
+    const response = await toHttpTransport(ctx).request(request);
+
+    expect(response).toEqual(body);
+    expect(calls[0]?.url).toBe(baseUrl);
+    expect(calls[0]?.request.method).toBe('POST');
+    expect(calls[0]?.body).toEqual({ ...request, system: 'DevCentre' });
   });
 
-  it.each([Number.NaN, Number.POSITIVE_INFINITY, -1, 1.5])(
-    'rejects invalid maxRetries value %s',
-    maxRetries => {
-      const context: ClientContext = {
-        transport: jest.fn(),
-        baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-        rateLimitRetry: { maxRetries },
-      };
+  it('lets a request override apiKey and system', async () => {
+    const { transport, calls } = createMockTransport();
+    const ctx = createNovaPoshtaContext({ transport, apiKey: 'default', system: 'DevCentre' });
 
-      expect(() => toHttpTransport(context)).toThrow(
-        'rateLimitRetry.maxRetries must be a finite non-negative integer',
-      );
-    },
-  );
+    await toHttpTransport(ctx).request({ ...request, apiKey: 'own' } as NovaPoshtaRequest);
 
-  it.each([Number.NaN, Number.NEGATIVE_INFINITY, -1, 0.5])('rejects invalid delayMs value %s', delayMs => {
-    const context: ClientContext = {
-      transport: jest.fn(),
-      baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-      rateLimitRetry: { delayMs },
-    };
+    expect(calls[0]?.body.apiKey).toBe('own');
+  });
 
-    expect(() => toHttpTransport(context)).toThrow(
-      'rateLimitRetry.delayMs must be a finite non-negative integer',
+  it('retries API-level rate limiting reported in a 200 body', async () => {
+    const limited = envelope({ success: false, errorCodes: ['20000401501'] });
+    const done = envelope({ data: [{ Ref: 'result-ref' }] });
+    const responses = [limited, done];
+    const calls: unknown[] = [];
+    const transport = (async (req: unknown) => {
+      calls.push(req);
+      return { status: 200, headers: {}, data: responses[calls.length - 1] };
+    }) as never;
+
+    const ctx = createNovaPoshtaContext({ transport, retry: { maxRetries: 1, baseDelayMs: 0, jitter: 'none' } });
+    const response = await toHttpTransport(ctx).request(request);
+
+    expect(response).toEqual(done);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('throws CarrierError for a non-2xx response', async () => {
+    const transport = (async () => ({ status: 500, headers: {}, data: { message: 'boom' } })) as never;
+    const ctx = createNovaPoshtaContext({ transport, retry: false });
+
+    await expect(toHttpTransport(ctx).request(request)).rejects.toBeInstanceOf(CarrierError);
+  });
+
+  it('createNovaPoshtaClient mounts every service', () => {
+    const client = createNovaPoshtaClient({ apiKey: 'key' });
+
+    expect(Object.keys(client).sort()).toEqual(
+      ['address', 'contactPerson', 'counterparty', 'reference', 'tracking', 'use', 'waybill'].sort(),
     );
+  });
+});
+
+describe('custom retry predicate', () => {
+  it('runs next to the built-in rate-limit check', async () => {
+    const shouldRetryResponse = jest.fn(
+      (response: { data: unknown }) => (response.data as { info: string[] }).info[0] === 'again',
+    );
+    const responses = [
+      envelope({ info: ['again'] }),
+      envelope({ success: false, errorCodes: ['20000401501'] }),
+      envelope({}),
+    ];
+    let n = 0;
+    const transport = (async () => ({ status: 200, headers: {}, data: responses[n++] })) as never;
+
+    const ctx = createNovaPoshtaContext({
+      transport,
+      retry: { maxRetries: 2, baseDelayMs: 0, jitter: 'none', shouldRetryResponse },
+    });
+    const response = await toHttpTransport(ctx).request(request);
+
+    expect(n).toBe(3);
+    expect(shouldRetryResponse).toHaveBeenCalled();
+    expect(response).toEqual(responses[2]);
   });
 });

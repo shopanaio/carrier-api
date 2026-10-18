@@ -1,4 +1,4 @@
-import { createClient } from '../../src/core/client';
+import { createClient } from '../mocks/client';
 import { ContactPersonService } from '../../src/services/contactPersonService';
 import { createMockTransport } from '../mocks/transport';
 
