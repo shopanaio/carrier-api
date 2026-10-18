@@ -1,0 +1,64 @@
+{
+  "name": "@shopana/carrier-testing",
+  "version": "0.0.1",
+  "description": "Contract-driven carrier API simulator and adapter conformance checks for Shopana carrier clients",
+  "main": "dist/index.cjs",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/**/*",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "npm run clean && rollup -c rollup.config.mjs && tsc -p tsconfig.json --emitDeclarationOnly",
+    "clean": "rm -rf dist",
+    "type-check": "tsc --noEmit -p tsconfig.json",
+    "test": "jest",
+    "test:coverage": "jest --coverage"
+  },
+  "keywords": [
+    "carrier",
+    "carrier-api",
+    "shipping",
+    "logistics",
+    "typescript",
+    "simulator",
+    "contract-testing",
+    "openapi",
+    "jest",
+    "conformance"
+  ],
+  "author": "Shopana.io",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shopanaio/carrier-api.git",
+    "directory": "packages/carrier-testing"
+  },
+  "bugs": {
+    "url": "https://github.com/shopanaio/carrier-api/issues"
+  },
+  "homepage": "https://github.com/shopanaio/carrier-api/tree/main/packages/carrier-testing#readme",
+  "dependencies": {
+    "@shopana/carrier-core": "^0.0.1",
+    "@shopana/carrier-contracts": "^0.0.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

@@ -9,8 +9,10 @@ on:
       - 'packages/**/scripts/**'
       - 'packages/**/build.js'
       - 'packages/**/rollup.config.js'
+      - 'packages/**/rollup.config.mjs'
       - 'packages/**/tsup.config.ts'
       - 'packages/**/tsconfig.json'
+      - 'tools/rollup-package.mjs'
       - '.github/workflows/changeset-required.yml'
       - 'tools/validate-changesets.mjs'
 
@@ -48,9 +50,31 @@ jobs:
 
           mapfile -t changed_package_dirs < <(
             printf '%s\n' "$changed_files" |
-              sed -nE 's#^packages/([^/]+)/((src|scripts)/.*|package\.json|build\.js|rollup\.config\.js|tsup\.config\.ts|tsconfig\.json)$#packages/\1#p' |
+              sed -nE 's#^packages/([^/]+)/((src|scripts)/.*|package\.json|build\.js|rollup\.config\.m?js|tsup\.config\.ts|tsconfig\.json)$#packages/\1#p' |
               sort -u
           )
+
+          # The shared rollup config is part of the build of every package whose rollup config imports it.
+          if printf '%s\n' "$changed_files" | grep -qx 'tools/rollup-package.mjs'; then
+            while IFS= read -r config; do
+              changed_package_dirs+=("$(dirname "$config")")
+            done < <(grep -l 'rollup-package.mjs' packages/*/rollup.config.mjs packages/*/rollup.config.js 2>/dev/null || true)
+          fi
+
+          # Private packages (e.g. demo-post-api-client) are never released and need no changeset.
+          releasable_dirs=()
+          for package_dir in "${changed_package_dirs[@]}"; do
+            if [[ -f "$package_dir/package.json" ]] && node -e 'process.exit(require(process.argv[1]).private === true ? 0 : 1)' "$PWD/$package_dir/package.json"; then
+              echo "Skipping private package $package_dir"
+              continue
+            fi
+            releasable_dirs+=("$package_dir")
+          done
+          if [[ "${#releasable_dirs[@]}" -gt 0 ]]; then
+            mapfile -t changed_package_dirs < <(printf '%s\n' "${releasable_dirs[@]}" | sort -u)
+          else
+            changed_package_dirs=()
+          fi
 
           if printf '%s\n' "$changed_files" | grep -Eq '^\.changeset/[^/]+\.md$'; then
             has_changeset=true

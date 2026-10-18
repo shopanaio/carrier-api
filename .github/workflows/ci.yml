@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  platform:
+    name: Build, lint and unit-test packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: 20
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      # Packages are discovered from packages/* (tools/workspace-packages.mjs), dependencies first,
+      # so a package added by tools/create-carrier.mjs is built, checked and tested without editing CI.
+      - name: Build packages
+        run: yarn build
+
+      - name: Type-check packages
+        run: yarn type-check
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Unit tests with coverage thresholds
+        run: yarn test:coverage
+
+      - name: Tooling tests (scaffolder drift, package discovery)
+        run: yarn test:tools
+
+      - name: Pack dry run
+        run: yarn pack:dry-run
