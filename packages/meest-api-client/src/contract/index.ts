@@ -1,7 +1,7 @@
 // code and comments in English
 import { createClient, createFetchTransport, createHttpClient, tokenAuth } from '@shopana/carrier-core';
 import type { HttpTransport, RateLimitOptions, RateLimiter } from '@shopana/carrier-core';
-import { MEEST_CONTRACT_BASE_URL, MEEST_DEFAULT_RATE_LIMIT } from './config';
+import { MEEST_CONTRACT_BASE_URL } from './config';
 import type { MeestContractConfig } from './config';
 import { MEEST_CARRIER, isEnvelope, isOk, mapError, toMeestError } from './errors';
 import { AuthService } from './services/authService';
@@ -16,7 +16,6 @@ import { TrackingService } from './services/trackingService';
 import type { AuthResponse, RefreshTokenResponse } from './types/generated';
 
 export * from './config';
-export * from './dates';
 export { unwrapMeestResponse } from './errors';
 export { MEEST_CARRIER, toMeestError } from './errors';
 export * from './services/base';
@@ -95,9 +94,7 @@ export function createMeestContractClient(config: MeestContractConfig) {
       : config.clock || config.sleep
         ? { retry: { clock: config.clock, sleep: config.sleep } }
         : {}),
-    ...(config.rateLimit === false
-      ? {}
-      : { rateLimit: withTime(config.rateLimit ?? MEEST_DEFAULT_RATE_LIMIT, config) }),
+    ...(config.rateLimit ? { rateLimit: withTime(config.rateLimit, config) } : {}),
     ...(config.timeoutMs ? { timeoutMs: config.timeoutMs } : {}),
     ...(config.logger ? { logger: config.logger } : {}),
     mapError,

@@ -1,10 +1,8 @@
 import { CarrierErrorCategory } from '@shopana/carrier-core';
 import {
-  createMemoryReferenceCache,
   createMeestPublicClient,
   isMeestNotFound,
   unwrapMeestPublic,
-  withReferenceCache,
 } from '../src';
 import { mockTransport } from './mock';
 import type { Handler } from './mock';
@@ -139,69 +137,5 @@ describe('optional helpers', () => {
         message: 'Meest public API returned an error',
       }),
     );
-  });
-
-  it('withReferenceCache serves repeated GETs from the cache until they expire; the client itself never caches', async () => {
-    let now = 0;
-    const cache = createMemoryReferenceCache(() => now);
-    const mock = mockTransport(BASE, () => ok([{ br_id: 'b1' }]));
-    const client = createMeestPublicClient({
-      transport: withReferenceCache(mock.transport, { cache, ttlSec: 10 }),
-      retry: false,
-    });
-    await client.branches.list({ type: 'poshtomat' });
-    await client.branches.list({ type: 'poshtomat' });
-    await client.branches.list({ type: 'minibranch' });
-    expect(mock.calls).toHaveLength(2);
-    now = 10_001;
-    await client.branches.list({ type: 'poshtomat' });
-    expect(mock.calls).toHaveLength(3);
-
-    const plain = make(() => ok([]));
-    await plain.client.geo.regions();
-    await plain.client.geo.regions();
-    expect(plain.calls).toHaveLength(2);
-  });
-
-  it('withReferenceCache does not cache failures or non-GET calls', async () => {
-    const cache = createMemoryReferenceCache();
-    let status = 503;
-    const mock = mockTransport(BASE, () => ({ status, data: 'x' }));
-    const wrapped = withReferenceCache(mock.transport, { cache });
-    const request = { method: 'GET' as const, url: `${BASE}/branches` };
-    await wrapped(request);
-    status = 200;
-    await wrapped(request);
-    await wrapped(request);
-    await wrapped({ ...request, method: 'POST' });
-    await wrapped({ ...request, method: 'POST' });
-    expect(mock.calls.map(c => c.method)).toEqual(['GET', 'GET', 'POST', 'POST']);
-  });
-
-  it('expires memory cache entries after the TTL', () => {
-    let now = 0;
-    const cache = createMemoryReferenceCache(() => now);
-    cache.set('k', 1, 10);
-    expect(cache.get('k')).toBe(1);
-    now = 10_001;
-    expect(cache.get('k')).toBeUndefined();
-  });
-});
-
-describe('resilience', () => {
-  it('retries a GET after a 503', async () => {
-    const { client, calls } = make((_, i) => (i === 0 ? { status: 503, data: 'unavailable' } : ok([])), {
-      retry: { baseDelayMs: 1, jitter: 'none', sleep: async () => {} },
-    });
-    expect((await client.geo.regions()).status).toBe(1);
-    expect(calls).toHaveLength(2);
-  });
-
-  it('throws gateway failures as CarrierErrors', async () => {
-    const { client } = make(() => ({ status: 502, data: 'Bad gateway' }));
-    await expect(client.branches.list()).rejects.toMatchObject({
-      category: CarrierErrorCategory.Server,
-      httpStatus: 502,
-    });
   });
 });

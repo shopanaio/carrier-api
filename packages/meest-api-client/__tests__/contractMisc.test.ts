@@ -1,23 +1,5 @@
 import { CarrierErrorCategory } from '@shopana/carrier-core';
-import { formatDate, formatDateTime, formatIsoDate, toMeestError } from '../src';
-
-describe('dates', () => {
-  const winter = new Date('2026-01-31T22:30:15Z'); // already 01 Feb in Kyiv
-  const summer = new Date('2026-07-15T21:30:00Z'); // UTC+3
-
-  it('formats in Kyiv time', () => {
-    expect(formatDate(winter)).toBe('01.02.2026');
-    expect(formatIsoDate(winter)).toBe('2026-02-01');
-    expect(formatDateTime(winter)).toBe('2026-02-01 00:30:15');
-    expect(formatDateTime(summer)).toBe('2026-07-16 00:30:00');
-  });
-
-  it('passes strings through and rejects invalid dates', () => {
-    expect(formatDate('19.03.2019')).toBe('19.03.2019');
-    expect(formatIsoDate('2019-03-19')).toBe('2019-03-19');
-    expect(() => formatDateTime(new Date('x'))).toThrow('Invalid date');
-  });
-});
+import { toMeestError } from '../src';
 
 describe('error mapping', () => {
   it('reads both envelope spellings and keeps details', () => {

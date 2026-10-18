@@ -13,8 +13,8 @@ The clients send the documented requests and return what Meest answers, field fo
 
 - Every method returns the response body exactly as Meest sends it: the `{ status, info, result }` envelope of the contract API, the `{ status, msg, result }` envelope of the public API, or the bare payload where the Swagger documents no envelope. An `Error` envelope in a 2xx body is returned, not thrown.
 - Only non-2xx HTTP answers throw (`CarrierError` with the raw body in `raw`), because retries and token renewal depend on the HTTP status.
-- The client does no validation, caching, date conversion or filtering. Inputs are what the endpoint takes: dates and ids are strings.
-- Optional helpers are separate exports you opt into: `unwrapMeestResponse` / `unwrapMeestPublic` (result or exception), `withReferenceCache` (caches GET answers at the transport), `formatDate` / `formatIsoDate` / `formatDateTime` (a `Date` in Kyiv time as the endpoints expect).
+- The client does no validation, caching, date conversion, filtering or default rate limiting. Inputs are what the endpoint takes: dates and ids are strings.
+- Optional helpers are separate exports you opt into: `unwrapMeestResponse` / `unwrapMeestPublic` (result or exception).
 - Request and response types are generated from the Swagger snapshot (`yarn generate:types`) and pinned field by field in `type-tests/` (see Tests).
 
 Every method takes a trailing `{ signal }` (`AbortSignal`) that cancels the call, its retries and the wait for a rate-limit slot.
@@ -24,13 +24,9 @@ Every method takes a trailing `{ signal }` (`AbortSignal`) that cancels the call
 No credentials. Registers of localities and branches, one branch, nearest branches by address or coordinates.
 
 ```ts
-import { createMeestPublicClient, createMemoryReferenceCache, withReferenceCache } from '@shopana/meest-api-client';
-import { createFetchTransport } from '@shopana/carrier-core';
+import { createMeestPublicClient } from '@shopana/meest-api-client';
 
-const meest = createMeestPublicClient({
-  // optional: the registers are large (localities about 6 MB, branches about 2.3 MB) and change daily at most
-  transport: withReferenceCache(createFetchTransport(), { cache: createMemoryReferenceCache(), ttlSec: 86_400 }),
-});
+const meest = createMeestPublicClient(); // optional: baseUrl, transport, retry, rateLimit, timeoutMs, logger
 
 const lockers = await meest.branches.list({ city: 'Ternopil', type: 'poshtomat', lang: 'en' }); // short form
 const full = await meest.branches.list({ city: 'Ternopil', viewdata: 'full' }); // full form
@@ -69,7 +65,7 @@ const events = await meest.tracking.byNumber(created.result.barCode!);
 Namespaces: `auth`, `search`, `parcels`, `pricing`, `print`, `tracking`, `registers`, `misc`.
 
 - **Token.** Logs in on the first call, sends it in the `token` header, renews it ahead of expiry and once after a 401 (refresh first, then a full login). `auth.login()` and `auth.refresh()` return Meest's answer unchanged (`result.token`, `result.refresh_token`, `result.expiresIn`). Tokens are cached per account (base URL plus a hash of the login); pass `tokenStore` to share them between processes.
-- **Limits.** 100 requests a minute per user: the client throttles itself (`rateLimit: false` turns it off). 429 and 5xx are retried for reads; `POST /parcel` is **never** repeated automatically, check `parcels.get(number, 'parcelNumber')` before retrying yourself.
+- **Limits.** Meest allows 100 requests a minute per user. The client applies no limit by default; pass `rateLimit: { limit: 100, intervalMs: 60_000 }` (or your own limiter) to throttle. 429 and 5xx are retried for reads; `POST /parcel` is **never** repeated automatically, check `parcels.get(number, 'parcelNumber')` before retrying yourself.
 - **Forms.** `print.declaration` and `print.cn23` use the `declarationForm`/`cn23Form` endpoints, which take the phone number of the parcel's sender or recipient. `registers.availableTimeSlots` takes `{ type: 'PickUp' | 'Delivery', streetId, cityId }` as the endpoint does.
 - **Sandbox.** The collection documents none. Pass the URL Meest gives you as `baseUrl`.
 - **Swagger quirks.** `status` is `OK`/`ok`/`Error`, errors sit in `info` or in flat fields, and a few responses have no envelope. The register bodies list a root `parcelID` as required although it only exists inside `parcelsItems`; the snapshot is sanitized for that one (`scripts/contract-source.js`).

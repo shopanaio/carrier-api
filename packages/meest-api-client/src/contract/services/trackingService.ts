@@ -25,7 +25,7 @@ export class TrackingService extends ContractService {
     });
   }
 
-  /** Events of a day (`yyyy-MM-dd`, Kyiv time for a Date). */
+  /** Events of a day (`yyyy-MM-dd`). */
   byDate(date: string, options?: RequestOptions): Promise<TrackingByDateResponse> {
     return this.httpGet({
       signal: options?.signal,
@@ -44,8 +44,8 @@ export class TrackingService extends ContractService {
   }
 
   /**
-   * Delivered parcels, 150 per page starting at 1. Both bounds are sent as `yyyy-MM-dd HH:mm:ss`; the Swagger
-   * documents `dateTo` as `dd.MM.yyyy HH:mm`, so pass a string in that form if the server rejects the default.
+   * Delivered parcels, 150 per page starting at 1. Both bounds are sent as given; the Swagger
+   * documents `dateFrom` as `yyyy-MM-dd HH:mm:ss` and `dateTo` as `dd.MM.yyyy HH:mm`.
    */
   delivered(dateFrom: string, dateTo: string, page = 1, options?: RequestOptions): Promise<TrackingDeliveredResponse> {
     return this.httpGet({

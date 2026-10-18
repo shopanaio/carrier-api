@@ -13,9 +13,6 @@ import type {
 
 export const MEEST_CONTRACT_BASE_URL = 'https://api.meest.com/v3.0/openAPI';
 
-/** Meest allows 100 requests per minute per user. */
-export const MEEST_DEFAULT_RATE_LIMIT: RateLimitOptions = { limit: 100, intervalMs: 60_000 };
-
 export interface MeestContractConfig {
   /** Account login issued with the contract. */
   username: Secret;
@@ -32,8 +29,8 @@ export interface MeestContractConfig {
   loginTimeoutMs?: number;
   /** Retry policy; `false` disables. Non-idempotent calls (parcel creation) are never repeated after a 5xx. */
   retry?: RetryOptions | false;
-  /** Default 100 requests per minute (the documented limit). `false` disables. */
-  rateLimit?: RateLimiter | RateLimitOptions | false;
+  /** Optional client-side limiter. None by default; Meest documents 100 requests per minute per user. */
+  rateLimit?: RateLimiter | RateLimitOptions;
   /** Per-call deadline, also applied to login and refresh. */
   timeoutMs?: number;
   logger?: HttpLogger;

@@ -1,5 +1,5 @@
 import { CarrierErrorCategory, InMemoryTokenStore } from '@shopana/carrier-core';
-import { createMeestContractClient, formatDate, formatDateTime, formatIsoDate, unwrapMeestResponse } from '../src';
+import { createMeestContractClient, unwrapMeestResponse } from '../src';
 import { FakeClock, mockTransport } from './mock';
 import { BASE, fail, makeContract, ok, rejection } from './contractHelpers';
 
@@ -137,7 +137,7 @@ describe('requests', () => {
     await client.parcels.delete('p1', 'k1');
     await client.parcels.get('T-1', 'parcelNumber');
     await client.parcels.get('p1');
-    await client.parcels.list(formatDate(new Date('2026-01-31T22:30:00Z')));
+    await client.parcels.list('01.02.2026');
     await client.parcels.status('p1');
     await client.parcels.statusDetails('p1');
     await client.parcels.lock({ ClientsShipmentRef: 'T-1' } as never);
@@ -159,15 +159,13 @@ describe('requests', () => {
     expect(apiCalls().at(-1)!.query).toEqual({ barCode: '711-1' });
   });
 
-  it('tracking: sends date strings as given; the optional helpers format a Date in Kyiv time', async () => {
+  it('tracking: sends date strings as given', async () => {
     const { client, apiCalls } = makeContract();
-    const from = new Date('2026-01-01T10:00:00Z');
-    const to = new Date('2026-01-01T11:30:00Z');
     await client.tracking.byNumber('711-1');
     await client.tracking.parcelInfo('p1');
-    await client.tracking.byDate(formatIsoDate(from));
-    await client.tracking.byPeriod(formatDateTime(from), formatDateTime(to));
-    await client.tracking.delivered('2026-01-01 00:00:00', formatDateTime(to), 2);
+    await client.tracking.byDate('2026-01-01');
+    await client.tracking.byPeriod('2026-01-01 12:00:00', '2026-01-01 13:30:00');
+    await client.tracking.delivered('2026-01-01 00:00:00', '2026-01-01 13:30:00', 2);
     expect(apiCalls().map(c => decodeURIComponent(`${c.method} ${c.path}`))).toEqual([
       'GET /tracking/711-1',
       'GET /parcelInfoTracking/p1',
@@ -433,8 +431,8 @@ describe('resilience', () => {
     expect(clock.now() - t0).toBeGreaterThan(0);
   });
 
-  it('can run unthrottled', async () => {
-    const { client, clock } = makeContract({ client: { rateLimit: false } });
+  it('does not throttle unless a rate limit is configured', async () => {
+    const { client, clock } = makeContract();
     const t0 = clock.now();
     for (let i = 0; i < 150; i += 1) await client.search.branchTypes();
     expect(clock.now()).toBe(t0);
