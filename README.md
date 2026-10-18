@@ -341,13 +341,13 @@ Stable releases of the 1.x line use the `main` branch:
 4. The same workflow builds and publishes stable package versions to npm with
    the `latest` tag and creates GitHub releases.
 
-#### 2.0 release (`release/2.0`)
+#### 2.0 release
 
-The 2.0 line is released from the `release/2.0` branch in Changesets pre mode
+The 2.0 line is developed on `release/2.0` and, once merged into `main`, released by the `Release` workflow in Changesets pre mode
 (`.changeset/pre.json`, tag `next`). Every public package starts from a `1.0.0`
 baseline with a `major` Changeset, so the first versions are `2.0.0-next.0`.
 
-1. Merge changes and their Changesets into `release/2.0`.
+1. Merge `release/2.0` (with its Changesets) into `main`.
 2. The `Release` workflow opens a `chore: version packages` pull request.
 3. Merging it publishes `X.Y.Z-next.N` versions to npm with the `next` tag.
 4. To cut the stable 2.0.0, run `yarn changeset pre exit`, commit, and merge

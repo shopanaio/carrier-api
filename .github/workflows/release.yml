@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - release/2.0
     paths:
       - '.changeset/**'
       - 'packages/**/package.json'
