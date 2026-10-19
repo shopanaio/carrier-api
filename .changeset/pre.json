@@ -1,0 +1,17 @@
+{
+  "mode": "pre",
+  "tag": "beta",
+  "initialVersions": {
+    "@shopana/tests": "1.0.0",
+    "@shopana/carrier-contracts": "0.0.1",
+    "@shopana/carrier-core": "0.0.1",
+    "@shopana/carrier-testing": "0.0.1",
+    "@shopana/demo-post-api-client": "0.0.0",
+    "@shopana/meest-api-client": "0.0.1",
+    "@shopana/novaposhta-api-client": "0.0.1",
+    "@shopana/novaposhta-mcp-server": "0.0.1",
+    "@shopana/novaposhta-transport-fetch": "0.0.1",
+    "@shopana/ukrposhta-api-client": "0.0.0"
+  },
+  "changesets": []
+}

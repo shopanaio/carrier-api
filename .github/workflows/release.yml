@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - beta
     paths:
       - '.changeset/**'
       - 'packages/**/package.json'
@@ -15,6 +16,9 @@ on:
       - 'packages/**/tsup.config.ts'
       - 'packages/**/tsconfig.json'
       - 'tools/rollup-package.mjs'
+      - 'tools/publish-beta.mjs'
+      - 'package.json'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
 
 permissions:
@@ -29,6 +33,7 @@ concurrency:
 jobs:
   release:
     name: Version or publish packages
+    if: ${{ github.ref == 'refs/heads/main' || github.ref == 'refs/heads/beta' }}
     runs-on: ubuntu-latest
 
     steps:
@@ -90,6 +95,30 @@ jobs:
             has_changeset=true
           fi
 
+          # In pre mode, versioning retains the Markdown Changesets and records
+          # consumed IDs in pre.json. Accept version-only beta updates as well.
+          if [[ "${{ github.ref_name }}" == "beta" && "$has_package_source" == "false" && "$has_package_manifest" == "true" ]] &&
+            printf '%s\n' "$changed_files" | grep -qx '.changeset/pre.json'; then
+            node --input-type=module - "$before" "$after" <<'NODE'
+          import { execFileSync } from 'node:child_process';
+          import { readFileSync } from 'node:fs';
+          const pre = JSON.parse(readFileSync('.changeset/pre.json', 'utf8'));
+          if (pre.mode !== 'pre' || pre.tag !== 'beta' || pre.changesets.length === 0) {
+            throw new Error('Expected a versioned beta prerelease state');
+          }
+          const manifests = execFileSync('git', ['diff', '--name-only', ...process.argv.slice(2)], { encoding: 'utf8' })
+            .trim().split('\n').filter(path => /^packages\/[^/]+\/package\.json$/.test(path));
+          for (const path of manifests) {
+            const pkg = JSON.parse(readFileSync(path, 'utf8'));
+            if (!pkg.private && !/^\d+\.\d+\.\d+-beta\.\d+$/.test(pkg.version)) {
+              throw new Error(`Expected a beta version for ${pkg.name}`);
+            }
+          }
+          NODE
+            echo "Beta package version update detected."
+            exit 0
+          fi
+
           if [[ "$has_package_source" == "false" && "$has_package_manifest" == "false" && "$has_changeset" == "true" ]]; then
             echo "::error::Changeset-only pushes are not allowed to trigger release automation."
             exit 1
@@ -113,7 +142,7 @@ jobs:
         uses: changesets/action@v1
         with:
           version: yarn version:packages
-          publish: yarn release:stable
+          publish: ${{ github.ref_name == 'beta' && 'yarn release:beta' || 'yarn release:stable' }}
           title: "chore: version packages"
           commit: "chore: version packages"
           createGithubReleases: true
