@@ -340,6 +340,38 @@ Releases use the `main` branch:
 4. The same workflow builds and publishes stable package versions to npm with
    the `latest` tag and creates GitHub releases.
 
+### Preparing the next minor release
+
+The integration branch `release/2.0` contains the next **minor** release; its
+historical branch name does not select a major version. Open preparation PRs
+against `release/2.0`, then merge that branch into `main` through the release PR.
+
+Keep the source Changesets in the integration branch. Do not run
+`yarn version:packages`, commit generated release changelogs, or enter Changesets
+pre mode there. The `Release` workflow runs on `main` and owns the separate
+`chore: version packages` PR, including dependency version updates and changelogs.
+
+The current Changesets plan is:
+
+| Package | Next version | Release type |
+| --- | --- | --- |
+| `@shopana/carrier-contracts` | `0.1.0` | minor |
+| `@shopana/carrier-core` | `0.1.0` | minor |
+| `@shopana/carrier-testing` | `0.1.0` | minor |
+| `@shopana/meest-api-client` | `0.1.0` | minor |
+| `@shopana/novaposhta-api-client` | `0.1.0` | minor |
+| `@shopana/ukrposhta-api-client` | `0.1.0` | minor |
+| `@shopana/novaposhta-mcp-server` | `0.0.2` | patch |
+
+`@shopana/novaposhta-transport-fetch` has no pending release. The demo carrier
+and end-to-end test workspaces are private and are not published.
+
+Before merging the integration branch, confirm the plan with
+`yarn changeset:check` and `yarn changeset status`, and require both the `CI` and
+`Changeset Required` checks on the release PR to pass. CI builds, type-checks,
+lints, runs unit tests with coverage and tooling tests, and checks package contents.
+Live carrier end-to-end tests require credentials and are run separately.
+
 Manual release packaging checks are:
 
 ```sh
