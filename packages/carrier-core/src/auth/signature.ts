@@ -63,7 +63,7 @@ export function serializeBody(request: HttpRequest): string {
 
 export type DigestEncoding = 'hex' | 'base64';
 
-/** HMAC-SHA256 via WebCrypto (Node 18+, browsers, edge). */
+/** HMAC-SHA256 via WebCrypto (Node 24+, browsers, edge). */
 export async function hmacSha256(key: string, message: string, encoding: DigestEncoding = 'hex'): Promise<string> {
   const subtle = getSubtle();
   const encoder = new TextEncoder();

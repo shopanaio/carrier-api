@@ -213,7 +213,7 @@ All carrier clients in this monorepo follow a **consistent, battle-tested design
 
 ### Prerequisites
 
-- Node.js 18+ or 20+
+- Node.js 24+
 - Yarn 3+ (Yarn Workspaces)
 
 ### Setup
@@ -222,6 +222,10 @@ All carrier clients in this monorepo follow a **consistent, battle-tested design
 # Clone the repository
 git clone https://github.com/shopanaio/carrier-api.git
 cd carrier-api
+
+# Select the project Node.js version
+nvm install
+nvm use
 
 # Install dependencies
 yarn install

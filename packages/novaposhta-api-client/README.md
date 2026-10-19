@@ -519,7 +519,7 @@ client.contactPerson.delete({ Ref, CounterpartyRef })
 
 ## 🌍 Supported Environments
 
-- ✅ **Node.js** 16+, 18+, 20+
+- ✅ **Node.js** 24+
 - ✅ **Browsers** (Chrome, Firefox, Safari, Edge)
 - ✅ **Edge Runtimes** (Cloudflare Workers, Vercel Edge, Deno)
 - ✅ **React Native** (with polyfills)

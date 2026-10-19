@@ -118,7 +118,7 @@ export function renderFiles(options) {
           './package.json': './package.json',
         },
         sideEffects: false,
-        engines: { node: '>=18' },
+        engines: { node: '>=24' },
         ...(options.private ? {} : { publishConfig: { access: 'public' } }),
       },
       null,

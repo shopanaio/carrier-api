@@ -1,6 +1,6 @@
 # @shopana/carrier-core
 
-Carrier-agnostic HTTP core for Shopana carrier API clients. No runtime dependencies; works in Node 18+, browsers and edge runtimes.
+Carrier-agnostic HTTP core for Shopana carrier API clients. No runtime dependencies; works in Node 24+, browsers and edge runtimes.
 
 ## What's inside
 

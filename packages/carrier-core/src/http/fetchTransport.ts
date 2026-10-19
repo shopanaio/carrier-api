@@ -5,7 +5,7 @@ import { appendQuery } from './url';
 import { attemptSignal } from '../utils/time';
 
 export interface FetchTransportOptions {
-  /** Defaults to the global `fetch` (Node 18+, browsers, edge runtimes). */
+  /** Defaults to the global `fetch` (Node 24+, browsers, edge runtimes). */
   fetchImpl?: typeof fetch;
   /** Headers added to every request; request headers win on conflict. */
   baseHeaders?: Record<string, string>;

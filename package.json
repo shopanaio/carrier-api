@@ -7,6 +7,9 @@
     "packages/*",
     "e2e"
   ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "node tools/workspace-packages.mjs run build",
     "build:novaposhta-api-client": "yarn workspace @shopana/novaposhta-api-client build",
