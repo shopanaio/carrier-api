@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - main
+      - beta
 
 permissions:
   contents: read
@@ -21,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version-file: '.nvmrc'
           cache: yarn
 
       - name: Install dependencies

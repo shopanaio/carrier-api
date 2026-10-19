@@ -7,6 +7,9 @@
     "packages/*",
     "e2e"
   ],
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "node tools/workspace-packages.mjs run build",
     "build:novaposhta-api-client": "yarn workspace @shopana/novaposhta-api-client build",
@@ -20,7 +23,7 @@
     "test:mcp": "yarn workspace @shopana/novaposhta-mcp-server test",
     "test": "node tools/workspace-packages.mjs run test",
     "test:coverage": "node tools/workspace-packages.mjs run test:coverage --fallback test",
-    "test:tools": "node --test tools/__tests__/create-carrier.test.mjs tools/__tests__/workspace-packages.test.mjs",
+    "test:tools": "node --test tools/__tests__/*.test.mjs",
     "test:e2e": "yarn workspace @shopana/tests test",
     "test:e2e:watch": "yarn workspace @shopana/tests test:watch",
     "pack:dry-run": "node tools/workspace-packages.mjs pack",
@@ -33,7 +36,8 @@
     "lint:fix": "eslint \"packages/*/src/**/*.ts\" --fix",
     "format": "prettier --write \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"packages/**/*.{ts,tsx,js,jsx,json,md}\" \"tests/**/*.{ts,tsx,js,jsx,json,md}\"",
-    "type-check": "node tools/workspace-packages.mjs run type-check"
+    "type-check": "node tools/workspace-packages.mjs run type-check",
+    "release:beta": "yarn build && yarn pack:dry-run && node tools/publish-beta.mjs"
   },
   "keywords": [
     "nova-poshta",

@@ -14,6 +14,9 @@
   "bin": {
     "novaposhta-mcp": "./dist/cli.js"
   },
+  "engines": {
+    "node": ">=24"
+  },
   "scripts": {
     "build": "node build.js",
     "dev:http": "npm run build && node dist/cli.js --http",

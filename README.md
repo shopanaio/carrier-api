@@ -213,7 +213,7 @@ All carrier clients in this monorepo follow a **consistent, battle-tested design
 
 ### Prerequisites
 
-- Node.js 18+ or 20+
+- Node.js 24+
 - Yarn 3+ (Yarn Workspaces)
 
 ### Setup
@@ -222,6 +222,10 @@ All carrier clients in this monorepo follow a **consistent, battle-tested design
 # Clone the repository
 git clone https://github.com/shopanaio/carrier-api.git
 cd carrier-api
+
+# Select the project Node.js version
+nvm install
+nvm use
 
 # Install dependencies
 yarn install
@@ -316,9 +320,13 @@ We welcome contributions from the community! Whether it's bug fixes, new feature
 
 ### Changesets and releases
 
-Package releases are automated with GitHub Actions and Changesets. Changes to
-package source files, package scripts, or package manifests must include a
-user-facing Changeset generated with:
+`main` remains the default branch for the existing stable version. New carrier
+contracts, the shared platform, and the Meest/Ukrposhta providers are developed
+on `beta`. Open new development PRs against `beta`; a merge into `main` is not
+part of the beta release process.
+
+Changes to package source files, package scripts, or package manifests must
+include a user-facing Changeset generated with:
 
 ```sh
 yarn changeset
@@ -328,32 +336,55 @@ Select every affected public package and use `patch` for backwards-compatible
 fixes or `minor` for backwards-compatible features. Major Changesets and
 placeholder release notes are rejected automatically. Documentation-only,
 test-only, and repository maintenance changes do not need a Changeset.
+The `Changeset Required` workflow checks pull requests.
 
-The `Changeset Required` workflow checks pull requests before release automation
-can run.
+The `beta` branch uses Changesets prerelease mode with the `beta` tag and
+`baseBranch: beta`. Its release flow is:
 
-Releases use the `main` branch:
+1. Merge a source change and its `.changeset/*.md` file into `beta`.
+2. The `Release` workflow opens or updates a `chore: version packages` PR into
+   `beta`, generating prerelease versions, dependency ranges, and changelogs.
+3. Review and merge that version PR into `beta`.
+4. The workflow builds and checks package contents, then publishes the packages
+   with versions such as `0.1.0-beta.0` under the npm `beta` dist-tag. Subsequent
+   prereleases increment the beta suffix.
 
-1. Merge a source change and its `.changeset/*.md` file into `main`.
-2. The `Release` workflow opens a `chore: version packages` pull request.
-3. Review and merge that version pull request.
-4. The same workflow builds and publishes stable package versions to npm with
-   the `latest` tag and creates GitHub releases.
+Keep `.changeset/pre.json` committed and let the release automation run
+`yarn version:packages`. The pending Changesets start the carrier/platform
+packages at `0.1.0-beta.0` and the MCP server at `0.0.2-beta.0`.
+The demo carrier and end-to-end test workspaces are private and are not published.
 
-Manual release packaging checks are:
+Install the beta providers explicitly:
 
 ```sh
+npm install @shopana/meest-api-client@beta @shopana/ukrposhta-api-client@beta
+```
+
+`yarn release:beta` validates the prerelease state and refuses unpublished
+versions that do not end in `-beta.N`. Its publisher explicitly selects the npm
+`beta` tag, including for newly introduced packages. Changesets pre state is
+preserved after publication. The stable release command rejects prerelease mode.
+
+Local release preparation checks are:
+
+```sh
+yarn changeset:check
+yarn changeset status
 yarn build
 yarn pack:dry-run
 ```
 
+CI runs on PRs and pushes to `beta` and `main`: build, type checks, lint, unit
+coverage, tooling tests, and packaging. Live carrier end-to-end tests require
+credentials and are run separately.
+
 npm publishing uses Trusted Publishing/OIDC. Configure every public npm package
 to trust the `shopanaio/carrier-api` repository and
-`.github/workflows/release.yml`. Packages that do not exist on npm yet require a
-repository `NPM_TOKEN` secret for their first publication; it can be removed
-after Trusted Publishing is configured. A `CHANGESETS_TOKEN` secret is optional
-and is only needed when the default `GITHUB_TOKEN` cannot manage release pull
-requests.
+`.github/workflows/release.yml`, with access for the beta release workflow.
+Packages that do not exist on npm yet require a repository `NPM_TOKEN` secret for
+their first publication; it can be removed after Trusted Publishing is configured.
+A `CHANGESETS_TOKEN` secret is optional and is only needed when the default
+`GITHUB_TOKEN` cannot manage release pull requests.
 
 ### Reporting Issues
 
