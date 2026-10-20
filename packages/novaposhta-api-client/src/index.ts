@@ -64,6 +64,8 @@ export type { ClientContext, Client, ServiceAPI, RateLimitRetryOptions } from '.
 export type { HttpTransport } from './http/transport';
 
 export { WaybillService } from './services/waybillService';
+export { DocumentService } from './services/documentService';
+export type { PrintDocumentRequest } from './services/documentService';
 
 export { TrackingService } from './services/trackingService';
 export type { TrackingStatistics, TrackingFilter } from './services/trackingService';
@@ -178,6 +180,7 @@ export type {
   CreateWaybillRequest,
   CreateWaybillWithOptionsRequest,
   CreateWaybillToPostomatRequest,
+  CreateWaybillForPrivateRecipientRequest,
   CreatePoshtomatWaybillRequest,
   UpdateWaybillRequest,
   DeleteWaybillRequest,

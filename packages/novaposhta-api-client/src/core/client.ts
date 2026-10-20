@@ -14,6 +14,8 @@ export interface ClientContext {
   transport: HttpPostJsonTransport;
   baseUrl: string;
   apiKey?: string;
+  /** Optional private binary transport for document printing. */
+  downloadPdf?: (url: URL) => Promise<Uint8Array>;
   system?: 'DevCentre';
   /** Retry API-level rate-limit responses (error code 20000401501). */
   rateLimitRetry?: false | RateLimitRetryOptions;
