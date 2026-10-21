@@ -7,6 +7,8 @@ describeIf(env.bearer && env.token)('Ukrposhta sandbox: eCom', () => {
     environment: 'sandbox',
     bearer: env.bearer!,
     counterpartyToken: env.token!,
+    ...(env.ecomBaseUrl ? { baseUrl: env.ecomBaseUrl } : {}),
+    ...(env.formsBaseUrl ? { formsBaseUrl: env.formsBaseUrl } : {}),
   });
 
   it('creates a shipment, prints its sticker and deletes it', async () => {
