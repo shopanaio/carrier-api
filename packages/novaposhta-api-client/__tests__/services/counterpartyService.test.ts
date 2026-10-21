@@ -1,4 +1,4 @@
-import { createClient } from '../../src/core/client';
+import { createClient } from '../mocks/client';
 import { CounterpartyService } from '../../src/services/counterpartyService';
 import { createMockTransport } from '../mocks/transport';
 

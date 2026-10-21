@@ -15,8 +15,8 @@ import {
   CounterpartyService,
   ContactPersonService,
   createClient,
+  createNovaPoshtaContext,
 } from '@shopana/novaposhta-api-client';
-import { createFetchHttpTransport } from '@shopana/novaposhta-transport-fetch';
 import { readFileSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
@@ -52,14 +52,14 @@ export class NovaPoshtaMCPServer {
       },
     );
 
-    const transport = createFetchHttpTransport();
-    const client = createClient({
-      transport,
-      baseUrl: config.baseUrl,
-      apiKey: config.apiKey,
-      system: config.system,
-      rateLimitRetry: { maxRetries: 3, delayMs: 1200 },
-    })
+    const client = createClient(
+      createNovaPoshtaContext({
+        baseUrl: config.baseUrl,
+        apiKey: config.apiKey,
+        system: config.system,
+        retry: { maxRetries: 3, baseDelayMs: 1200 },
+      }),
+    )
       .use(new AddressService())
       .use(new ReferenceService())
       .use(new TrackingService())

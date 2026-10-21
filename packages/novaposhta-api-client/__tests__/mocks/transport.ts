@@ -1,27 +1,23 @@
-import type { HttpPostJsonTransport } from '../../src/core/client';
+import type { HttpRequest, HttpResponse, HttpTransport } from '@shopana/carrier-core';
 
 export interface MockTransportCall {
   url: string;
   body: any;
-  signal?: AbortSignal;
-  headers?: Record<string, string>;
+  request: HttpRequest;
 }
 
 export function createMockTransport(mockResponse?: any): {
-  transport: HttpPostJsonTransport;
+  transport: HttpTransport;
   calls: MockTransportCall[];
   setResponse: (response: any) => void;
 } {
   const calls: MockTransportCall[] = [];
   let response = mockResponse || { success: true, data: [] };
 
-  const transport: HttpPostJsonTransport = async args => {
-    calls.push({ ...args });
-    return {
-      status: 200,
-      data: response,
-    };
-  };
+  const transport = (async (request: HttpRequest): Promise<HttpResponse<unknown>> => {
+    calls.push({ url: request.url, body: request.body?.kind === 'json' ? request.body.value : undefined, request });
+    return { status: 200, headers: {}, data: response };
+  }) as HttpTransport;
 
   return {
     transport,

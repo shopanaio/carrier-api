@@ -5,9 +5,7 @@ const forbiddenSummaryPattern = /\b(todo|tbd|wip|placeholder)\b/i;
 
 const parsedArguments = parseArguments(process.argv.slice(2));
 const changesetPaths =
-  parsedArguments.changesetPaths.length > 0
-    ? parsedArguments.changesetPaths
-    : findChangesetFiles();
+  parsedArguments.changesetPaths.length > 0 ? parsedArguments.changesetPaths : findChangesetFiles();
 const publicPackages = findPublicPackages();
 
 if (changesetPaths.length === 0) {
@@ -59,11 +57,7 @@ for (const packageDir of parsedArguments.changedPackageDirs) {
 
 if (errors.length > 0) {
   for (const error of errors) {
-    console.error(
-      `::error file=${annotationValue(error.path)}::${annotationValue(
-        error.message,
-      )}`,
-    );
+    console.error(`::error file=${annotationValue(error.path)}::${annotationValue(error.message)}`);
   }
 
   process.exit(1);
@@ -71,19 +65,13 @@ if (errors.length > 0) {
 
 console.log('Changeset release notes look good.');
 
-function validateChangeset(
-  changesetPath,
-  contents,
-  knownPackages,
-  validationErrors,
-) {
+function validateChangeset(changesetPath, contents, knownPackages, validationErrors) {
   const parsed = parseChangeset(contents);
 
   if (!parsed) {
     validationErrors.push({
       path: changesetPath,
-      message:
-        'Changeset must include frontmatter followed by user-facing release text.',
+      message: 'Changeset must include frontmatter followed by user-facing release text.',
     });
     return [];
   }
@@ -92,8 +80,7 @@ function validateChangeset(
   if (!releases) {
     validationErrors.push({
       path: changesetPath,
-      message:
-        'Changeset frontmatter must contain package names with patch or minor release types.',
+      message: 'Changeset frontmatter must contain package names with patch or minor release types.',
     });
     return [];
   }
@@ -126,16 +113,12 @@ function validateChangeset(
   if (forbiddenSummaryPattern.test(summary)) {
     validationErrors.push({
       path: changesetPath,
-      message:
-        'Changeset release text must be final user-facing content, not a placeholder.',
+      message: 'Changeset release text must be final user-facing content, not a placeholder.',
     });
   }
 
   return releases
-    .filter(
-      release =>
-        release.type !== 'major' && knownPackages.has(release.name),
-    )
+    .filter(release => release.type !== 'major' && knownPackages.has(release.name))
     .map(release => release.name);
 }
 
@@ -165,9 +148,7 @@ function parseReleases(frontmatter) {
 
   const releases = [];
   for (const line of lines) {
-    const match = line.match(
-      /^(?:'([^']+)'|"([^"]+)"|([^'"\s][^:]*?))\s*:\s*(patch|minor|major)\s*(?:#.*)?$/,
-    );
+    const match = line.match(/^(?:'([^']+)'|"([^"]+)"|([^'"\s][^:]*?))\s*:\s*(patch|minor|major)\s*(?:#.*)?$/);
 
     if (!match) {
       return null;
@@ -190,10 +171,7 @@ function normalizeSummary(body) {
 }
 
 function annotationValue(value) {
-  return value
-    .replaceAll('%', '%25')
-    .replaceAll('\r', '%0D')
-    .replaceAll('\n', '%0A');
+  return value.replaceAll('%', '%25').replaceAll('\r', '%0D').replaceAll('\n', '%0A');
 }
 
 function findChangesetFiles() {
@@ -202,9 +180,9 @@ function findChangesetFiles() {
   }
 
   return readdirSync('.changeset')
-    .filter((fileName) => fileName.endsWith('.md'))
+    .filter(fileName => fileName.endsWith('.md'))
     .sort()
-    .map((fileName) => `.changeset/${fileName}`);
+    .map(fileName => `.changeset/${fileName}`);
 }
 
 function findPublicPackages() {
@@ -216,9 +194,7 @@ function findPublicPackages() {
     readdirSync('packages')
       .map(packageDir => `packages/${packageDir}/package.json`)
       .filter(packageJsonPath => existsSync(packageJsonPath))
-      .map(packageJsonPath =>
-        JSON.parse(readFileSync(packageJsonPath, 'utf8')),
-      )
+      .map(packageJsonPath => JSON.parse(readFileSync(packageJsonPath, 'utf8')))
       .filter(packageJson => packageJson.private !== true)
       .map(packageJson => packageJson.name),
   );

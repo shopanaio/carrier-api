@@ -1,18 +1,19 @@
 import {
   CargoType,
   createClient,
+  createNovaPoshtaContext,
   NovaPoshtaMethod,
   NovaPoshtaModel,
   PayerType,
   PaymentMethod,
   ServiceType,
   WaybillService,
-  type ClientContext,
   type CreateWaybillRequest,
   type CreateWaybillToPostomatRequest,
   type NovaPoshtaRequest,
   type NovaPoshtaResponse,
 } from '@shopana/novaposhta-api-client';
+import type { HttpRequest, HttpTransport } from '@shopana/carrier-core';
 
 import { client } from '../../../setup/client.setup';
 
@@ -153,15 +154,13 @@ describe('WaybillService - createToPostomat', () => {
 
 function createTestClient(response: NovaPoshtaResponse<unknown>) {
   const requests: NovaPoshtaRequest[] = [];
-  const transport = (async ({ body }: { body: unknown }) => {
+  const transport = (async (request: HttpRequest) => {
+    const body = request.body?.kind === 'json' ? request.body.value : undefined;
     requests.push(body as NovaPoshtaRequest);
-    return { status: 200, data: response };
-  }) as ClientContext['transport'];
+    return { status: 200, headers: {}, data: response };
+  }) as HttpTransport;
 
-  const testClient = createClient({
-    transport,
-    baseUrl: 'https://api.novaposhta.ua/v2.0/json/',
-  }).use(new WaybillService());
+  const testClient = createClient(createNovaPoshtaContext({ transport, retry: false })).use(new WaybillService());
 
   return { testClient, requests };
 }

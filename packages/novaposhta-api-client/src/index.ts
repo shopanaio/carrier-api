@@ -6,13 +6,13 @@
  *
  * @example
  * ```typescript
- * import { createClient, PayerType, PaymentMethod } from '@novaposhta/client';
+ * import { createNovaPoshtaClient, PayerType, PaymentMethod } from '@shopana/novaposhta-api-client';
  *
  * // Create configuration
  * const config = { apiKey: process.env.NOVA_POSHTA_API_KEY! };
  *
  * // Initialize client
- * const client = new NovaPoshtaClient(config);
+ * const client = createNovaPoshtaClient(config);
  *
  * // Track a document
  * const tracking = await client.tracking.trackDocument('20400048799000');
@@ -58,8 +58,20 @@
  */
 
 // Core client (flat API via use(new Service()))
-export { createClient } from './core/client';
-export type { ClientContext, Client, ServiceAPI, RateLimitRetryOptions } from './core/client';
+export { createClient, toHttpTransport, resolveContext, RATE_LIMIT_ERROR_CODE } from './core/client';
+export type {
+  ClientContext,
+  CoreContext,
+  Client,
+  ServiceAPI,
+  NovaPoshtaClientConfig,
+  // Deprecated 0.x construction, still accepted by createClient()
+  LegacyClientContext,
+  HttpPostJsonTransport,
+  RateLimitRetryOptions,
+} from './core/client';
+export { createNovaPoshtaClient, createNovaPoshtaContext, NOVA_POSHTA_BASE_URL } from './config';
+export type { NovaPoshtaConfig, NovaPoshtaClient } from './config';
 
 export type { HttpTransport } from './http/transport';
 
